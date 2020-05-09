@@ -1,0 +1,14 @@
+[submodule "Xaloc/vendor/spdlog"]
+	path = Xaloc/vendor/spdlog
+	url = https://github.com/gabime/spdlog.git
+	branch = v1.x
+[submodule "Xaloc/vendor/GLFW"]
+	path = Xaloc/vendor/GLFW
+	url = https://github.com/pacojq/glfw.git
+[submodule "Xaloc/vendor/imgui"]
+	path = Xaloc/vendor/imgui
+	url = https://github.com/pacojq/imgui.git
+	branch = docking
+[submodule "Xaloc/vendor/glm"]
+	path = Xaloc/vendor/glm
+	url = https://github.com/pacojq/glm.git
