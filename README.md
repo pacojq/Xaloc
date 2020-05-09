@@ -1,5 +1,9 @@
 # Xaloc Engine
 
+<p align="center">
+  <img height="350" src="res/xaloc-logo.png" alt="Xaloc Engine logo" />
+</p>
+
 > Sirocco (Catalan: _Xaloc_).
 > 
 > From arabic, _shaluq_ 'wind from the sea' .
