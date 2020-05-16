@@ -8,6 +8,13 @@
 
 #include "Xaloc/Core/Timestep.h"
 
+#include "Xaloc/Scene/Scene.h"
+#include "Xaloc/Scene/GameObject.h"
+#include "Xaloc/Scene/Component.h"
+
+#include "Xaloc/Scene/Components/SpriteRenderer.h"
+
+
 #include "Xaloc/Core/Input/Input.h"
 #include "Xaloc/Core/Input/KeyCodes.h"
 #include "Xaloc/Core/Input/MouseButtonCodes.h"

@@ -2,6 +2,8 @@
 
 #include "Xaloc.h"
 
+#include <vector>
+
 class Sandbox2D : public Xaloc::Layer
 {
 public:
@@ -16,6 +18,8 @@ public:
 	void OnEvent(Xaloc::Event& e) override;
 
 private:
+
+	Xaloc::Ref<Xaloc::Scene> m_Scene;
 
 	Xaloc::OrthographicCameraController m_CameraController;
 

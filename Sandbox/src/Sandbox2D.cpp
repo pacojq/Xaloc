@@ -13,13 +13,20 @@ Sandbox2D::Sandbox2D()
 	m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 	m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 {
-
+	m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");
 }
 
 
 void Sandbox2D::OnAttach()
 {
 	m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
+
+
+	Xaloc::GameObject* go = m_Scene->CreateGameObject("Player");
+	
+	Xaloc::SpriteRenderer* spr = new Xaloc::SpriteRenderer("assets/textures/Checkerboard.png");
+
+	go->AddComponent(spr);
 }
 
 void Sandbox2D::OnDetach()
@@ -33,6 +40,9 @@ void Sandbox2D::OnUpdate(Xaloc::Timestep ts)
 
 	m_CameraController.OnUpdate(ts);
 
+	//m_Scene->OnUpdate(ts);
+
+
 
 	// RENDER
 
@@ -43,6 +53,10 @@ void Sandbox2D::OnUpdate(Xaloc::Timestep ts)
 
 	Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
 
+
+	m_Scene->OnUpdate(ts);
+
+	   	  
 	//Xaloc::Renderer2D::DrawRotatedQuad({ -0.5f, 0.5f }, { 0.8f, 0.8f }, m_Rotation, m_SecondColor);
 	Xaloc::Renderer2D::DrawQuad({ -0.5f, 0.5f, 1.0f }, { 0.8f, 0.8f }, m_SecondColor);
 	Xaloc::Renderer2D::DrawQuad({ 0.25f, -0.25f }, { 1.2f, 1.2f }, m_FirstColor);
