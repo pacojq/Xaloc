@@ -21,6 +21,8 @@ namespace Xaloc {
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
+		virtual void OnEvent(Event& e) override;
+
 		virtual void OnImGuiRender() override;
 
 		void Begin();
