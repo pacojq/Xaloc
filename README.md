@@ -1,7 +1,18 @@
-# Xaloc Engine
+<h1 align="center" style="border-bottom: none;">
+  <a href="https://github.com/pacojq/Xaloc/">Xaloc Engine</a>
+</h1>
 
 <p align="center">
-  <img height="350" src="res/xaloc-logo.png" alt="Xaloc Engine logo" />
+  <img height="200" src="res/xaloc-logo.png" alt="Xaloc Engine logo" />
+</p>
+
+<p align="center">
+  <a href=""><img alt="platforms" src="https://img.shields.io/badge/platform-Windows-blue?style=flat-square"/></a>
+  <img alt="GitHub" src="https://img.shields.io/github/license/pacojq/Xaloc?color=blue&style=flat-square">
+  <a href=""><img alt="size" src="https://img.shields.io/github/repo-size/pacojq/Xaloc?style=flat-square"/></a>
+  <br/>
+  <!-- <a href=""><img alt="stars" src="https://img.shields.io/github/stars/pacojq/Xaloc?style=social"/></a> -->
+  <img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/_thisIsPJ?style=social">
 </p>
 
 > Sirocco (Catalan: _Xaloc_).
@@ -9,6 +20,7 @@
 > From arabic, _shaluq_ 'wind from the sea' .
 > 
 > A Mediterranean wind that comes from the Sahara and can reach hurricane speeds in North Africa and Southern Europe, especially during the summer season.
+
 
 ## About
 
@@ -27,6 +39,22 @@ You can clone Xaloc using git. Make sure you do a ```--recursive``` clone!
 
 If you are working on Windows, execute the script ```scripts/Win-GenProjects.bat``` 
 to generate the solution and project files.
+
+
+## Features
+
+Right now, Xaloc is completely bare-bones. Its most basic features are:
+
+ - Support for OpenGL.
+ - In-game debug UI using ImGui.
+ - Simple 2D batch renderer.
+
+Other features coming up in the future are:
+
+ - Entity management.
+ - Audio.
+ - 2D physics.
+ - Support for Vulkan.
 
 
 ## Dependencies
