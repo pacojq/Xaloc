@@ -2,6 +2,8 @@
 
 #include "imgui/imgui.h"
 
+#include "Random.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 static const uint32_t s_mapWidth = 24;
@@ -44,8 +46,6 @@ void SandboxLayer::OnAttach()
 	m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
 
 	Xaloc::Ref<Xaloc::Texture2D> tilemap = Xaloc::Texture2D::Create("assets/game/textures/tilemap.png");
-	m_TextureStairs = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 5.0f }, { 16.0f, 16.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
-
 
 	glm::vec2 size = { 16.0f, 16.0f };
 	glm::vec2 pad = { 0.0f, 0.0f };
@@ -71,9 +71,48 @@ void SandboxLayer::OnAttach()
 	m_TileWater = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 9.0f, 10.0f }, size, pad, off);
 
 
-	Xaloc::GameObject* go = m_Scene->CreateGameObject("Player");
-	m_SpriteRenderer = new Xaloc::SpriteRenderer(m_TextureStairs);
-	go->AddComponent(m_SpriteRenderer);
+
+	// PLAYER
+
+	Xaloc::Ref<Xaloc::SubTexture2D> tilePlayer = Xaloc::SubTexture2D::CreateFromGrid(tilemap, 
+		{ 24.0f, 17.0f }, size, pad, off);
+
+	m_Player = m_Scene->CreateGameObject("Player");
+	m_SpriteRenderer = new Xaloc::SpriteRenderer(tilePlayer);
+	m_Player->AddComponent(m_SpriteRenderer);
+	m_PlayerComponent = new PlayerComponent();
+	m_Player->AddComponent(m_PlayerComponent);
+
+
+
+	// FOREST
+
+	Xaloc::GameObject* forest = m_Scene->CreateGameObject("Forest");
+
+	Xaloc::Ref<Xaloc::SubTexture2D> tree_0 = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 7.0f }, size, pad, off);
+	Xaloc::Ref<Xaloc::SubTexture2D> tree_1 = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 8.0f }, size, pad, off);
+
+	for (uint32_t y = 0; y < s_mapHeight; y++)
+	{
+		for (uint32_t x = 0; x < s_mapWidth; x++)
+		{
+			char tileType = s_MapTiles[((s_mapHeight - 1) - y) * s_mapWidth + x];
+			glm::vec3 pos = { x - (s_mapWidth / 2.0f), y - (s_mapHeight / 2.0f), m_TilesDepth };
+
+			if (tileType != 'G' || (x == s_mapWidth/2.0f && y == s_mapHeight/2.0f))
+				continue;
+
+			if (Random::Float() < 0.3f)
+				continue;
+
+			Xaloc::Ref<Xaloc::SubTexture2D> tex = Random::Float() < 0.5f ? tree_0 : tree_1;
+			Xaloc::SpriteRenderer* sprite = new Xaloc::SpriteRenderer(tex);
+			sprite->SetDepth(0.1f);
+			sprite->SetLocalPosition(pos);
+			forest->AddComponent(sprite);
+		}
+	}
+
 }
 
 void SandboxLayer::OnDetach()
@@ -135,13 +174,15 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 			if (tileType == 'W')
 				continue;
 			
-			Xaloc::Ref<Xaloc::SubTexture2D> tex;
-
 			if (s_TextureMap.find(tileType) != s_TextureMap.end())
-				tex = s_TextureMap[tileType];
-			else tex = m_TextureStairs;
-
-			Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, tex);
+			{
+				Xaloc::Ref<Xaloc::SubTexture2D> tex = s_TextureMap[tileType];
+				Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, tex);
+			}
+			else
+			{
+				Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f });
+			}
 		}
 	}
 
@@ -173,6 +214,19 @@ void SandboxLayer::OnImGuiRender()
 	{
 		m_SpriteRenderer->SetDepth(depth);
 	}
+
+
+	ImGui::Separator();
+	ImGui::Text("Player data");
+
+	glm::vec3 playerPos = m_Player->GetPosition();
+	ImGui::DragFloat("X", &playerPos.x, 0.1f);
+	ImGui::DragFloat("Y", &playerPos.y, 0.1f);
+	m_Player->SetPosition(playerPos);
+
+	float playerSpd = m_PlayerComponent->GetSpeed();
+	ImGui::DragFloat("Speed", &playerSpd, 0.1f);
+	m_PlayerComponent->SetSpeed(playerSpd);
 
 	ImGui::End();
 

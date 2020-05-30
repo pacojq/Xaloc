@@ -2,6 +2,8 @@
 
 #include "Xaloc.h"
 
+#include "PlayerComponent.h"
+
 #include <vector>
 
 class SandboxLayer : public Xaloc::Layer
@@ -33,9 +35,10 @@ private:
 	glm::vec4 m_SecondColor;
 	Xaloc::Ref<Xaloc::Texture2D> m_Texture;
 
+	Xaloc::GameObject* m_Player;
 	Xaloc::SpriteRenderer* m_SpriteRenderer;
+	PlayerComponent* m_PlayerComponent;
 
-	Xaloc::Ref<Xaloc::SubTexture2D> m_TextureStairs;
 	Xaloc::Ref<Xaloc::SubTexture2D> m_TileWater;
 	std::unordered_map<char, Xaloc::Ref<Xaloc::SubTexture2D>> s_TextureMap;
 	float m_TilesDepth = -0.1f;

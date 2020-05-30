@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Component.h"
-
 #include "Xaloc/Core/Timestep.h"
 
 #include <glm\glm.hpp>
@@ -9,6 +7,7 @@
 
 namespace Xaloc {
 
+	class Component;
 
 	struct Transform
 	{
@@ -26,6 +25,7 @@ namespace Xaloc {
 
 		void OnUpdate(Timestep ts);
 
+
 		void AddComponent(Component* component);
 
 		void SetPosition(glm::vec3 position) { m_Position = position; }
@@ -38,7 +38,7 @@ namespace Xaloc {
 
 	private:
 		std::string m_Name;
-		glm::vec3 m_Position;
+		glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
 
 		//Transform& m_Transform;
 		std::vector<Component*> m_Components;

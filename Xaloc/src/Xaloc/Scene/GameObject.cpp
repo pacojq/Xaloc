@@ -1,5 +1,6 @@
 #include "xapch.h"
 #include "GameObject.h"
+#include "Component.h"
 
 namespace Xaloc {
 
@@ -30,6 +31,7 @@ namespace Xaloc {
 
 	void GameObject::AddComponent(Component* component)
 	{
+		component->Bind(this);
 		m_Components.push_back(component);
 	}
 }
