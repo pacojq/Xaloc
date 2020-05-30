@@ -28,6 +28,9 @@ Xaloc is an in-development 2D game engine written in C++.
 
 I develop it in my spare time as a personal project, so expect frequent periods of time with no activity in this repository.
 
+<p align="center">
+    <img height="400" src="res/sandbox.png" alt="Screenshot of an example application built with Xaloc." />
+</p>
 
 ## Set up
 
