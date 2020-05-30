@@ -33,6 +33,7 @@
 #include "Xaloc/Renderer/Buffer.h"
 #include "Xaloc/Renderer/Shader.h"
 #include "Xaloc/Renderer/Texture.h"
+#include "Xaloc/Renderer/SubTexture2D.h"
 #include "Xaloc/Renderer/VertexArray.h"
 
 #include "Xaloc/Renderer/OrthographicCamera.h"

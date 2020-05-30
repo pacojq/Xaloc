@@ -5,19 +5,26 @@
 
 namespace Xaloc {
 
-	SpriteRenderer::SpriteRenderer(const std::string& filename)
-	{
+	//SpriteRenderer::SpriteRenderer(const std::string& filename)
+	//{
+	//	// TODO
+	//}
 
+	SpriteRenderer::SpriteRenderer(const Ref<Texture2D>& texture)
+	{
+		glm::vec2 min = { 0.0f, 0.0f };
+		glm::vec2 max = { 1.0f, 1.0f };
+		m_SubTexture = CreateRef<SubTexture2D>(texture, min, max);
 	}
 
-	SpriteRenderer::SpriteRenderer(Ref<Texture2D>& texture)
-		: m_Texture(texture)
+	SpriteRenderer::SpriteRenderer(const Ref<SubTexture2D>& subTexture)
+		: m_SubTexture(subTexture)
 	{
-
 	}
 
 	void SpriteRenderer::OnUpdate(Timestep ts)
 	{
-		Renderer2D::DrawQuad({ 0.25f, -0.25f , -2.0f }, { .2f, .2f }, {1.0f, 0.0f, 1.0f, 1.0f});
+		glm::vec3 pos = GetLocalPosition();
+		Renderer2D::DrawQuad({ pos.x, pos.y, m_Depth }, { 1.0f, 1.0f }, m_SubTexture);
 	}
 }

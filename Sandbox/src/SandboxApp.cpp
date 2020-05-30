@@ -8,7 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Sandbox2D.h"
+#include "SandboxLayer.h"
 
 
 class ExampleLayer : public Xaloc::Layer
@@ -301,7 +301,7 @@ public:
 	Sandbox(Xaloc::ApplicationSpec spec) : Xaloc::Application(spec)
 	{
 		//PushLayer(new ExampleLayer());
-		PushLayer(new Sandbox2D());
+		PushLayer(new SandboxLayer());
 	}
 
 	~Sandbox()

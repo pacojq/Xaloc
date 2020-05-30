@@ -4,11 +4,11 @@
 
 #include <vector>
 
-class Sandbox2D : public Xaloc::Layer
+class SandboxLayer : public Xaloc::Layer
 {
 public:
-	Sandbox2D();
-	virtual ~Sandbox2D() = default;
+	SandboxLayer();
+	virtual ~SandboxLayer() = default;
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
@@ -32,5 +32,12 @@ private:
 	glm::vec4 m_FirstColor;
 	glm::vec4 m_SecondColor;
 	Xaloc::Ref<Xaloc::Texture2D> m_Texture;
+
+	Xaloc::SpriteRenderer* m_SpriteRenderer;
+
+	Xaloc::Ref<Xaloc::SubTexture2D> m_TextureStairs;
+	Xaloc::Ref<Xaloc::SubTexture2D> m_TileWater;
+	std::unordered_map<char, Xaloc::Ref<Xaloc::SubTexture2D>> s_TextureMap;
+	float m_TilesDepth = -0.1f;
 
 };

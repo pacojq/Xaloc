@@ -27,6 +27,9 @@ namespace Xaloc {
 		void OnUpdate(Timestep ts);
 
 		void AddComponent(Component* component);
+
+		void SetPosition(glm::vec3 position) { m_Position = position; }
+		glm::vec3 GetPosition() const { return m_Position; }
 		
 	private:
 		GameObject(const std::string& name);
@@ -35,6 +38,7 @@ namespace Xaloc {
 
 	private:
 		std::string m_Name;
+		glm::vec3 m_Position;
 
 		//Transform& m_Transform;
 		std::vector<Component*> m_Components;

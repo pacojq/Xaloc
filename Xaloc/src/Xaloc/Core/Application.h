@@ -26,6 +26,8 @@ namespace Xaloc {
 
 		unsigned int Width = 1280;
 		unsigned int Height = 720;
+
+		bool VSyncEnabled = true;
 	};
 	
 
