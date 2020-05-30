@@ -48,14 +48,14 @@ to generate the solution and project files.
 
 Right now, Xaloc is completely bare-bones. Its most basic features are:
 
+ - Basic Scene/Entity/Component structure.
  - Support for OpenGL.
  - In-game debug UI using ImGui.
  - Simple 2D batch renderer.
 
 Other features coming up in the future are:
 
- - Entity management.
- - Audio.
+ - Audio system.
  - 2D physics.
  - Support for Vulkan.
 
