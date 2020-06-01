@@ -20,12 +20,14 @@ namespace Xaloc {
 
 	struct ApplicationSpec
 	{
-		std::string Name;
+		std::string Name = "Xaloc App";
 
-		RendererAPI::API TargetGraphics;
+		RendererAPI::API TargetGraphics = RendererAPI::API::OpenGL;
 
 		unsigned int Width = 1280;
 		unsigned int Height = 720;
+
+		bool PauseOnFocusLost = false;
 
 		bool VSyncEnabled = true;
 	};
@@ -55,6 +57,7 @@ namespace Xaloc {
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
+		bool OnWindowFocus(WindowFocusEvent& e);
 
 	private:
 		std::unique_ptr<Window> m_Window;
@@ -65,6 +68,9 @@ namespace Xaloc {
 		bool m_Running = true;
 		bool m_Paused = false; // Whether the game is running in a freezed state
 		bool m_Minimized = false;
+		bool m_Focused = true;
+
+		bool m_PauseOnFocusLost;
 
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;

@@ -123,7 +123,7 @@ void SandboxLayer::OnDetach()
 void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 {
 	// UPDATE
-
+	
 	m_CameraController.OnUpdate(ts);
 
 	//m_Scene->OnUpdate(ts);

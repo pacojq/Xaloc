@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Event.h"
+#include "glm/gtx/io.hpp"
 
 namespace Xaloc {
 
@@ -34,6 +35,28 @@ namespace Xaloc {
 
 		EVENT_CLASS_TYPE(WindowClose)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	};
+
+	class XALOC_API WindowFocusEvent : public Event
+	{
+	public:
+		WindowFocusEvent(bool focused)
+			: m_Focused(focused) {}
+
+		inline bool IsFocused() const { return m_Focused; }
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "WindowFocusEvent: " << m_Focused;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(WindowFocus)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+
+	private:
+		bool m_Focused;
 	};
 
 	class XALOC_API AppTickEvent : public Event

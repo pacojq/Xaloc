@@ -40,7 +40,6 @@ namespace Xaloc {
 		m_Data.Height = props.Height;
 
 
-		XA_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 
 		if (!s_GLFWInitialized)
 		{
@@ -50,15 +49,34 @@ namespace Xaloc {
 			glfwSetErrorCallback(GLFWErrorCallback);
 			s_GLFWInitialized = true;
 		}
+		
+		//int videoModeCount;
+		//const GLFWvidmode* modes = glfwGetVideoModes(primary, &videoModeCount);
+		//XA_CORE_INFO("Primary monitor:");
+		//for (int i = 0; i < videoModeCount; i++)
+		//{
+		//	XA_CORE_INFO("    Video mode [{0}]: {1} x {2} | {3} Hz", i, modes[i].width, modes[i].height, modes[i].refreshRate);
+		//}
+		//
 
+		GLFWmonitor* primary = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(primary);
+		XA_CORE_INFO("Current video mode: {0} x {1} | {2} Hz", mode->width, mode->height, mode->refreshRate);
+		
+		XA_CORE_INFO("Creating window '{0}' ({1}, {2})", props.Title, props.Width, props.Height);
+
+		
+		glfwWindowHint(GLFW_RESIZABLE, props.IsResizable ? GLFW_TRUE : GLFW_FALSE);
+		glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
+		glfwWindowHint(GLFW_DECORATED, props.IsDecorated ? GLFW_TRUE : GLFW_FALSE);
+		glfwWindowHint(GLFW_REFRESH_RATE, 0); // Run at max refresh rate
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 
 		m_Context = CreateScope<OpenGLContext>(m_Window);
 		m_Context->Init();
 		
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-		SetVSync(true);
-		//SetVSync(false);
+		SetVSync(props.IsVSyncEnabled);
 
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
@@ -75,6 +93,13 @@ namespace Xaloc {
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);			
 			WindowCloseEvent event;
+			data.EventCallback(event);
+		});
+
+		glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int focused)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			WindowFocusEvent event(focused);
 			data.EventCallback(event);
 		});
 

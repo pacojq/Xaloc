@@ -138,6 +138,11 @@ namespace Xaloc {
 		ImGui::PlotLines("FPS", m_FpsValues, size);
 		ImGui::Text("FPS: %f", avg);
 		ImGui::Text("Frame time (ms): %f", 1.0f / avg * 1000.0f);
+
+		bool vSync = Application::Get().GetWindow().IsVSync();
+		ImGui::Checkbox("VSync Enabled", &vSync);
+		Application::Get().GetWindow().SetVSync(vSync);
+		
 		ImGui::End();
 	}
 

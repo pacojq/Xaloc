@@ -17,6 +17,10 @@ namespace Xaloc {
 		unsigned int Width;
 		unsigned int Height;
 
+		bool IsVSyncEnabled = true;
+		bool IsResizable = true;
+		bool IsDecorated = true;
+
 		WindowProps(const std::string& title = "Xaloc Engine",
 						unsigned int width = 1280,
 						unsigned int height = 720)

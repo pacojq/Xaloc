@@ -23,15 +23,19 @@ namespace Xaloc {
 		XA_CORE_ASSERT(!s_Instance, "Application should be null");
 		s_Instance = this;
 
+		m_PauseOnFocusLost = spec.PauseOnFocusLost;
+
+		
 		RendererAPI::SetAPI(spec.TargetGraphics);
 
 		WindowProps props;
 		props.Title = spec.Name;
 		props.Width = spec.Width;
 		props.Height = spec.Height;
+		props.IsVSyncEnabled = spec.VSyncEnabled;
+		
 		m_Window = std::unique_ptr<Window>(Window::Create(props));
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
-		m_Window->SetVSync(spec.VSyncEnabled);
 
 		Renderer::Init();
 
@@ -56,6 +60,7 @@ namespace Xaloc {
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
+		dispatcher.Dispatch<WindowFocusEvent>(BIND_EVENT_FN(OnWindowFocus));
 		
 		//XA_CORE_TRACE("{0}", e);
 
@@ -113,6 +118,26 @@ namespace Xaloc {
 
 
 		return true;
+	}
+
+	bool Application::OnWindowFocus(WindowFocusEvent& e)
+	{
+		if (e.IsFocused())
+			XA_CORE_INFO("Window focus gain registered.");
+		else XA_CORE_INFO("Window focus loss registered.");
+
+		if (m_PauseOnFocusLost)
+		{
+			if (e.IsFocused() && !m_Focused)
+				m_Paused = false;
+			
+			else if (!e.IsFocused() && m_Focused)
+				m_Paused = true;
+		}
+
+		m_Focused = e.IsFocused();
+		
+		return false;
 	}
 
 }

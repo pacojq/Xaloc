@@ -317,6 +317,7 @@ Xaloc::Application* Xaloc::CreateApplication()
 
 	spec.Name = "Sandbox App";
 	spec.TargetGraphics = Xaloc::RendererAPI::API::OpenGL;
+	//spec.PauseOnFocusLost = true;
 
 	return new Sandbox(spec);
 }
