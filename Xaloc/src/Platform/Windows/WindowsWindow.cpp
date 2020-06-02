@@ -78,6 +78,24 @@ namespace Xaloc {
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(props.IsVSyncEnabled);
 
+
+		// Gamepad discovery
+
+		for (int i = 0; i < GLFW_JOYSTICK_LAST; i++)
+		{
+			if (glfwJoystickPresent(i))
+			{
+				if (glfwJoystickIsGamepad(i))
+					XA_CORE_INFO("Gamepad detected [id={0}] {1} - {2}", i, glfwGetJoystickName(i), glfwGetGamepadName(i));
+				else XA_CORE_INFO("Joystick detected [id={0}] {1}", i, glfwGetJoystickName(i));
+			}
+		}
+
+		
+		
+
+
+		
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 		{
@@ -138,6 +156,26 @@ namespace Xaloc {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			KeyTypedEvent event(character);
 			data.EventCallback(event);
+		});
+
+
+		glfwSetJoystickCallback([](int joystickId, int ev)
+		{
+			if (ev == GLFW_CONNECTED)
+			{
+				if (glfwJoystickIsGamepad(joystickId))
+				{
+					XA_CORE_INFO("Gamepad connected [id={0}] {1} - {2}", joystickId, glfwGetJoystickName(joystickId), glfwGetGamepadName(joystickId));
+				}
+				else
+				{
+					XA_CORE_INFO("Joystick connected [id={0}] {1}", joystickId, glfwGetJoystickName(joystickId));
+				}
+			}
+			else if (ev == GLFW_DISCONNECTED)
+			{
+				XA_CORE_INFO("Joystick disconnected [id={0}]", joystickId);
+			}
 		});
 
 

@@ -8,7 +8,9 @@ namespace Xaloc {
 	{
 	protected:
 		virtual bool IsKeyPressedImpl(int keyCode) override;
-
+		
+		virtual bool IsGamepadButtonPressedImpl(int id, int button) override;
+		virtual bool IsGamepadConnectedImpl(int id) override;
 
 		virtual bool IsMouseButtonPressedImpl(int button) override;
 		virtual std::pair<float, float> GetMousePositionImpl() override;

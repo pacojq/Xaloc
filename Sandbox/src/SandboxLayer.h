@@ -25,10 +25,6 @@ private:
 
 	Xaloc::OrthographicCameraController m_CameraController;
 
-	// TEMP
-	Xaloc::Ref<Xaloc::VertexArray> m_SquareVertexArray;
-	Xaloc::Ref<Xaloc::Shader> m_FlatColorShader;
-
 	float m_TilingFactor;
 	float m_Rotation;
 	glm::vec4 m_FirstColor;

@@ -17,6 +17,7 @@
 
 #include "Xaloc/Core/Input/Input.h"
 #include "Xaloc/Core/Input/KeyCodes.h"
+#include "Xaloc/Core/Input/GamepadButtonCodes.h"
 #include "Xaloc/Core/Input/MouseButtonCodes.h"
 
 #include "Xaloc/Renderer/OrthographicCameraController.h"

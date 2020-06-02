@@ -16,6 +16,24 @@ namespace Xaloc {
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
+	bool WindowsInput::IsGamepadButtonPressedImpl(int id, int button)
+	{
+		GLFWgamepadstate gpState;
+
+		if (glfwGetGamepadState(id, &gpState))
+		{
+			auto state = gpState.buttons[button];
+			return state == GLFW_PRESS || state == GLFW_REPEAT;
+		}
+		
+		return false;
+	}
+
+	bool WindowsInput::IsGamepadConnectedImpl(int id)
+	{
+		return glfwJoystickPresent(id) && glfwJoystickIsGamepad(id);
+	}
+
 	bool WindowsInput::IsMouseButtonPressedImpl(int button)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
