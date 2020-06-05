@@ -56,7 +56,7 @@ namespace Xaloc {
 		const float spacing = style.ItemInnerSpacing.x;
 
 		// Text change level
-		ImGui::AlignFirstTextHeightToWidgets();
+		//ImGui::AlignFirstTextHeightToWidgets();
 		ImGui::Text("Display");
 
 		ImGui::SameLine(0.0f, 2.0f * spacing);
@@ -116,7 +116,7 @@ namespace Xaloc {
 		const float spacing = ImGui::GetStyle().ItemInnerSpacing.x + ImGui::CalcTextSize(" ").x;
 
 		// Checkbox for scrolling lock
-		ImGui::AlignFirstTextHeightToWidgets();
+		//ImGui::AlignFirstTextHeightToWidgets();
 		ImGui::Text("Scroll to bottom");
 		ImGui::SameLine(0.0f, spacing + maxWidth - ImGui::CalcTextSize("Scroll to bottom").x);
 		ImGui::Checkbox("##ScrollToBottom", &s_AllowScrollingToBottom);
@@ -129,7 +129,7 @@ namespace Xaloc {
 			ImGuiConsole::Clear();
 
 		// Slider for font scale
-		ImGui::AlignFirstTextHeightToWidgets();
+		//ImGui::AlignFirstTextHeightToWidgets();
 		ImGui::Text("Display scale");
 		ImGui::SameLine(0.0f, spacing + maxWidth - ImGui::CalcTextSize("Display scale").x);
 		ImGui::PushItemWidth(maxWidth * 1.25f / 1.1f);

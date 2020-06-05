@@ -123,7 +123,7 @@ namespace Xaloc {
 		if (size >= 50)
 			m_FrameTimes.erase(m_FrameTimes.begin());
 
-		//m_FrameTimes.push_back(Arkhe::Application::GetFPS());
+		//m_FrameTimes.push_back(Xaloc::Application::GetFPS());
 		m_FrameTimes.push_back(ImGui::GetIO().Framerate);
 		for (int i = 0; i < size; i++)
 		{

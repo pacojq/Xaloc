@@ -50,6 +50,12 @@ project "Xaloc"
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
 	}
+	
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS",
+		"GLFW_INCLUDE_NONE"
+	}
 
 	includedirs
 	{
@@ -75,8 +81,6 @@ project "Xaloc"
 
 		defines
 		{
-			"XA_BUILD_DLL",
-			"GLFW_INCLUDE_NONE"
 		}
 
 	filter "configurations:Debug"

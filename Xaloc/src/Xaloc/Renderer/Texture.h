@@ -12,6 +12,8 @@ namespace Xaloc {
 
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
+		
+		virtual uint32_t GetRendererID() const = 0;
 
 		// Give a pointer to a memory address and upload
 		// stuff to the GPU.

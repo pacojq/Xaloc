@@ -57,31 +57,49 @@
 #endif // End of platform detection
 
 
+
+#ifdef XA_DEBUG
+	#if defined(XA_PLATFORM_WINDOWS)
+		#define XA_DEBUGBREAK() __debugbreak()
+	#elif defined(XA_PLATFORM_LINUX)
+		#include <signal.h>
+		#define XA_DEBUGBREAK() raise(SIGTRAP)
+	#else
+		#error "Platform doesn't support debugbreak yet!"
+	#endif
+	#define XA_ENABLE_ASSERTS
+#else
+	#define XA_DEBUGBREAK()
+#endif
+
+
+
+
 // DLL support
 #ifdef XA_PLATFORM_WINDOWS
-#if XA_DYNAMIC_LINK
-#ifdef XA_BUILD_DLL
-#define XALOC_API __declspec(dllexport)
+	#if XA_DYNAMIC_LINK
+		#ifdef XA_BUILD_DLL
+			#define XALOC_API __declspec(dllexport)
+		#else
+			#define XALOC_API __declspec(dllimport)
+		#endif
+	#else
+		#define XALOC_API
+	#endif
 #else
-#define XALOC_API __declspec(dllimport)
-#endif
-#else
-#define XALOC_API
-#endif
-#else
-#error Arkhé only supports Windows!
+	#error Xaloc only supports Windows!
 #endif // End of DLL support
 
 #ifdef XA_DEBUG
-#define XA_ENABLE_ASSERTS
+	#define XA_ENABLE_ASSERTS
 #endif
 
 #ifdef XA_ENABLE_ASSERTS
-#define XA_ASSERT(x, ...) { if(!(x)) { XA_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
-#define XA_CORE_ASSERT(x, ...) { if(!(x)) { XA_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#define XA_ASSERT(x, ...) { if(!(x)) { XA_ERROR("Assertion Failed: {0}", __VA_ARGS__); XA_DEBUGBREAK(); } }
+	#define XA_CORE_ASSERT(x, ...) { if(!(x)) { XA_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); XA_DEBUGBREAK(); } }
 #else
-#define XA_ASSERT(x, ...)
-#define XA_CORE_ASSERT(x, ...)
+	#define XA_ASSERT(x, ...)
+	#define XA_CORE_ASSERT(x, ...)
 #endif
 
 #define BIT(x) (1 << x)

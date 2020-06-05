@@ -8,7 +8,7 @@
 namespace Xaloc {
 
 	/*
-		Arkhe's 2D renderer.
+		Xaloc's 2D renderer.
 	*/
 	class Renderer2D
 	{
