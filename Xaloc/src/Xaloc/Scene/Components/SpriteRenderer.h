@@ -1,18 +1,17 @@
 #pragma once
 
 #include "Xaloc/Renderer/SubTexture2D.h"
-#include "Xaloc/Scene/Component.h"
 
 namespace Xaloc {
 
-	class SpriteRenderer : public Component
+	class SpriteRenderer
 	{
 	public:
 		//SpriteRenderer(const std::string& filename);
 		SpriteRenderer(const Ref<Texture2D>& texture);
 		SpriteRenderer(const Ref<SubTexture2D>& subTexture);
 		
-		void OnUpdate(Timestep ts) override;
+		//void OnUpdate(Timestep ts);
 
 		void SetDepth(float depth) { m_Depth = depth; }
 		float GetDepth() { return m_Depth; }

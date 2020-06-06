@@ -1,5 +1,14 @@
 #pragma once
 
+#ifdef XA_PLATFORM_WINDOWS
+
+	#ifndef NOMINMAX
+	#define NOMINMAX 1
+	#endif
+	#include <Windows.h>
+
+#endif
+
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -14,7 +23,3 @@
 #include <unordered_set>
 
 #include "Xaloc/Core/Log.h"
-
-#ifdef XA_PLATFORM_WINDOWS
-	#include <Windows.h>
-#endif

@@ -74,19 +74,14 @@ void SandboxLayer::OnAttach()
 
 	// PLAYER
 
-	Xaloc::Ref<Xaloc::SubTexture2D> tilePlayer = Xaloc::SubTexture2D::CreateFromGrid(tilemap, 
+	Xaloc::Ref<Xaloc::SubTexture2D> tilePlayer = Xaloc::SubTexture2D::CreateFromGrid(tilemap,
 		{ 24.0f, 17.0f }, size, pad, off);
 
 	m_Player = m_Scene->CreateGameObject("Player");
-	m_SpriteRenderer = new Xaloc::SpriteRenderer(tilePlayer);
-	m_Player->AddComponent(m_SpriteRenderer);
-	m_PlayerComponent = new PlayerComponent();
-	m_Player->AddComponent(m_PlayerComponent);
-
-
+	m_Player.AddComponent<Xaloc::SpriteRendererComponent>(tilePlayer);
 
 	// FOREST
-
+	/*
 	Xaloc::GameObject* forest = m_Scene->CreateGameObject("Forest");
 
 	Xaloc::Ref<Xaloc::SubTexture2D> tree_0 = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 7.0f }, size, pad, off);
@@ -112,7 +107,7 @@ void SandboxLayer::OnAttach()
 			forest->AddComponent(sprite);
 		}
 	}
-
+	*/
 }
 
 void SandboxLayer::OnDetach()
@@ -160,7 +155,7 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 
 
 	Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
+	/*
 	for (uint32_t y = 0; y < s_mapHeight; y++)
 	{
 		for (uint32_t x = 0; x < s_mapWidth; x++)
@@ -185,7 +180,7 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 			}
 		}
 	}
-
+	*/
 	Xaloc::Renderer2D::EndScene();
 
 
@@ -209,24 +204,24 @@ void SandboxLayer::OnImGuiRender()
 
 	ImGui::DragFloat("Tiles depth", &m_TilesDepth, 0.1f, -10.0f, 10.0f);
 
-	float depth = m_SpriteRenderer->GetDepth();
-	if (ImGui::DragFloat("SpriteRenderer depth", &depth, 0.1f, -10.0f, 10.0f))
-	{
-		m_SpriteRenderer->SetDepth(depth);
-	}
+	//float depth = m_SpriteRenderer->GetDepth();
+	//if (ImGui::DragFloat("SpriteRenderer depth", &depth, 0.1f, -10.0f, 10.0f))
+	//{
+	//	m_SpriteRenderer->SetDepth(depth);
+	//}
 
 
 	ImGui::Separator();
 	ImGui::Text("Player data");
 
-	glm::vec3 playerPos = m_Player->GetPosition();
-	ImGui::DragFloat("X", &playerPos.x, 0.1f);
-	ImGui::DragFloat("Y", &playerPos.y, 0.1f);
-	m_Player->SetPosition(playerPos);
+	//glm::vec3 playerPos = m_Player->GetPosition();
+	//ImGui::DragFloat("X", &playerPos.x, 0.1f);
+	//ImGui::DragFloat("Y", &playerPos.y, 0.1f);
+	//m_Player->SetPosition(playerPos);
 
-	float playerSpd = m_PlayerComponent->GetSpeed();
-	ImGui::DragFloat("Speed", &playerSpd, 0.1f);
-	m_PlayerComponent->SetSpeed(playerSpd);
+	//float playerSpd = m_PlayerComponent->GetSpeed();
+	//ImGui::DragFloat("Speed", &playerSpd, 0.1f);
+	//m_PlayerComponent->SetSpeed(playerSpd);
 
 	ImGui::End();
 
@@ -246,7 +241,7 @@ void SandboxLayer::OnImGuiRender()
 
 
 
-
+	/*
 	static bool p_open = true;
 	static bool opt_fullscreen_persistant = true;
 	bool opt_fullscreen = opt_fullscreen_persistant;
@@ -310,7 +305,7 @@ void SandboxLayer::OnImGuiRender()
 	
 
 	ImGui::End();
-	
+	*/
 }
 
 void SandboxLayer::OnEvent(Xaloc::Event& e)

@@ -22,9 +22,9 @@ namespace Xaloc {
 	{
 	}
 
-	void SpriteRenderer::OnUpdate(Timestep ts)
-	{
-		glm::vec3 pos = GetPosition();
-		Renderer2D::DrawQuad({ pos.x, pos.y, m_Depth }, { 1.0f, 1.0f }, m_SubTexture);
-	}
+	//void SpriteRenderer::OnUpdate(Timestep ts)
+	//{
+	//	glm::vec3 pos = GetPosition();
+	//	Renderer2D::DrawQuad({ pos.x, pos.y, m_Depth }, { 1.0f, 1.0f }, m_SubTexture);
+	//}
 }

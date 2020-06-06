@@ -19,6 +19,7 @@ IncludeDir["Glad"] = "Xaloc/vendor/Glad/include"
 IncludeDir["ImGui"] = "Xaloc/vendor/imgui"
 IncludeDir["stb_image"] = "Xaloc/vendor/stb_image"
 IncludeDir["glm"] = "Xaloc/vendor/glm"
+IncludeDir["entt"] = "Xaloc/vendor/entt/single_include"
 
 group "Dependencies"
 	include "Xaloc/vendor/GLFW"
@@ -44,7 +45,10 @@ project "Xaloc"
 	files
 	{
 		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.c",
+		"%{prj.name}/src/**.hpp",
 		"%{prj.name}/src/**.cpp",
+		
 		"%{prj.name}/vendor/stb_image/**.h",
 		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
@@ -65,7 +69,8 @@ project "Xaloc"
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}"
 	}
 	
 	links
@@ -81,6 +86,7 @@ project "Xaloc"
 
 		defines
 		{
+			"XA_PLATFORM_WINDOWS"
 		}
 
 	filter "configurations:Debug"
@@ -113,7 +119,9 @@ project "Sandbox"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.c",
+		"%{prj.name}/src/**.hpp",
+		"%{prj.name}/src/**.cpp",
 	}
 
 	includedirs
@@ -121,7 +129,8 @@ project "Sandbox"
 		"Xaloc/vendor/spdlog/include",
 		"Xaloc/src",
 		"Xaloc/vendor",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}"
 	}
 
 	links

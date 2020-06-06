@@ -1,11 +1,12 @@
 #pragma once
 
-#include "GameObject.h"
-
 #include "Xaloc/Core/Timestep.h"
 
+#include <entt/entt.hpp>
 
 namespace Xaloc {
+
+	class GameObject;
 
 	class Scene
 	{
@@ -18,19 +19,22 @@ namespace Xaloc {
 
 		void OnUpdate(Timestep ts);
 
-		void AddGameObject(GameObject* gameObject);
-		GameObject* Scene::CreateGameObject(const std::string& name);
+
+		GameObject Scene::CreateGameObject(const std::string& name);
 
 	private:
 
 
 
 	private:
+		uint32_t m_SceneID;
+		entt::entity m_SceneEntity;
+		entt::registry m_Registry;
+
 		std::string m_Name;
-		std::vector<GameObject*> m_GameObjects;
 
-		// TODO friend class???
-
+		
+		friend class GameObject;
 	};
 
 }

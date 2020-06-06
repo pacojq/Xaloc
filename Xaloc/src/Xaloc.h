@@ -10,9 +10,10 @@
 
 #include "Xaloc/Scene/Scene.h"
 #include "Xaloc/Scene/GameObject.h"
-#include "Xaloc/Scene/Component.h"
 
-#include "Xaloc/Scene/Components/SpriteRenderer.h"
+#include "Xaloc/Scene/Components/TagComponent.h"
+#include "Xaloc/Scene/Components/TransformComponent.h"
+#include "Xaloc/Scene/Components/SpriteRendererComponent.h"
 
 
 #include "Xaloc/Core/Input/Input.h"

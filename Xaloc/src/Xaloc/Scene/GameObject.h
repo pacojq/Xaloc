@@ -1,49 +1,49 @@
 #pragma once
 
+#include "Scene.h"
 #include "Xaloc/Core/Timestep.h"
 
+#include "Xaloc/Scene/Components/TransformComponent.h"
+
+#include <entt/entt.hpp>
 #include <glm\glm.hpp>
-#include <vector>
 
 namespace Xaloc {
-
-	class Component;
-
-	struct Transform
-	{
-		glm::vec3 Position;
-		glm::vec3 Scale;
-		float Rotation;
-	};
-
-
 
 	class GameObject
 	{
 	public:
-		~GameObject();
-
-		void OnUpdate(Timestep ts);
-
-
-		void AddComponent(Component* component);
-
-		void SetPosition(glm::vec3 position) { m_Position = position; }
-		glm::vec3 GetPosition() const { return m_Position; }
+		GameObject() = default;
+		~GameObject() {}
 		
+
+		template<typename T, typename... Args>
+		T& AddComponent(Args&&... args) { return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...); }
+
+		template<typename T>
+		T& GetComponent() { return m_Scene->m_Registry.get<T>(m_EntityHandle); }
+
+		template<typename T>
+		bool HasComponent() { return m_Scene->m_Registry.has<T>(m_EntityHandle); }
+
+
+		glm::mat4& Transform() { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
+		const glm::mat4& Transform() const { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
+
+		operator uint32_t () const { return (uint32_t)m_EntityHandle; }
+		
+
 	private:
-		GameObject(const std::string& name);
-
-
-
-	private:
-		std::string m_Name;
-		glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
-
-		//Transform& m_Transform;
-		std::vector<Component*> m_Components;
-
+		GameObject(entt::entity handle, Scene* scene)
+			: m_EntityHandle(handle), m_Scene(scene) {}
 		friend class Scene;
+
+	private:
+		entt::entity m_EntityHandle;
+		Scene* m_Scene = nullptr;
+
+		std::string m_Name;
+
 	};
 
 }

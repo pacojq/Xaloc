@@ -12,3 +12,6 @@
 [submodule "Xaloc/vendor/glm"]
 	path = Xaloc/vendor/glm
 	url = https://github.com/pacojq/glm.git
+[submodule "Xaloc/vendor/entt"]
+	path = Xaloc/vendor/entt
+	url = https://github.com/pacojq/entt.git
