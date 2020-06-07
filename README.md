@@ -64,11 +64,12 @@ Other features coming up in the future are:
 
 Xaloc has the following dependencies:
 
-  - [ImGui](https://github.com/pacojq/imgui) for GUI rendering.
-  - [GLFW](https://github.com/pacojq/glfw) for OpenGL, OpenGL ES, window creation 
+  - [ImGui](https://github.com/ocornut/imgui) for GUI rendering.
+  - [GLFW](https://github.com/glfw/glfw) for OpenGL, OpenGL ES, window creation 
   and input handling. More info at its [website](https://www.glfw.org/).
   - [Glad](https://glad.dav1d.de) for OpenGL rendering.
-  - [glm](https://github.com/pacojq/glm) as math(s) library.
+  - [glm](https://github.com/g-truc//glm) as math(s) library.
+  - [entt](https://github.com/skypjack/entt) for ECS management.
   - [spdlog](https://github.com/gabime/spdlog) for logging.
   - [stb_image.h](https://github.com/nothings/stb) for loading textures.
 
