@@ -214,10 +214,23 @@ void SandboxLayer::OnImGuiRender()
 	ImGui::Separator();
 	ImGui::Text("Player data");
 
+	glm::mat4 matrix = m_Player.Transform();
+	glm::vec3 translation = {matrix[3][0], matrix[3][1], matrix[3][2] };
+
 	//glm::vec3 playerPos = m_Player->GetPosition();
-	//ImGui::DragFloat("X", &playerPos.x, 0.1f);
-	//ImGui::DragFloat("Y", &playerPos.y, 0.1f);
+	ImGui::DragFloat("X", &translation.x, 0.1f);
+	ImGui::DragFloat("Y", &translation.y, 0.1f);
+	ImGui::DragFloat("Z", &translation.z, 0.1f);
 	//m_Player->SetPosition(playerPos);
+
+	//matrix[0][3] = translation.x;
+	//matrix[1][3] = translation.y; 
+	//matrix[2][3] = translation.z;
+	matrix[3][0] = translation.x;
+	matrix[3][1] = translation.y;
+	matrix[3][2] = translation.z;
+
+	m_Player.SetTransform(&matrix);
 
 	//float playerSpd = m_PlayerComponent->GetSpeed();
 	//ImGui::DragFloat("Speed", &playerSpd, 0.1f);

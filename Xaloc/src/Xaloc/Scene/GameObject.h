@@ -6,7 +6,9 @@
 #include "Xaloc/Scene/Components/TransformComponent.h"
 
 #include <entt/entt.hpp>
-#include <glm\glm.hpp>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Xaloc {
 
@@ -29,6 +31,12 @@ namespace Xaloc {
 
 		glm::mat4& Transform() { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
 		const glm::mat4& Transform() const { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
+
+		void SetTransform(glm::mat4* trans)
+		{ 
+			auto& transformComponent = GetComponent<TransformComponent>();
+			memcpy(glm::value_ptr(transformComponent.Transform), trans, sizeof(glm::mat4));
+		}
 
 		operator uint32_t () const { return (uint32_t)m_EntityHandle; }
 		
