@@ -24,7 +24,7 @@
 
 ## About
 
-Xaloc is an in-development 2D game engine written in C++. 
+Xaloc is an in-development 2D game engine written in C++, allowing an ECS approach and C# scripting.
 
 I develop it in my spare time as a personal project, so expect frequent periods of time with no activity in this repository.
 
@@ -46,12 +46,13 @@ to generate the solution and project files.
 
 ## Features
 
-Right now, Xaloc is completely bare-bones. Its most basic features are:
+Right now, Xaloc is very bare-bones. Its most basic features are:
 
  - Basic Scene/Entity/Component structure.
  - Support for OpenGL.
  - In-game debug UI using ImGui.
  - Simple 2D batch renderer.
+ - C# scripting.
 
 Other features coming up in the future are:
 
@@ -65,6 +66,7 @@ Other features coming up in the future are:
 Xaloc has the following dependencies:
 
   - [ImGui](https://github.com/ocornut/imgui) for GUI rendering.
+  - [mono](https://www.mono-project.com/docs/about-mono/) for C# [scripting](https://www.mono-project.com/docs/advanced/embedding/scripting/).
   - [GLFW](https://github.com/glfw/glfw) for OpenGL, OpenGL ES, window creation 
   and input handling. More info at its [website](https://www.glfw.org/).
   - [Glad](https://glad.dav1d.de) for OpenGL rendering.
