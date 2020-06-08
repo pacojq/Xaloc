@@ -9,13 +9,10 @@ namespace SandboxCs
 
         public void OnCreate()
         {
-            Console.WriteLine("Script.OnCreate");
         }
 
         public void OnUpdate(float ts)
         {
-            Console.WriteLine("Script.OnUpdate");
-
             Matrix4 transform = GetTransform();
             Vector3 translation = transform.Translation;
 

@@ -18,12 +18,12 @@ namespace Xaloc {
 
 	void OnTransformConstruct(entt::registry& registry, entt::entity entity)
 	{
-		XA_CORE_TRACE("Transform Component constructed!");
+		XA_CORE_TRACE("New Transform component registered!");
 	}
 
 	void OnBehaviourComponentConstruct(entt::registry& registry, entt::entity entity)
 	{
-		XA_CORE_TRACE("Behaviour Component constructed!");
+		XA_CORE_TRACE("New Behaviour component registered!");
 		
 		// Note: there should be exactly one scene component per registry
 		auto view = registry.view<SceneComponent>();
