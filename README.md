@@ -48,11 +48,12 @@ to generate the solution and project files.
 
 Right now, Xaloc is very bare-bones. Its most basic features are:
 
- - Basic Scene/Entity/Component structure.
- - Support for OpenGL.
+ - Basic Scene system.
+ - ECS support.
+ - C# scripting.
  - In-game debug UI using ImGui.
  - Simple 2D batch renderer.
- - C# scripting.
+ - OpenGL support.
 
 Other features coming up in the future are:
 
