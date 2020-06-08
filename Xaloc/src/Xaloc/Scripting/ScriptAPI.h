@@ -12,6 +12,12 @@ extern "C" {
 
 namespace Xaloc { namespace Scripting {
 
+	// Logging
+	void Xaloc_Log_Fatal(MonoString* msg);
+	void Xaloc_Log_Error(MonoString* msg);
+	void Xaloc_Log_Warn(MonoString* msg);
+	void Xaloc_Log_Info(MonoString* msg);
+	void Xaloc_Log_Trace(MonoString* msg);
 
 	// Input
 	bool Xaloc_Input_IsKeyPressed(KeyCode key);
@@ -23,4 +29,7 @@ namespace Xaloc { namespace Scripting {
 	bool Xaloc_Entity_HasComponent(uint32_t sceneID, uint32_t entityID, void* type);
 
 
+	// Tag Component
+	MonoString* Xaloc_TagComponent_GetTag(uint32_t sceneID, uint32_t entityID);
+	void Xaloc_TagComponent_SetTag(uint32_t sceneID, uint32_t entityID, MonoString* inTag);
 } }

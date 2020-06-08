@@ -19,6 +19,27 @@ namespace Xaloc { namespace Scripting {
 
 
 	// = = = = = = = = = = = = = INPUT = = = = = = = = = = = = = //
+
+	std::string FromMonoString(MonoString* str)
+	{
+		mono_unichar2* chl = mono_string_chars(str);
+		std::string out("");
+		for (int i = 0; i < mono_string_length(str); i++)
+			out += chl[i];
+		return out;
+	}
+	
+	void Xaloc_Log_Fatal(MonoString* msg) { XA_FATAL(FromMonoString(msg)); }
+	void Xaloc_Log_Error(MonoString* msg) { XA_ERROR(FromMonoString(msg)); }
+	void Xaloc_Log_Warn(MonoString* msg) { XA_WARN(FromMonoString(msg)); }
+	void Xaloc_Log_Info(MonoString* msg) { XA_INFO(FromMonoString(msg)); }
+	void Xaloc_Log_Trace(MonoString* msg) { XA_TRACE(FromMonoString(msg)); }
+
+
+
+	
+	
+	// = = = = = = = = = = = = = INPUT = = = = = = = = = = = = = //
 	
 	bool Xaloc_Input_IsKeyPressed(KeyCode key)
 	{
@@ -71,4 +92,39 @@ namespace Xaloc { namespace Scripting {
 		return result;
 	}
 
+
+
+
+
+	// = = = = = = = = = = = = = TAG COMPONENT = = = = = = = = = = = = = //
+
+	MonoString* Xaloc_TagComponent_GetTag(uint32_t sceneID, uint32_t entityID)
+	{
+		XA_CORE_ASSERT(s_ActiveScenes.find(sceneID) != s_ActiveScenes.end(), "Invalid Scene ID!");
+
+		Scene* scene = s_ActiveScenes[sceneID];
+		Entity entity((entt::entity)entityID, scene);
+		auto& tagComponent = entity.GetComponent<TagComponent>();
+
+		std::string tag = tagComponent.Tag;
+		
+		return mono_string_new(mono_domain_get(), tag.c_str());
+	}
+	
+	void Xaloc_TagComponent_SetTag(uint32_t sceneID, uint32_t entityID, MonoString* inTag)
+	{
+		XA_CORE_ASSERT(s_ActiveScenes.find(sceneID) != s_ActiveScenes.end(), "Invalid Scene ID!");
+
+		Scene* scene = s_ActiveScenes[sceneID];
+		Entity entity((entt::entity)entityID, scene);
+		auto& tagComponent = entity.GetComponent<TagComponent>();
+
+		std::string tag = FromMonoString(inTag);
+		tagComponent.Tag = tag;
+	}
+
+
+
+
+	
 } }

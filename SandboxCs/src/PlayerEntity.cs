@@ -9,10 +9,18 @@ namespace SandboxCs
 
         public void OnCreate()
         {
+            Log.Warn("Hello world!");
+
+            TagComponent tag = GetComponent<TagComponent>();
+            tag.Tag = "Tag from CSharp!";
+
+            Log.Warn($"We have a new tag: { GetComponent<TagComponent>().Tag}");
         }
 
         public void OnUpdate(float ts)
         {
+            //Log.Warn("Hi there!");
+
             Matrix4 transform = GetTransform();
             Vector3 translation = transform.Translation;
 

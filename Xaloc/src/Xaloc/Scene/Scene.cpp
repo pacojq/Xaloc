@@ -21,6 +21,14 @@ namespace Xaloc {
 		XA_CORE_TRACE("New Transform component registered!");
 	}
 
+	void OnTagConstruct(entt::registry& registry, entt::entity entity)
+	{
+
+		auto& tag = registry.get<TagComponent>(entity);
+		
+		XA_CORE_TRACE("New Tag component registered: {0}", tag.Tag);
+	}
+
 	void OnBehaviourComponentConstruct(entt::registry& registry, entt::entity entity)
 	{
 		XA_CORE_TRACE("New Behaviour component registered!");
@@ -41,6 +49,7 @@ namespace Xaloc {
 		: m_Name(name), m_SceneID(s_SceneIDCounter++)
 	{
 		m_Registry.on_construct<TransformComponent>().connect<&OnTransformConstruct>();
+		m_Registry.on_construct<TagComponent>().connect<&OnTagConstruct>();
 		m_Registry.on_construct<BehaviourComponent>().connect<&OnBehaviourComponentConstruct>();
 
 		m_SceneEntity = m_Registry.create();
