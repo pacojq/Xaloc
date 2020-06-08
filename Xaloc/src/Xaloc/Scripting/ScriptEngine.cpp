@@ -239,12 +239,12 @@ namespace Xaloc {
 					continue;
 
 				MonoType* fieldType = mono_field_get_type(iter);
-				FieldType hazelFieldType = GetXalocFieldType(fieldType);
+				FieldType xalocFieldType = GetXalocFieldType(fieldType);
 
 				// TODO: Attributes
 				MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(behaviourClass.Class, iter);
 
-				auto& publicField = s_PublicFields[behaviour.ModuleName].emplace_back(name, hazelFieldType);
+				auto& publicField = s_PublicFields[behaviour.ModuleName].emplace_back(name, xalocFieldType);
 				publicField.m_EntityInstance = &entityInstance;
 				publicField.m_MonoClassField = iter;
 				// mono_field_set_value(entityInstance.Instance, iter, )
