@@ -5,7 +5,7 @@
 
 #include "Xaloc/Renderer/Renderer.h"
 
-#include "Input/Input.h"
+#include "Xaloc/Scripting/ScriptEngine.h"
 
 #include <GLFW/glfw3.h>
 
@@ -41,6 +41,9 @@ namespace Xaloc {
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+
+		// TODO move scripting module name to ApplicationSpec
+		ScriptEngine::Init("assets/scripts/SandboxCs.dll");
 	}
 
 
@@ -97,6 +100,9 @@ namespace Xaloc {
 
 			m_Window->OnUpdate();
 		}
+
+		// TODO Shutdown
+		ScriptEngine::Shutdown();
 	}
 
 	void Application::Close()

@@ -7,10 +7,12 @@ workspace "Xaloc"
 		"Release",
 		"Dist"
 	}
+	
+	startproject "Sandbox"
+	
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-startproject "Sandbox"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
@@ -20,6 +22,12 @@ IncludeDir["ImGui"] = "Xaloc/vendor/imgui"
 IncludeDir["stb_image"] = "Xaloc/vendor/stb_image"
 IncludeDir["glm"] = "Xaloc/vendor/glm"
 IncludeDir["entt"] = "Xaloc/vendor/entt/single_include"
+IncludeDir["mono"] = "Xaloc/vendor/mono/include"
+
+LibraryDir = {}
+LibraryDir["mono"] = "vendor/mono/lib/Debug/mono-2.0-sgen.lib"
+
+
 
 group "Dependencies"
 	include "Xaloc/vendor/GLFW"
@@ -70,7 +78,8 @@ project "Xaloc"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.mono}"
 	}
 	
 	links
@@ -78,7 +87,8 @@ project "Xaloc"
 		"GLFW",
 		"Glad",
 		"ImGui",
-		"opengl32.lib"
+		"opengl32.lib",
+		"%{LibraryDir.mono}"
 	}
 
 	filter "system:windows"
@@ -104,7 +114,24 @@ project "Xaloc"
 		runtime "Release"
 		optimize "on"
 
+		
+project "XalocSharp"
+	location "XalocSharp"
+	kind "SharedLib"
+	language "C#"
 
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+	files 
+	{
+		"%{prj.name}/src/**.cs", 
+	}
+	
+
+
+	
+group "Sandbox"	
 
 project "Sandbox"
 	location "Sandbox"
@@ -138,6 +165,11 @@ project "Sandbox"
 		"Xaloc"
 	}
 
+	postbuildcommands 
+	{
+		'{COPY} "../Sandbox/assets" "%{cfg.targetdir}/assets"'
+	}
+	
 	filter "system:windows"
 		systemversion "latest"
 
@@ -145,13 +177,49 @@ project "Sandbox"
 		defines "XA_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		
+		postbuildcommands 
+		{
+			'{COPY} "../Xaloc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+		
 
 	filter "configurations:Release"
 		defines "XA_RELEASE"
 		runtime "Release"
 		optimize "on"
+		
+		postbuildcommands 
+		{
+			'{COPY} "../Xaloc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
 
 	filter "configurations:Dist"
 		defines "XA_DIST"
 		runtime "Release"
 		optimize "on"
+		
+		postbuildcommands 
+		{
+			'{COPY} "../Xaloc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+
+project "SandboxCs"
+	location "SandboxCs"
+	kind "SharedLib"
+	language "C#"
+
+	targetdir ("Sandbox/assets/scripts")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+	files 
+	{
+		"%{prj.name}/src/**.cs", 
+	}
+
+	links
+	{
+		"XalocSharp"
+	}
+
+

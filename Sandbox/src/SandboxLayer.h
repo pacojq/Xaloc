@@ -29,7 +29,7 @@ private:
 	glm::vec4 m_SecondColor;
 	Xaloc::Ref<Xaloc::Texture2D> m_Texture;
 	
-	Xaloc::GameObject m_Player;
+	Xaloc::Entity m_Player;
 
 	Xaloc::Ref<Xaloc::SubTexture2D> m_TileWater;
 	std::unordered_map<char, Xaloc::Ref<Xaloc::SubTexture2D>> s_TextureMap;

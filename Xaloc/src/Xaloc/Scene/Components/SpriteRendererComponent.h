@@ -10,6 +10,7 @@ namespace Xaloc {
 		Ref<SubTexture2D> SubTexture;
 		float TilingFactor = 1.0f;
 
+		SpriteRendererComponent() = default;
 		SpriteRendererComponent(Ref<SubTexture2D>& subTexture)
 			: SubTexture(subTexture)
 		{

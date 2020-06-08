@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Xaloc/Core/Core.h"
+#include "KeyCodes.h"
 
 namespace Xaloc {
 
@@ -8,7 +9,7 @@ namespace Xaloc {
 	{
 
 	public:
-		inline static bool IsKeyPressed(int keyCode) { return s_Instance->IsKeyPressedImpl(keyCode); }
+		inline static bool IsKeyPressed(KeyCode keyCode) { return s_Instance->IsKeyPressedImpl(keyCode); }
 
 		inline static bool IsGamepadButtonPressed(int id, int button) { return s_Instance->IsGamepadButtonPressedImpl(id, button); }
 		inline static bool IsGamepadConnected(int id) { return s_Instance->IsGamepadConnectedImpl(id); }
@@ -20,7 +21,7 @@ namespace Xaloc {
 
 
 	protected:
-		virtual bool IsKeyPressedImpl(int keyCode) = 0;
+		virtual bool IsKeyPressedImpl(KeyCode keyCode) = 0;
 		
 		virtual bool IsGamepadButtonPressedImpl(int id, int button) = 0;
 		virtual bool IsGamepadConnectedImpl(int id) = 0;

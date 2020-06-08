@@ -77,12 +77,13 @@ void SandboxLayer::OnAttach()
 	Xaloc::Ref<Xaloc::SubTexture2D> tilePlayer = Xaloc::SubTexture2D::CreateFromGrid(tilemap,
 		{ 24.0f, 17.0f }, size, pad, off);
 
-	m_Player = m_Scene->CreateGameObject("Player");
+	m_Player = m_Scene->CreateEntity("Player");
 	m_Player.AddComponent<Xaloc::SpriteRendererComponent>(tilePlayer);
+	m_Player.AddComponent<Xaloc::BehaviourComponent>("SandboxCs.PlayerEntity");
 
 	// FOREST
 	/*
-	Xaloc::GameObject* forest = m_Scene->CreateGameObject("Forest");
+	Xaloc::Entity* forest = m_Scene->CreateEntity("Forest");
 
 	Xaloc::Ref<Xaloc::SubTexture2D> tree_0 = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 7.0f }, size, pad, off);
 	Xaloc::Ref<Xaloc::SubTexture2D> tree_1 = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 8.0f }, size, pad, off);

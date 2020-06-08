@@ -6,8 +6,13 @@
 
 namespace Xaloc {
 
-	class GameObject;
+	class Entity;
 
+	struct SceneComponent
+	{
+		uint32_t SceneID;
+	};
+	
 	class Scene
 	{
 	public:
@@ -20,7 +25,7 @@ namespace Xaloc {
 		void OnUpdate(Timestep ts);
 
 
-		GameObject Scene::CreateGameObject(const std::string& name);
+		Entity Scene::CreateEntity(const std::string& name);
 
 	private:
 
@@ -34,7 +39,7 @@ namespace Xaloc {
 		std::string m_Name;
 
 		
-		friend class GameObject;
+		friend class Entity;
 	};
 
 }

@@ -7,7 +7,7 @@ namespace Xaloc {
 	class WindowsInput : public Input
 	{
 	protected:
-		virtual bool IsKeyPressedImpl(int keyCode) override;
+		virtual bool IsKeyPressedImpl(KeyCode keyCode) override;
 		
 		virtual bool IsGamepadButtonPressedImpl(int id, int button) override;
 		virtual bool IsGamepadConnectedImpl(int id) override;

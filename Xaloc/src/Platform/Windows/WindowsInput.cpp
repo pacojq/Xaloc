@@ -9,10 +9,10 @@ namespace Xaloc {
 	Scope<Input> Input::s_Instance = CreateScope<WindowsInput>();
 
 
-	bool WindowsInput::IsKeyPressedImpl(int keyCode)
+	bool WindowsInput::IsKeyPressedImpl(KeyCode keyCode)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		auto state = glfwGetKey(window, keyCode);
+		auto state = glfwGetKey(window, static_cast<int32_t>(keyCode));
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
