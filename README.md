@@ -44,6 +44,14 @@ If you are working on Windows, execute the script ```scripts/Win-GenProjects.bat
 to generate the solution and project files.
 
 
+## Execution
+
+The default startup project is the ```Sandbox``` App.
+
+Remember to build the **entire solution** if you modify the C# files in ```SandboxCs```, since the dll file for the
+scripting project is generated appart from the main Sandbox application.
+
+
 ## Features
 
 Right now, Xaloc is very bare-bones. Its most basic features are:
