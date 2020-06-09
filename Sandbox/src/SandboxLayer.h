@@ -29,6 +29,8 @@ private:
 	glm::vec4 m_SecondColor;
 	Xaloc::Ref<Xaloc::Texture2D> m_Texture;
 	
+	Xaloc::Ref<Xaloc::Framebuffer> m_Framebuffer;
+	
 	Xaloc::Entity m_Player;
 
 	Xaloc::Ref<Xaloc::SubTexture2D> m_TileWater;

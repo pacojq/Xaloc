@@ -16,6 +16,8 @@
 
 namespace Xaloc {
 
+	static bool s_Initialized = false;
+	
 	static MonoDomain* s_MonoDomain = nullptr;
 	static std::string s_AssemblyPath;
 
@@ -130,6 +132,7 @@ namespace Xaloc {
 
 	void ScriptEngine::Init(const std::string& assemblyPath)
 	{
+		s_Initialized = true;
 		s_AssemblyPath = assemblyPath;
 
 		
@@ -193,6 +196,9 @@ namespace Xaloc {
 
 	void ScriptEngine::OnInitEntity(BehaviourComponent& behaviour, uint32_t entityID, uint32_t sceneID)
 	{
+		if (!s_Initialized)
+			return;
+
 		EntityBehaviourClass& behaviourClass = s_BehaviourClassMap[behaviour.ModuleName];
 		behaviourClass.FullName = behaviour.ModuleName;
 		if (behaviour.ModuleName.find('.') != std::string::npos)

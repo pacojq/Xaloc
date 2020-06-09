@@ -9,12 +9,12 @@ namespace SandboxCs
 
         public void OnCreate()
         {
-            Log.Warn("Hello world!");
+            Log.Info("Hello world!");
 
             TagComponent tag = GetComponent<TagComponent>();
             tag.Tag = "Tag from CSharp!";
 
-            Log.Warn($"We have a new tag: { GetComponent<TagComponent>().Tag}");
+            Log.Info($"We have a new tag: { GetComponent<TagComponent>().Tag}");
         }
 
         public void OnUpdate(float ts)

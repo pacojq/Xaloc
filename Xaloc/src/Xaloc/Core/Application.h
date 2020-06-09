@@ -22,6 +22,9 @@ namespace Xaloc {
 	{
 		std::string Name = "Xaloc App";
 
+		bool UseScripting = false;
+		std::string ScriptingDllPath;
+
 		RendererAPI::API TargetGraphics = RendererAPI::API::OpenGL;
 
 		unsigned int Width = 1280;

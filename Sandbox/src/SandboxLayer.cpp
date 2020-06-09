@@ -45,6 +45,16 @@ void SandboxLayer::OnAttach()
 {
 	m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
 
+
+	Xaloc::FramebufferSpec framebufferSpec;
+	framebufferSpec.Width = 1280;
+	framebufferSpec.Height = 720;
+	m_Framebuffer = Xaloc::Framebuffer::Create(framebufferSpec);
+
+
+
+	
+
 	Xaloc::Ref<Xaloc::Texture2D> tilemap = Xaloc::Texture2D::Create("assets/game/textures/tilemap.png");
 
 	glm::vec2 size = { 16.0f, 16.0f };
@@ -130,6 +140,8 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 
 	Xaloc::Renderer2D::ResetStats();
 
+	m_Framebuffer->Bind();
+
 	Xaloc::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 	Xaloc::RenderCommand::Clear();
 
@@ -156,7 +168,7 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 
 
 	Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-	/*
+	
 	for (uint32_t y = 0; y < s_mapHeight; y++)
 	{
 		for (uint32_t x = 0; x < s_mapWidth; x++)
@@ -181,7 +193,7 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 			}
 		}
 	}
-	*/
+	
 	Xaloc::Renderer2D::EndScene();
 
 
@@ -189,6 +201,7 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 	m_Scene->OnUpdate(ts);
 	Xaloc::Renderer2D::EndScene();
 
+	m_Framebuffer->Unbind();
 }
 
 
@@ -255,7 +268,7 @@ void SandboxLayer::OnImGuiRender()
 
 
 
-	/*
+	
 	static bool p_open = true;
 	static bool opt_fullscreen_persistant = true;
 	bool opt_fullscreen = opt_fullscreen_persistant;
@@ -312,14 +325,14 @@ void SandboxLayer::OnImGuiRender()
 	}
 
 	ImGui::Begin("Scene");
-	uint32_t texID = m_Texture->GetRendererID();
-	ImGui::Image((void*)texID, ImVec2{ 64.0f, 64.0f });
+	uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
+	ImGui::Image((void*)texID, ImVec2{ 1280.0f, 720.0f }, ImVec2{0, 1}, ImVec2{1, 0});
 	ImGui::End();
 
 	
 
 	ImGui::End();
-	*/
+	
 }
 
 void SandboxLayer::OnEvent(Xaloc::Event& e)

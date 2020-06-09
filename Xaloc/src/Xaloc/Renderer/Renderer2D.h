@@ -19,52 +19,152 @@ namespace Xaloc {
 		static void BeginScene(const OrthographicCamera& camera);
 		static void EndScene();
 
+		/// <summary>
+		/// Draws the current batch and resets its state.
+		/// </summary>
 		static void Flush();
 
+
+
+		
 
 		// Primitives
 
 
-
-		// Draw a flat-colored quad
+		/// <summary>
+		/// Draw a flat-colored quad
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="color"></param>
+		/// <param name="depth"></param>
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float depth = 0.0f);
 		
-		// Draw a flat-colored quad
+		/// <summary>
+		/// Draw a flat-colored quad
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="color"></param>
+		/// <param name="depth"></param>
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
 
-		// Draw a textured quad
+		/// <summary>
+		/// Draw a textured quad
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="texture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 
-		// Draw a textured quad
+		/// <summary>
+		/// Draw a textured quad
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="texture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 
-		// Draw a textured quad using a SubTexture2D
+		/// <summary>
+		/// Draw a textured quad using a SubTexture2D
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="subTexture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& subTexture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 
-		// Draw a textured quad using a SubTexture2D
+		/// <summary>
+		/// Draw a textured quad using a SubTexture2D
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="subTexture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& subTexture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 
+		/// <summary>
+		/// Draw a textured quad using a SubTexture2D
+		/// </summary>
+		/// <param name="transform"></param>
+		/// <param name="subTexture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subTexture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 
 		
 
 
-		// Draw a flat-colored, rotated quad. Expecting rotation in radians.
+
+
+		
+
+		/// <summary>
+		/// Draw a flat-colored, rotated quad.
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="rotation">Rotation, in radians</param>
+		/// <param name="color"></param>
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color);
 
-		// Draw a flat-colored, rotated quad. Expecting rotation in radians.
+		/// <summary>
+		/// Draw a flat-colored, rotated quad.
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="rotation">Rotation, in radians</param>
+		/// <param name="color"></param>
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color);
 
-		// Draw a textured, rotated quad. Expecting rotation in radians.
+		/// <summary>
+		/// Draw a textured, rotated quad.
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="rotation">Rotation, in radians</param>
+		/// <param name="texture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 
-		// Draw a textured, rotated quad. Expecting rotation in radians.
+		/// <summary>
+		/// Draw a textured, rotated quad.
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="rotation">Rotation, in radians</param>
+		/// <param name="texture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 
-		// Draw a textured, rotated quad using a SubTexture2D. Expecting rotation in radians.
+		/// <summary>
+		/// Draw a textured, rotated quad using a SubTexture2D.
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="rotation">Rotation, in radians</param>
+		/// <param name="subTexture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subTexture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 		
-		// Draw a textured, rotated quad using a SubTexture2D. Expecting rotation in radians.
+		/// <summary>
+		/// Draw a textured, rotated quad using a SubTexture2D.
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="size"></param>
+		/// <param name="rotation">Rotation, in radians</param>
+		/// <param name="subTexture"></param>
+		/// <param name="tilingFactor"></param>
+		/// <param name="tintColor"></param>
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subTexture, float tilingFactor = 1.0f, const glm::vec4 tintColor = glm::vec4(1.0f));
 
 

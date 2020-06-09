@@ -42,8 +42,11 @@ namespace Xaloc {
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 
-		// TODO move scripting module name to ApplicationSpec
-		ScriptEngine::Init("assets/scripts/SandboxCs.dll");
+		if (spec.UseScripting)
+		{
+			// TODO error handling with ScriptingDllPath
+			ScriptEngine::Init(spec.ScriptingDllPath);
+		}
 	}
 
 
