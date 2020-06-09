@@ -62,12 +62,21 @@ Right now, Xaloc is very bare-bones. Its most basic features are:
  - In-game debug UI using ImGui.
  - Simple 2D batch renderer.
  - OpenGL support.
+ 
+<p align="center">
+    <img height="400" src="res/csharp-demo.gif" alt="Example of C# scripting." />
+</p>
 
 Other features coming up in the future are:
 
+ - Editor
  - Audio system.
  - 2D physics.
  - Support for Vulkan.
+
+<p align="center">
+    <img height="400" src="res/sandbox-editor.png" alt="Screenshot of a work-in-progress editor." />
+</p>
 
 
 ## Dependencies
