@@ -51,8 +51,11 @@ The default startup project is the ```Sandbox``` App.
 Remember to build the **entire solution** if you modify the C# files in ```SandboxCs```, since the dll file for the
 scripting project is generated appart from the main Sandbox application.
 
+<p align="center">
+    <img height="400" src="res/csharp-demo.gif" alt="Example of C# scripting." />
+</p>
 
-## Features
+## Current Features
 
 Right now, Xaloc is very bare-bones. Its most basic features are:
 
@@ -63,16 +66,17 @@ Right now, Xaloc is very bare-bones. Its most basic features are:
  - Simple 2D batch renderer.
  - OpenGL support.
  
-<p align="center">
-    <img height="400" src="res/csharp-demo.gif" alt="Example of C# scripting." />
-</p>
+
+## Planned Features
 
 Other features coming up in the future are:
 
- - Editor
+ - Editor.
  - Audio system.
  - 2D physics.
  - Support for Vulkan.
+
+The game editor is currently work-in-progress:
 
 <p align="center">
     <img height="400" src="res/sandbox-editor.png" alt="Screenshot of a work-in-progress editor." />
