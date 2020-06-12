@@ -40,7 +40,7 @@ namespace Xaloc {
 	{
 	public:
 		Application(ApplicationSpec spec);
-		virtual ~Application() = default;
+		virtual ~Application();
 
 		void Run();
 		void Close();

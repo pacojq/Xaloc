@@ -14,12 +14,11 @@ namespace Xaloc {
 		RenderCommand::Init();
 		Renderer2D::Init();
 	}
-	/*
+
 	void Renderer::Shutdown()
 	{
-		RenderCommand::Init();
-		Renderer2D::Init();
-	}*/
+		Renderer2D::Shutdown();
+	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{

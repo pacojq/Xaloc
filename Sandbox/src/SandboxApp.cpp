@@ -1,5 +1,5 @@
 #include <Xaloc.h>
-#include "Xaloc/Core/EntryPoint.h"
+#include <Xaloc/EntryPoint.h>
 
 #include "imgui/imgui.h"
 

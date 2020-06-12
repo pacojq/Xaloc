@@ -20,6 +20,8 @@ namespace Xaloc {
 	Application::Application(ApplicationSpec spec)
 		: m_Name(spec.Name)
 	{
+		XA_PROFILE_FUNCTION();
+		
 		XA_CORE_ASSERT(!s_Instance, "Application should be null");
 		s_Instance = this;
 
@@ -49,20 +51,33 @@ namespace Xaloc {
 		}
 	}
 
+	Application::~Application()
+	{
+		XA_PROFILE_FUNCTION();
+
+		Renderer::Shutdown();
+	}
+
 
 	void Application::PushLayer(Layer* layer)
 	{
+		XA_PROFILE_FUNCTION();
+		
 		m_LayerStack.PushLayer(layer);
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
+		XA_PROFILE_FUNCTION();
+		
 		m_LayerStack.PushOverlay(overlay);
 	}
 
 
 	void Application::OnEvent(Event& e)
 	{
+		XA_PROFILE_FUNCTION();
+		
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
@@ -81,25 +96,37 @@ namespace Xaloc {
 
 	void Application::Run()
 	{
+		XA_PROFILE_FUNCTION();
+		
 		while (m_Running)
 		{
+			XA_PROFILE_SCOPE("RunLoop");
+			
 			float time = (float) glfwGetTime(); // TODO Platform::GetTime()
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
 			m_FPS = 1.0f / timestep;
 
-			if (!m_Minimized && !m_Paused)
+			if (!m_Minimized)
 			{
-				for (Layer* layer : m_LayerStack)
-					layer->OnUpdate(timestep);
+				if (!m_Paused)
+				{
+					XA_PROFILE_SCOPE("LayerStack OnUpdate");
+					
+					for (Layer* layer : m_LayerStack)
+						layer->OnUpdate(timestep);
+				}
+
+				m_ImGuiLayer->Begin();
+				{
+					XA_PROFILE_SCOPE("LayerStack OnImGuiRender");
+					
+					for (Layer* layer : m_LayerStack)
+						layer->OnImGuiRender();
+				}
+				m_ImGuiLayer->End();
 			}
-
-
-			m_ImGuiLayer->Begin();
-			for (Layer* layer : m_LayerStack)
-				layer->OnImGuiRender();
-			m_ImGuiLayer->End();
 
 			m_Window->OnUpdate();
 		}
@@ -122,6 +149,8 @@ namespace Xaloc {
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
+		XA_PROFILE_FUNCTION();
+		
 		if (e.GetWidth() == 0 || e.GetHeight() == 0)
 		{
 			m_Minimized = true;

@@ -8,6 +8,8 @@ namespace Xaloc {
 	class XALOC_API Input
 	{
 
+	// TODO handle non-QWERTY keyboards with GLFW
+
 	public:
 		inline static bool IsKeyPressed(KeyCode keyCode) { return s_Instance->IsKeyPressedImpl(keyCode); }
 

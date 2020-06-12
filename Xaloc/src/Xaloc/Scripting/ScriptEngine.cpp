@@ -140,7 +140,8 @@ namespace Xaloc {
 
 		// TODO better distribute the mono/lib folder
 		mono_set_assemblies_path("mono/lib");
-		// mono_jit_set_trace_options("--verbose");
+		mono_jit_set_trace_options("--verbose");
+		
 		auto domain = mono_jit_init("Xaloc");
 
 		char* name = (char*)"XalocRuntime";

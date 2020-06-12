@@ -23,3 +23,5 @@
 #include <unordered_set>
 
 #include "Xaloc/Core/Log.h"
+
+#include "Xaloc/Debug/Instrumentor.h"

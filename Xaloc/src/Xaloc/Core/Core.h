@@ -1,7 +1,17 @@
 #pragma once
 
-
 #include <memory>
+#include "Xaloc/Debug/DebugBreak.h"
+
+
+namespace Xaloc {
+
+	void InitCore();
+	void ShutdownCore();
+	
+}
+
+
 
 // Platform detection using predefined macros
 #ifdef _WIN32
@@ -61,17 +71,7 @@
 
 
 #ifdef XA_DEBUG
-	#if defined(XA_PLATFORM_WINDOWS)
-		#define XA_DEBUGBREAK() __debugbreak()
-	#elif defined(XA_PLATFORM_LINUX)
-		#include <signal.h>
-		#define XA_DEBUGBREAK() raise(SIGTRAP)
-	#else
-		#error "Platform doesn't support debugbreak yet!"
-	#endif
 	#define XA_ENABLE_ASSERTS
-#else
-	#define XA_DEBUGBREAK()
 #endif
 
 
