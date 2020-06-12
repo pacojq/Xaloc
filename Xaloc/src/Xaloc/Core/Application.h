@@ -27,8 +27,8 @@ namespace Xaloc {
 
 		RendererAPI::API TargetGraphics = RendererAPI::API::OpenGL;
 
-		unsigned int Width = 1280;
-		unsigned int Height = 720;
+		uint32_t Width = 1280;
+		uint32_t Height = 720;
 
 		bool PauseOnFocusLost = false;
 

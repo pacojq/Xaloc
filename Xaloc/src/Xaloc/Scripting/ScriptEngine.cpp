@@ -184,6 +184,9 @@ namespace Xaloc {
 
 	void ScriptEngine::OnUpdateEntity(uint32_t entityID, Timestep ts)
 	{
+		if (!s_Initialized)
+			return;
+		
 		XA_CORE_ASSERT(s_EntityInstanceMap.find(entityID) != s_EntityInstanceMap.end(), "Could not find entity in instance map!");
 
 		auto& entity = s_EntityInstanceMap[entityID];

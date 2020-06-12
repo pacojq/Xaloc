@@ -115,6 +115,7 @@ project "Xaloc"
 		optimize "on"
 
 		
+		
 project "XalocSharp"
 	location "XalocSharp"
 	kind "SharedLib"
@@ -128,6 +129,84 @@ project "XalocSharp"
 		"%{prj.name}/src/**.cs", 
 	}
 	
+
+
+project "XalocEditor"
+	location "XalocEditor"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.c",
+		"%{prj.name}/src/**.hpp",
+		"%{prj.name}/src/**.cpp",
+	}
+
+	includedirs
+	{
+		"Xaloc/vendor/spdlog/include",
+		"Xaloc/src",
+		"Xaloc/vendor",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}"
+	}
+
+	links
+	{
+		"Xaloc"
+	}
+
+	postbuildcommands 
+	{
+		'{COPY} "../XalocEditor/assets" "%{cfg.targetdir}/assets"'
+	}
+	
+	filter "system:windows"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines "XA_DEBUG"
+		runtime "Debug"
+		symbols "on"
+		
+		postbuildcommands 
+		{
+			'{COPY} "../Xaloc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+		
+
+	filter "configurations:Release"
+		defines "XA_RELEASE"
+		runtime "Release"
+		optimize "on"
+		
+		postbuildcommands 
+		{
+			'{COPY} "../Xaloc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+
+	filter "configurations:Dist"
+		defines "XA_DIST"
+		runtime "Release"
+		optimize "on"
+		
+		postbuildcommands 
+		{
+			'{COPY} "../Xaloc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
+
+
+
+
+
+
 
 
 	
@@ -191,7 +270,7 @@ project "Sandbox"
 		
 		postbuildcommands 
 		{
-			'{COPY} "../Xaloc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+			'{COPY} "../Xaloc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
 		}
 
 	filter "configurations:Dist"
@@ -201,7 +280,7 @@ project "Sandbox"
 		
 		postbuildcommands 
 		{
-			'{COPY} "../Xaloc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+			'{COPY} "../Xaloc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
 		}
 
 project "SandboxCs"
