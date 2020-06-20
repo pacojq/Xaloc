@@ -23,6 +23,7 @@ IncludeDir["stb_image"] = "Xaloc/vendor/stb_image"
 IncludeDir["glm"] = "Xaloc/vendor/glm"
 IncludeDir["entt"] = "Xaloc/vendor/entt/single_include"
 IncludeDir["mono"] = "Xaloc/vendor/mono/include"
+IncludeDir["pugixml"] = "Xaloc/vendor/pugixml"
 
 LibraryDir = {}
 LibraryDir["mono"] = "vendor/mono/lib/Debug/mono-2.0-sgen.lib"
@@ -79,7 +80,8 @@ project "Xaloc"
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.mono}"
+		"%{IncludeDir.mono}",
+		"%{IncludeDir.pugixml}"
 	}
 	
 	links

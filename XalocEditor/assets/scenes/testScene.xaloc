@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene>
+  <entities>
+  
+	<entity>
+		<TagComponent tag="transform entity" />
+		<TransformComponent position="[0, 0, 0]" rotation="[1, 0, 0, 0]" scale="[1, 1, 1]" />
+	</entity>
+  
+	<entity>
+		<TagComponent tag="player" />
+		<TransformComponent position="[0, 0, 0]" rotation="[1, 0, 0, 0]" scale="[1, 1, 1]" />
+		<ScriptComponent name="SandboxCs.PlayerEntity" />
+	</entity>
+  
+  </entities>
+</scene>

@@ -2,6 +2,8 @@
 
 #include "Xaloc.h"
 
+#include "Xaloc/Editor/SceneHierarchyPanel.h"
+
 namespace Xaloc {
 
 	class EditorLayer : public Layer
@@ -20,6 +22,7 @@ namespace Xaloc {
 	private:
 
 		Ref<Scene> m_Scene;
+		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 		OrthographicCameraController m_CameraController;
 
@@ -30,6 +33,8 @@ namespace Xaloc {
 		Ref<Texture2D> m_Texture;
 
 		Ref<Framebuffer> m_Framebuffer;
+		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+		
 
 		Entity m_Player;
 

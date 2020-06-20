@@ -38,6 +38,8 @@ namespace Xaloc {
 		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 	{
 		m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");
+		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
+		
 		m_CameraController.SetZoomLevel(5.0f);
 	}
 
@@ -179,67 +181,6 @@ namespace Xaloc {
 
 	void EditorLayer::OnImGuiRender()
 	{
-		ImGui::Begin("Settings");
-		ImGui::DragFloat("Tiling factor", &m_TilingFactor, 0.1f, 0.1f, 10.0f);
-		ImGui::DragFloat("Rotation", &m_Rotation, 0.1f);
-		ImGui::ColorEdit4("First Color", glm::value_ptr(m_FirstColor));
-		ImGui::ColorEdit4("Second Color", glm::value_ptr(m_SecondColor));
-
-		ImGui::Separator();
-
-		ImGui::DragFloat("Tiles depth", &m_TilesDepth, 0.1f, -10.0f, 10.0f);
-
-		//float depth = m_SpriteRenderer->GetDepth();
-		//if (ImGui::DragFloat("SpriteRenderer depth", &depth, 0.1f, -10.0f, 10.0f))
-		//{
-		//	m_SpriteRenderer->SetDepth(depth);
-		//}
-
-
-		ImGui::Separator();
-		ImGui::Text("Player data");
-
-		glm::mat4 matrix = m_Player.Transform();
-		glm::vec3 translation = { matrix[3][0], matrix[3][1], matrix[3][2] };
-
-		//glm::vec3 playerPos = m_Player->GetPosition();
-		ImGui::DragFloat("X", &translation.x, 0.1f);
-		ImGui::DragFloat("Y", &translation.y, 0.1f);
-		ImGui::DragFloat("Z", &translation.z, 0.1f);
-		//m_Player->SetPosition(playerPos);
-
-		//matrix[0][3] = translation.x;
-		//matrix[1][3] = translation.y; 
-		//matrix[2][3] = translation.z;
-		matrix[3][0] = translation.x;
-		matrix[3][1] = translation.y;
-		matrix[3][2] = translation.z;
-
-		m_Player.SetTransform(&matrix);
-
-		//float playerSpd = m_PlayerComponent->GetSpeed();
-		//ImGui::DragFloat("Speed", &playerSpd, 0.1f);
-		//m_PlayerComponent->SetSpeed(playerSpd);
-
-		ImGui::End();
-
-
-		auto stats = Xaloc::Renderer2D::GetStats();
-
-		ImGui::Begin("Render Stats");
-		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::End();
-
-		//ImGui::ShowDemoWindow();
-
-
-
-
-
-
 		static bool p_open = true;
 		static bool opt_fullscreen_persistant = true;
 		bool opt_fullscreen = opt_fullscreen_persistant;
@@ -295,12 +236,93 @@ namespace Xaloc {
 			ImGui::EndMenuBar();
 		}
 
-		ImGui::Begin("Scene");
-		uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)texID, ImVec2{ 1280.0f, 720.0f }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+
+
+
+
+
+		
+
+		ImGui::Begin("Settings");
+		ImGui::DragFloat("Tiling factor", &m_TilingFactor, 0.1f, 0.1f, 10.0f);
+		ImGui::DragFloat("Rotation", &m_Rotation, 0.1f);
+		ImGui::ColorEdit4("First Color", glm::value_ptr(m_FirstColor));
+		ImGui::ColorEdit4("Second Color", glm::value_ptr(m_SecondColor));
+
+		ImGui::Separator();
+
+		ImGui::DragFloat("Tiles depth", &m_TilesDepth, 0.1f, -10.0f, 10.0f);
+
+		//float depth = m_SpriteRenderer->GetDepth();
+		//if (ImGui::DragFloat("SpriteRenderer depth", &depth, 0.1f, -10.0f, 10.0f))
+		//{
+		//	m_SpriteRenderer->SetDepth(depth);
+		//}
+
+
+		ImGui::Separator();
+		ImGui::Text("Player data");
+
+		glm::mat4 matrix = m_Player.Transform();
+		glm::vec3 translation = { matrix[3][0], matrix[3][1], matrix[3][2] };
+
+		ImGui::DragFloat("X", &translation.x, 0.1f);
+		ImGui::DragFloat("Y", &translation.y, 0.1f);
+		ImGui::DragFloat("Z", &translation.z, 0.1f);
+
+		matrix[3][0] = translation.x;
+		matrix[3][1] = translation.y;
+		matrix[3][2] = translation.z;
+
+		m_Player.SetTransform(&matrix);
+
+
 		ImGui::End();
 
 
+		auto stats = Xaloc::Renderer2D::GetStats();
+
+		ImGui::Begin("Render Stats");
+		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+		ImGui::Text("Quads: %d", stats.QuadCount);
+		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		ImGui::End();
+
+		//ImGui::ShowDemoWindow();
+
+
+
+
+
+
+
+
+
+
+		
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+		ImGui::Begin("Scene");
+		ImVec2 scenePanelSize = ImGui::GetContentRegionAvail();
+
+		if (m_ViewportSize != *((glm::vec2*) &scenePanelSize))
+		{
+			m_Framebuffer->Resize((uint32_t)scenePanelSize.x, (uint32_t)scenePanelSize.y);
+			m_ViewportSize = { scenePanelSize .x, scenePanelSize .y };
+
+			// TODO OnWindow resize, call m_CameraController.OnResize again 
+			m_CameraController.OnResize(scenePanelSize.x, scenePanelSize.y);
+		}
+		
+		uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
+		ImGui::Image((void*)texID, scenePanelSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+		ImGui::End();
+		ImGui::PopStyleVar();
+
+
+		m_SceneHierarchyPanel->OnImGuiRender();
+		
 
 		ImGui::End();
 

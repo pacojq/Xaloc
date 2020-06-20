@@ -26,6 +26,7 @@ namespace Xaloc {
 
 
 		Entity Scene::CreateEntity(const std::string& name);
+		void DestroyEntity(Entity entity);
 
 	private:
 
@@ -40,6 +41,7 @@ namespace Xaloc {
 
 		
 		friend class Entity;
+		friend class SceneHierarchyPanel;
 	};
 
 }
