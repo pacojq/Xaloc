@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "xapch.h"
 #include "Xaloc\Core\Core.h"
 
 namespace Xaloc {

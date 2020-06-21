@@ -468,6 +468,9 @@ namespace Xaloc {
 					if (!tex)
 						continue;
 
+
+					// TODO use pixels per unit and SubTexture width and size
+					
 					AABB boundingBox;
 					glm::vec4 sprMin = entity.Transform() * glm::vec4{ -0.5f, -0.5f, 0.0f, 1.0f };        // Get sprite quad min vertex
 					glm::vec4 sprMax = entity.Transform() * glm::vec4{ 0.5f, 0.5f, 0.0f, 1.0f };          // Get sprite quad max vertex

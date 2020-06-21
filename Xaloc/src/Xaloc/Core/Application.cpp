@@ -3,6 +3,8 @@
 
 #include "Xaloc/Core/Log.h"
 
+#include "Xaloc/ImGui/ImGuiStyles.h"
+
 #include "Xaloc/Renderer/Renderer.h"
 
 #include "Xaloc/Scripting/ScriptEngine.h"
@@ -43,6 +45,7 @@ namespace Xaloc {
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+		ImGuiStyles::ApplyDefaultStyle();
 
 		if (spec.UseScripting)
 		{
