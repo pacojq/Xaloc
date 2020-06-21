@@ -24,4 +24,4 @@
 
 #include "Xaloc/Core/Log.h"
 
-#include "Xaloc/Debug/Instrumentor.h"
+#include "Xaloc/Debugging/Instrumentor.h"
