@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "Xaloc/Debug/DebugBreak.h"
+#include "Xaloc/Debugging/DebugBreak.h"
 
 
 namespace Xaloc {
