@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Xaloc/Core/Timestep.h"
+#include "Xaloc/Events/Event.h"
 
 #include <entt/entt.hpp>
 
@@ -21,12 +22,17 @@ namespace Xaloc {
 
 		void Init();
 
-
 		void OnUpdate(Timestep ts);
-
+		void OnEvent(Event& e);
 
 		Entity Scene::CreateEntity(const std::string& name);
 		void DestroyEntity(Entity entity);
+
+		template<typename T>
+		auto FindEntitiesWith()
+		{
+			return m_Registry.view<T>();
+		}
 
 	private:
 

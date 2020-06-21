@@ -54,6 +54,7 @@ namespace Xaloc {
 
 		m_SceneEntity = m_Registry.create();
 		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_SceneID);
+		m_Registry.emplace<TagComponent>(m_SceneEntity, "Scene Entity");
 
 		s_ActiveScenes[m_SceneID] = this;
 
@@ -114,5 +115,19 @@ namespace Xaloc {
 	void Scene::DestroyEntity(Entity entity)
 	{
 		m_Registry.destroy(entity.m_EntityHandle);
+	}
+
+
+	void Scene::OnEvent(Event& e)
+	{
+		// TODO
+		
+		//auto view = m_Registry.view<CameraComponent>();
+		//for (auto entity : view)
+		//{
+		//	auto& comp = view.get<CameraComponent>(entity);
+		//	comp.Camera.OnEvent(e);
+		//	break;
+		//}
 	}
 }

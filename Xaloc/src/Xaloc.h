@@ -8,22 +8,36 @@
 
 #include "Xaloc/Core/Timestep.h"
 
+
+// --- Scene and ECS ----------------------------
+
 #include "Xaloc/Scene/Scene.h"
 #include "Xaloc/Scene/Components.h"
 #include "Xaloc/Scene/Entity.h"
 
+
+// --- Input ------------------------------------
 
 #include "Xaloc/Core/Input/Input.h"
 #include "Xaloc/Core/Input/KeyCodes.h"
 #include "Xaloc/Core/Input/GamepadButtonCodes.h"
 #include "Xaloc/Core/Input/MouseButtonCodes.h"
 
-#include "Xaloc/Renderer/OrthographicCameraController.h"
 
+// --- Math -------------------------------------
+
+#include "Xaloc/Core/Math/AABB.h"
+
+
+// --- ImGui ------------------------------------
+
+#include "imgui/imgui.h"
 #include "Xaloc/ImGui/ImGuiLayer.h"
 
 
 // --- Renderer ---------------------------------
+
+#include "Xaloc/Renderer/OrthographicCameraController.h"
 
 #include "Xaloc/Renderer/Renderer.h"
 #include "Xaloc/Renderer/Renderer2D.h"

@@ -14,6 +14,8 @@ namespace Xaloc {
 		const Ref<Texture2D> GetTexture() const { return m_Texture; }
 		const glm::vec2* GetTexCoords() const { return m_TexCoords; }
 
+		uint32_t GetWidth() const { return m_Width; }
+		uint32_t GetHeight() const { return m_Height; }
 
 		static Ref<SubTexture2D> CreateFromGrid(const Ref<Texture2D>& texture, const glm::vec2& cellCoords, 
 			const glm::vec2& cellSize, const glm::vec2& padding = { 0.0f, 0.0f }, const glm::vec2& offset = { 0.0f, 0.0f });
@@ -24,5 +26,8 @@ namespace Xaloc {
 	private:
 		Ref<Texture2D> m_Texture;
 		glm::vec2 m_TexCoords[4];
+
+		uint32_t m_Width;
+		uint32_t m_Height;
 	};
 }

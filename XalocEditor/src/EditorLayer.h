@@ -18,11 +18,27 @@ namespace Xaloc {
 		void OnUpdate(Timestep ts) override;
 		virtual void OnImGuiRender() override;
 		void OnEvent(Event& e) override;
+		
+		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
+	private:
+
+		struct SelectedEntity
+		{
+			Entity Entity;
+			// TODO cast a ray and get distance float Distance;
+		};
+		void OnEntitySelected(const SelectedEntity& selection);
+		
+		std::pair<float, float> GetMouseViewportSpace();
+
+		
 	private:
 
 		Ref<Scene> m_Scene;
 		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
+
+		std::vector<SelectedEntity> m_SelectionContext;
 
 		OrthographicCameraController m_CameraController;
 
@@ -33,7 +49,9 @@ namespace Xaloc {
 		Ref<Texture2D> m_Texture;
 
 		Ref<Framebuffer> m_Framebuffer;
+		
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+		glm::vec2 m_ViewportBounds[2];
 		
 
 		Entity m_Player;
@@ -42,6 +60,11 @@ namespace Xaloc {
 		std::unordered_map<char, Ref<SubTexture2D>> s_TextureMap;
 		float m_TilesDepth = -0.1f;
 
+
+	// Editor Windows
+	private:
+		bool m_ShowWindowConsole = true; // TODO
+		bool m_ShowWindowRenderStats = true;
 	};
 
 }
