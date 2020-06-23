@@ -52,8 +52,12 @@ namespace Xaloc {
 		Xaloc::FramebufferSpec framebufferSpec;
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
-		m_Framebuffer = Xaloc::Framebuffer::Create(framebufferSpec);
+		framebufferSpec.ClearColor = { 0.1f, 0.1f, 0.1f, 1 };
+		Ref<Xaloc::Framebuffer> framebuffer = Xaloc::Framebuffer::Create(framebufferSpec);
 
+		Xaloc::RenderPassSpecification renderPassSpec;
+		renderPassSpec.TargetFramebuffer = framebuffer;
+		m_RenderPass = Xaloc::RenderPass::Create(renderPassSpec);
 
 
 
@@ -138,10 +142,13 @@ namespace Xaloc {
 
 		Xaloc::Renderer2D::ResetStats();
 
-		m_Framebuffer->Bind();
+		// TODO begin render pass
+		//m_Framebuffer->Bind();
+		//m_RenderPass->GetSpecification().TargetFramebuffer->Bind();
+		Renderer::BeginRenderPass(m_RenderPass);
 
-		Xaloc::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-		Xaloc::RenderCommand::Clear();
+		//Xaloc::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		//Xaloc::RenderCommand::Clear();
 
 		#if false   	
 		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
@@ -212,8 +219,9 @@ namespace Xaloc {
 
 		
 		
-
-		m_Framebuffer->Unbind();
+		// TODO end render pass
+		//m_Framebuffer->Unbind();
+		Renderer::EndRenderPass();
 	}
 
 
@@ -361,7 +369,8 @@ namespace Xaloc {
 		
 		if (m_ViewportSize != *((glm::vec2*) & viewportSize))
 		{
-			m_Framebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+			m_RenderPass->GetSpecification().TargetFramebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+			//m_Framebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 			m_ViewportSize = { viewportSize.x, viewportSize.y };
 
 			// TODO OnWindow resize, call m_CameraController.OnResize again 
@@ -381,7 +390,8 @@ namespace Xaloc {
 		// TODO m_AllowViewportCameraEvents = ImGui::IsMouseHoveringRect(minBound, maxBound);
 
 		
-		uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
+		uint32_t texID = m_RenderPass->GetSpecification().TargetFramebuffer->GetColorAttachmentRendererID();
+		//uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)texID, viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 		ImGui::End();
 		ImGui::PopStyleVar();

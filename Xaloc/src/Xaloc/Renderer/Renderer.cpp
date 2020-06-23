@@ -8,6 +8,16 @@ namespace Xaloc {
 
 	Scope<Renderer::SceneData> Renderer::m_SceneData = CreateScope<Renderer::SceneData>();
 
+	struct RendererData
+	{
+		Ref<RenderPass> m_ActiveRenderPass;
+		// TODO Ref<ShaderLibrary> m_ShaderLibrary;
+		// TODO Ref<VertexArray> m_FullscreenQuadVertexArray;
+	};
+
+	static RendererData s_Data;
+
+	
 
 	void Renderer::Init()
 	{
@@ -34,6 +44,28 @@ namespace Xaloc {
 	void Renderer::EndScene()
 	{
 
+	}
+
+	void Renderer::BeginRenderPass(Ref<RenderPass> renderPass, bool clear)
+	{
+		XA_CORE_ASSERT(renderPass, "Render pass cannot be null!");
+
+		s_Data.m_ActiveRenderPass = renderPass;
+
+		renderPass->GetSpecification().TargetFramebuffer->Bind();
+		if (clear)
+		{
+			const glm::vec4& clearColor = renderPass->GetSpecification().TargetFramebuffer->GetSpecification().ClearColor;
+			RenderCommand::SetClearColor(clearColor);
+			RenderCommand::Clear();
+		}
+	}
+
+	void Renderer::EndRenderPass()
+	{
+		XA_CORE_ASSERT(s_Data.m_ActiveRenderPass, "No active render pass!");
+		s_Data.m_ActiveRenderPass->GetSpecification().TargetFramebuffer->Unbind();
+		s_Data.m_ActiveRenderPass = nullptr;
 	}
 
 	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)

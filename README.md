@@ -43,6 +43,10 @@ You can clone Xaloc using git. Make sure you do a ```--recursive``` clone!
 If you are working on Windows, execute the script ```scripts/Win-GenProjects.bat``` 
 to generate the solution and project files.
 
+### Vulkan 
+
+To work with the Vulkan API, you should first install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home).
+
 
 ## Execution
 

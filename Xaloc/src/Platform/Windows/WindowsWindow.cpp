@@ -5,7 +5,9 @@
 #include "Xaloc/Events/MouseEvent.h"
 #include "Xaloc/Events/KeyEvent.h"
 
+#include "Xaloc/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLContext.h"
+#include "Platform/Vulkan/VulkanContext.h"
 
 
 namespace Xaloc {
@@ -70,9 +72,19 @@ namespace Xaloc {
 		glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
 		glfwWindowHint(GLFW_DECORATED, props.IsDecorated ? GLFW_TRUE : GLFW_FALSE);
 		glfwWindowHint(GLFW_REFRESH_RATE, 0); // Run at max refresh rate
+
+		if (Renderer::GetAPI() == RendererAPI::API::Vulkan)
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 
-		m_Context = CreateScope<OpenGLContext>(m_Window);
+
+		if (Renderer::GetAPI() == RendererAPI::API::OpenGL)
+			m_Context = CreateScope<OpenGLContext>(m_Window);
+		else if (Renderer::GetAPI() == RendererAPI::API::Vulkan)
+			m_Context = CreateScope<VulkanContext>(m_Window);
+		
+		//m_Context = CreateScope<OpenGLContext>(m_Window);
 		m_Context->Init();
 		
 		glfwSetWindowUserPointer(m_Window, &m_Data);

@@ -3,6 +3,7 @@
 
 #include "Log.h"
 
+
 #define XALOC_VERSION "v0.0.1"
 
 namespace Xaloc {
@@ -11,7 +12,7 @@ namespace Xaloc {
 	{
 		Log::Init();
 
-		XA_CORE_TRACE("Xaloc Engine {}", XALOC_VERSION);
+		XA_CORE_TRACE("Xaloc Engine v{0}.{1}.{2}", XALOC_VERSION_MAJOR, XALOC_VERSION_MINOR, XALOC_VERSION_PATCH);
 		XA_CORE_TRACE("Initializing...");
 	}
 
