@@ -58,7 +58,8 @@ namespace Xaloc {
 		Xaloc::RenderPassSpecification renderPassSpec;
 		renderPassSpec.TargetFramebuffer = framebuffer;
 		m_RenderPass = Xaloc::RenderPass::Create(renderPassSpec);
-
+		
+		m_GuizmoRenderPass = Xaloc::RenderPass::Create(renderPassSpec);
 
 
 
@@ -210,18 +211,39 @@ namespace Xaloc {
 		Xaloc::Renderer2D::EndScene();
 
 
+
+		// TODO end render pass
+		//m_Framebuffer->Unbind();
+		Renderer::EndRenderPass();
+
+		
 		// DRAW SELECTED ENTITIES GUI
 		
 		if (m_SelectionContext.size())
 		{
-			// TODO
+			Entity selection = m_SelectionContext[0].Entity;
+
+			Xaloc::Renderer::BeginRenderPass(m_GuizmoRenderPass, false);
+			Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
+
+			// TODO get app pixels per unit
+			float pxPerUnit = 16.0f;
+			
+			glm::vec4 sprMin = selection.Transform() * glm::vec4{ -0.5f - 1.0f / pxPerUnit, -0.5f - 1.0f / pxPerUnit, 0.0f, 1.0f };        // Get sprite quad min vertex
+			glm::vec4 sprMax = selection.Transform() * glm::vec4{ 0.5f + 1.0f / pxPerUnit, 0.5f + 1.0f / pxPerUnit, 0.0f, 1.0f };          // Get sprite quad max vertex
+			
+			//glm::vec4 color = { 0.549f, 0.976f, 1.0f, 1.0f };
+			glm::vec4 color = glm::vec4(1.0f);
+			
+			Renderer2D::DrawLine({ sprMin.x, sprMin.y }, { sprMax.x, sprMin.y }, color, 0.5f);
+			Renderer2D::DrawLine({ sprMax.x, sprMin.y }, { sprMax.x, sprMax.y }, color, 0.5f);
+			Renderer2D::DrawLine({ sprMax.x, sprMax.y }, { sprMin.x, sprMax.y }, color, 0.5f);
+			Renderer2D::DrawLine({ sprMin.x, sprMax.y }, { sprMin.x, sprMin.y }, color, 0.5f);
+
+			Xaloc::Renderer2D::EndScene();
+			Xaloc::Renderer::EndRenderPass();
 		}
 
-		
-		
-		// TODO end render pass
-		//m_Framebuffer->Unbind();
-		Renderer::EndRenderPass();
 	}
 
 

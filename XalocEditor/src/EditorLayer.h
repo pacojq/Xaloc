@@ -50,6 +50,7 @@ namespace Xaloc {
 
 		//Ref<Framebuffer> m_Framebuffer;
 		Ref<RenderPass> m_RenderPass;
+		Ref<RenderPass> m_GuizmoRenderPass;
 		
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];

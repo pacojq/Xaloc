@@ -170,6 +170,7 @@ namespace Xaloc {
 
 
 
+		static void DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color = glm::vec4(1.0f), float width = 1.0f);
 
 
 
