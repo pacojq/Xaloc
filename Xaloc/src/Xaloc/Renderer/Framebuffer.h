@@ -28,6 +28,8 @@ namespace Xaloc {
 	{
 	public:
 		static Ref<Framebuffer> Create(const FramebufferSpec& spec);
+
+		virtual ~Framebuffer() = default;
 		
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;

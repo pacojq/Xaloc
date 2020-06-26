@@ -8,7 +8,7 @@ namespace Xaloc {
 	{
 	public:
 		OpenGLFramebuffer(const FramebufferSpec& spec);
-		virtual ~OpenGLFramebuffer();
+		virtual ~OpenGLFramebuffer() override;
 				
 		/// <summary>
 		/// Recreates the frame buffer.

@@ -135,8 +135,11 @@ namespace Xaloc {
 	{
 		// UPDATE
 
-		m_CameraController.OnUpdate(ts);
-
+		Application::Get().GetImGuiLayer()->SetBlockEvents(!(m_ViewportFocused && m_ViewportHovered));
+		if (m_ViewportFocused)
+		{
+			m_CameraController.OnUpdate(ts);
+		}
 
 
 		// RENDER
@@ -385,6 +388,9 @@ namespace Xaloc {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Scene");
+
+		m_ViewportFocused = ImGui::IsWindowFocused();
+		m_ViewportHovered = ImGui::IsWindowHovered();
 		
 		auto viewportOffset = ImGui::GetCursorPos();
 		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
