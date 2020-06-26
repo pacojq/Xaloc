@@ -4,9 +4,19 @@
 #include "Components.h"
 #include "Entity.h"
 
+#include "SceneSerializer.h"
+
 #include "Xaloc/Renderer/Renderer2D.h"
 
 #include "Xaloc/Scripting/ScriptEngine.h"
+
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+
+#include <pugixml.hpp>
+
 
 namespace Xaloc {
 
@@ -45,6 +55,55 @@ namespace Xaloc {
 		ScriptEngine::OnInitEntity(registry.get<BehaviourComponent>(entity), (uint32_t)entity, sceneID);
 	}
 
+
+
+
+	void Scene::Save(const Ref<Scene>& scene, const std::string& filename)
+	{
+		// TODO
+	}
+
+
+	
+
+	
+	void print_doc(const char* message, const pugi::xml_document& doc, const pugi::xml_parse_result& result)
+	{
+		std::cout
+			<< message
+			<< "\t: load result '" << result.description() << "'"
+			<< ", first character of root name: U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << pugi::as_wide(doc.first_child().name())[0]
+			<< ", year: " << doc.first_child().first_child().child_value()
+			<< std::endl;
+	}
+	
+	Ref<Scene> Scene::Load(const std::string& filename)
+	{
+		pugi::xml_document doc;
+		
+		std::ifstream stream(filename);
+		pugi::xml_parse_result result = doc.load(stream);
+
+		XA_CORE_TRACE("Scene read file result: {}", result.description());
+		
+		if (result.status != pugi::xml_parse_status::status_ok)
+		{
+			if (result.status == pugi::xml_parse_status::status_file_not_found)
+			{
+				XA_ASSERT(false, "Could not load scene. File not found.")
+			}
+			else
+			{
+				XA_ASSERT(false, "Could not load scene.")
+			}
+		}
+		
+		return SceneSerializer::Deserialize(doc, result);
+	}
+
+
+	
+	
 	Scene::Scene(const std::string& name)
 		: m_Name(name), m_SceneID(s_SceneIDCounter++)
 	{

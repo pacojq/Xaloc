@@ -30,14 +30,14 @@ namespace Xaloc {
 
 
 	EditorLayer::EditorLayer()
-		: Layer("Sandbox 2D"),
+		: Layer("Editor Layer"),
 		m_CameraController(1280.0f / 720.0f, true),
 		m_TilingFactor(1.0f),
 		m_Rotation(0.0f),
 		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 	{
-		m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");
+		m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
 		
 		m_CameraController.SetZoomLevel(5.0f);
@@ -46,6 +46,9 @@ namespace Xaloc {
 
 	void EditorLayer::OnAttach()
 	{
+		// TODO
+		Scene::Load("assets/scenes/testScene.xaloc");
+		
 		m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
 
 

@@ -17,6 +17,10 @@ namespace Xaloc {
 	class Scene
 	{
 	public:
+
+		static void Save(const Ref<Scene>& scene, const std::string& filename);
+		static Ref<Scene> Load(const std::string& filename);
+
 		Scene(const std::string& name = "Scene");
 		~Scene();
 
@@ -35,7 +39,6 @@ namespace Xaloc {
 		}
 
 	private:
-
 
 
 	private:
