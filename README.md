@@ -65,10 +65,13 @@ Right now, Xaloc is very bare-bones. Its most basic features are:
 
  - Basic Scene system.
  - ECS support.
+ - Scene XML serialization.
  - C# scripting.
  - In-game debug UI using ImGui.
  - Simple 2D batch renderer.
  - OpenGL support.
+ 
+ > For in-development features, check the [dev branch](https://github.com/pacojq/Xaloc/tree/dev).
  
 
 ## Planned Features

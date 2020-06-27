@@ -11,8 +11,8 @@ namespace Xaloc {
 		m_TexCoords[2] = { max.x, max.y };
 		m_TexCoords[3] = { min.x, max.y };
 
-		m_Width = (m_TexCoords[3].x - m_TexCoords[0].x) * texture->GetWidth();
-		m_Height = (m_TexCoords[3].y - m_TexCoords[0].y) * texture->GetHeight();
+		m_Width = glm::round((m_TexCoords[2].x - m_TexCoords[0].x) * texture->GetWidth());
+		m_Height = glm::round((m_TexCoords[2].y - m_TexCoords[0].y) * texture->GetHeight());
 	}
 
 
