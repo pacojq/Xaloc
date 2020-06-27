@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scene id="1">
+<scene id="0">
 
 	<name>Serialized Scene</name>
-
 
 	<entities>
 	
@@ -15,6 +14,9 @@
 			<TagComponent tag="player" />
 			<TransformComponent position="[0, 0, 0]" rotation="[1, 0, 0, 0]" scale="[1, 1, 1]" />
 			<ScriptComponent name="SandboxCs.PlayerEntity" />
+			
+			<!-- TODO replace this for an ASSET ID -->
+			<SpriteRendererComponent min="[0,0]" max="[1,1]" path="assets/game/textures/tilemap.png" />
 		</entity>
 		
 		<entity id="3">

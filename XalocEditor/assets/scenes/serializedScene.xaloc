@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- Xaloc Engine. Serialized Scene -->
+<scene id="0">
+	<name>Sandbox Scene</name>
+	<entities>
+		<entity id="5">
+			<TagComponent tag="Tree 4" />
+		</entity>
+		<entity id="4">
+			<TagComponent tag="Tree 3" />
+		</entity>
+		<entity id="3">
+			<TagComponent tag="Tree 2" />
+		</entity>
+		<entity id="2">
+			<TagComponent tag="Tree 1" />
+		</entity>
+		<entity id="1">
+			<TagComponent tag="Tree 0" />
+		</entity>
+		<entity id="0">
+			<TagComponent tag="Player" />
+		</entity>
+	</entities>
+</scene>

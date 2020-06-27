@@ -60,7 +60,14 @@ namespace Xaloc {
 
 	void Scene::Save(const Ref<Scene>& scene, const std::string& filename)
 	{
-		// TODO
+		pugi::xml_document doc = SceneSerializer::Serialize(scene);
+		bool success = doc.save_file(filename.c_str());
+		
+		if (!success)
+		{
+			XA_CORE_ERROR("Could not save scene in path '{}'", filename);
+		}
+		else XA_CORE_INFO("Scene saved in path '{}'", filename);
 	}
 
 
@@ -90,11 +97,11 @@ namespace Xaloc {
 		{
 			if (result.status == pugi::xml_parse_status::status_file_not_found)
 			{
-				XA_ASSERT(false, "Could not load scene. File not found.")
+				XA_CORE_ASSERT(false, "Could not load scene. File not found.")
 			}
 			else
 			{
-				XA_ASSERT(false, "Could not load scene.")
+				XA_CORE_ASSERT(false, "Could not load scene.")
 			}
 		}
 		
@@ -166,8 +173,10 @@ namespace Xaloc {
 		auto entity = Entity{ m_Registry.create(), this };
 
 		entity.AddComponent<TransformComponent>(glm::mat4(1.0f));
+		entity.AddComponent<IdComponent>(m_NextEntityId);
 		entity.AddComponent<TagComponent>(goName);
 		
+		m_NextEntityId++;
 		return entity;
 	}
 

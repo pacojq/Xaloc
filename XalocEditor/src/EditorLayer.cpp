@@ -313,6 +313,26 @@ namespace Xaloc {
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("Scene"))
+			{
+				if (ImGui::MenuItem("Save"))
+				{
+					// TODO
+				}
+				if (ImGui::MenuItem("Save as..."))
+				{
+					// TODO
+					std::string filename = Application::Get().SaveFile("*.xaloc");
+					if (filename != "")
+						Scene::Save(m_Scene, filename);
+				}
+				if (ImGui::MenuItem("Load..."))
+				{
+					// TODO
+				}
+				ImGui::EndMenu();
+			}
+
 			if (ImGui::BeginMenu("Window"))
 			{
 				if (ImGui::MenuItem("Render Stats")) m_ShowWindowRenderStats = true;

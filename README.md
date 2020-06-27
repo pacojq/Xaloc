@@ -100,6 +100,7 @@ Xaloc has the following dependencies:
   - [entt](https://github.com/skypjack/entt) for ECS management.
   - [spdlog](https://github.com/gabime/spdlog) for logging.
   - [stb_image.h](https://github.com/nothings/stb) for loading textures.
+  - [pugixml](https://pugixml.org) for scene serialization in XML.
 
 Projects are generated with [Premake 5](https://github.com/premake/premake-core/releases).
 
