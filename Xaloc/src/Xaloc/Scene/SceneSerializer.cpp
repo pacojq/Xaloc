@@ -4,7 +4,39 @@
 #include "Scene.h"
 #include "Components.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
+
 namespace Xaloc {
+
+    static std::vector<float> ParseVector(const std::string& str)
+    {
+        std::vector<float> output;
+        std::string s = std::string(str);
+        char separator = ',';
+
+        s.erase(0, 1); // Remove first "["
+        s.erase(str.length() - 1, 1); // Remove last "]"
+
+        std::string::size_type prev_pos = 0, pos = 0;
+
+        while ((pos = s.find(separator, pos)) != std::string::npos)
+        {
+            std::string substring(s.substr(prev_pos, pos - prev_pos));
+
+            output.push_back(std::stof(substring));
+
+            prev_pos = ++pos;
+        }
+
+        output.push_back(std::stof(s.substr(prev_pos, pos - prev_pos))); // Last word
+
+        return output;
+    }
+
+
+
+
 
 	Ref<Scene> SceneSerializer::Deserialize(pugi::xml_document& doc)
 	{
@@ -50,7 +82,33 @@ namespace Xaloc {
         pugi::xml_node transformNode = entityNode.child("TransformComponent");
         if (transformNode)
         {
-            // TODO
+            std::string strPosition = transformNode.attribute("position").value();
+            auto vecPosition = ParseVector(strPosition);
+            glm::vec3 position = { vecPosition[0], vecPosition[1], vecPosition[2] };
+
+            std::string strRotation = transformNode.attribute("rotation").value();
+            auto vecRotation = ParseVector(strRotation);
+            glm::quat rotation = { vecRotation[0], vecRotation[1], vecRotation[2], vecRotation[3] };
+
+            std::string strScale = transformNode.attribute("scale").value();
+            auto vecScale = ParseVector(strScale);
+            glm::vec3 scale = { vecScale[0], vecScale[1], vecScale[2] };
+
+            
+            glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+                * glm::mat4_cast( rotation )
+                * glm::scale(glm::mat4(1.0f), scale);
+
+            auto [oPosition, oRotation, oScale] = GetTransformDecomposition(transform);
+
+            XA_ASSERT(oPosition == position, "Failed to deserialize position");
+            XA_ASSERT(oRotation == rotation, "Failed to deserialize rotation");
+            XA_ASSERT(oScale == scale, "Failed to deserialize scale");
+
+            entity.GetComponent<TransformComponent>().Transform = transform;
+
+            XA_CORE_TRACE("        TransformComponent: position = {0}    rotation = {1}    scale = {2}",
+                strPosition, strRotation, strScale);
         }
 
         pugi::xml_node behaviourNode = entityNode.child("BehaviourComponent");
@@ -65,7 +123,22 @@ namespace Xaloc {
         pugi::xml_node rendererNode = entityNode.child("SpriteRendererComponent");
         if (rendererNode)
         {
-            // TODO
+            std::string strTexcoords = rendererNode.attribute("texcoords").value();
+            auto texcoords = ParseVector(strTexcoords);
+
+            uint32_t width = rendererNode.attribute("width").as_uint();
+            uint32_t height = rendererNode.attribute("height").as_uint();
+
+            // TODO use asset IDs
+            std::string path = rendererNode.attribute("path").value();
+            
+            Ref<Texture2D> tilemap = Texture2D::Create(path);
+            Ref<SubTexture2D> subTex = SubTexture2D::CreateFromAbsCoords(tilemap, { texcoords[0], texcoords[1] }, { width, height });
+
+            entity.AddComponent<SpriteRendererComponent>(subTex);
+
+            XA_CORE_TRACE("        SpriteRendererComponent: texcoords = {0}    width = {1}    height = {2}    path = {3}",
+                strTexcoords, width, height, path);
         }
     }
 
