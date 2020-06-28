@@ -33,6 +33,8 @@ namespace Xaloc {
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
+		// ======================================== SCENE HIERARCHY ======================================== //
+		
 		ImGui::Begin("Scene Hierarchy");
 		uint32_t entityCount = 0, meshCount = 0;
 		m_Scene->m_Registry.each([&](auto entity)
@@ -48,36 +50,19 @@ namespace Xaloc {
 			}
 			ImGui::EndPopup();
 		}
-
 		ImGui::End();
+
+
+		// =========================================== PROPERTIES ========================================== //
 
 		ImGui::Begin("Properties");
-
-		//if (m_SelectionContext)
-		//{
-		//	DrawComponents(m_SelectionContext);
-		//}
-
-		ImGui::End();
-
-		#if TODO
-		ImGui::Begin("Mesh Debug");
-		if (ImGui::CollapsingHeader(mesh->m_FilePath.c_str()))
+		if (m_SelectionContext)
 		{
-			if (mesh->m_IsAnimated)
-			{
-				if (ImGui::CollapsingHeader("Animation"))
-				{
-					if (ImGui::Button(mesh->m_AnimationPlaying ? "Pause" : "Play"))
-						mesh->m_AnimationPlaying = !mesh->m_AnimationPlaying;
-
-					ImGui::SliderFloat("##AnimationTime", &mesh->m_AnimationTime, 0.0f, (float)mesh->m_Scene->mAnimations[0]->mDuration);
-					ImGui::DragFloat("Time Scale", &mesh->m_TimeMultiplier, 0.05f, 0.0f, 10.0f);
-				}
-			}
+			DrawComponents(m_SelectionContext);
+		
+			// TODO add component
 		}
 		ImGui::End();
-		#endif
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
@@ -101,7 +86,6 @@ namespace Xaloc {
 		}
 		if (opened)
 		{
-			
 			ImGui::TreePop();
 		}
 
@@ -327,7 +311,6 @@ namespace Xaloc {
 			auto& src = entity.GetComponent<SpriteRendererComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(SpriteRendererComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 			{
-
 				ImGui::TreePop();
 			}
 			ImGui::Separator();
