@@ -285,14 +285,20 @@ namespace Xaloc {
 				}
 				if (ImGui::MenuItem("Save as..."))
 				{
-					// TODO
 					std::string filename = Application::Get().SaveFile("*.xaloc");
 					if (filename != "")
 						Scene::Save(m_Scene, filename);
 				}
 				if (ImGui::MenuItem("Load..."))
 				{
-					// TODO
+					std::string filename = Application::Get().OpenFile("*.xaloc");
+					if (filename != "")
+					{
+						m_Scene.reset();
+						m_Scene = Scene::Load(filename);
+
+						m_SceneHierarchyPanel->SetScene(m_Scene);
+					}
 				}
 				ImGui::EndMenu();
 			}

@@ -24,6 +24,8 @@ namespace Xaloc {
 	void SceneHierarchyPanel::SetScene(const Ref<Scene>& scene)
 	{
 		m_Scene = scene;
+		m_SelectionContext = {};
+		m_ShowProperties = false;
 	}
 
 	void SceneHierarchyPanel::SetSelected(Entity entity)
