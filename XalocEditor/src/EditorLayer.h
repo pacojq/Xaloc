@@ -58,7 +58,6 @@ namespace Xaloc {
 		glm::vec2 m_ViewportBounds[2];
 		
 
-		Entity m_Player;
 
 		Ref<SubTexture2D> m_TileWater;
 		std::unordered_map<char, Ref<SubTexture2D>> s_TextureMap;

@@ -37,7 +37,9 @@ namespace Xaloc {
 		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 	{
-		m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
+		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
+
+		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
 		
 		m_CameraController.SetZoomLevel(5.0f);
@@ -45,10 +47,7 @@ namespace Xaloc {
 
 
 	void EditorLayer::OnAttach()
-	{
-		// TODO
-		Scene::Load("assets/scenes/serializedScene.xaloc");
-		
+	{		
 		m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
 
 
@@ -92,41 +91,6 @@ namespace Xaloc {
 		m_TileWater = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 9.0f, 10.0f }, size, pad, off);
 
 
-
-		// PLAYER
-
-		Xaloc::Ref<Xaloc::SubTexture2D> tilePlayer = Xaloc::SubTexture2D::CreateFromGrid(tilemap,
-			{ 24.0f, 17.0f }, size, pad, off);
-
-		m_Player = m_Scene->CreateEntity("Player");
-		m_Player.AddComponent<Xaloc::SpriteRendererComponent>(tilePlayer);
-		m_Player.AddComponent<Xaloc::BehaviourComponent>("SandboxCs.PlayerEntity");
-
-
-
-		
-		// TREES
-		
-		Ref<SubTexture2D> tree_0 = SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 7.0f }, size, pad, off);
-		Ref<SubTexture2D> tree_1 = SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 8.0f }, size, pad, off);
-
-		uint32_t treeCount = 5;
-		Ref<SubTexture2D> treeSprites[] = { tree_0 , tree_1, tree_0 , tree_1, tree_0 };
-		glm::vec3 treePositions[] = { {-4, 2, 0}, {2, -3, 0}, {4, 0, 0}, {-2, -1, 0}, {3, 2, 0} };
-		
-		for (uint32_t i = 0; i < treeCount; i++)
-		{
-			Entity tree = m_Scene->CreateEntity("Tree " + std::to_string(i));
-			tree.AddComponent<SpriteRendererComponent>(treeSprites[i]);
-
-			glm::mat4 matrix = tree.Transform();
-
-			matrix[3][0] = treePositions[i].x;
-			matrix[3][1] = treePositions[i].y;
-			matrix[3][2] = treePositions[i].z;
-
-			tree.SetTransform(&matrix);
-		}
 	}
 
 	void EditorLayer::OnDetach()
@@ -358,30 +322,6 @@ namespace Xaloc {
 		ImGui::Separator();
 
 		ImGui::DragFloat("Tiles depth", &m_TilesDepth, 0.1f, -10.0f, 10.0f);
-
-		//float depth = m_SpriteRenderer->GetDepth();
-		//if (ImGui::DragFloat("SpriteRenderer depth", &depth, 0.1f, -10.0f, 10.0f))
-		//{
-		//	m_SpriteRenderer->SetDepth(depth);
-		//}
-
-
-		ImGui::Separator();
-		ImGui::Text("Player data");
-
-		glm::mat4 matrix = m_Player.Transform();
-		glm::vec3 translation = { matrix[3][0], matrix[3][1], matrix[3][2] };
-
-		ImGui::DragFloat("X", &translation.x, 0.1f);
-		ImGui::DragFloat("Y", &translation.y, 0.1f);
-		ImGui::DragFloat("Z", &translation.z, 0.1f);
-
-		matrix[3][0] = translation.x;
-		matrix[3][1] = translation.y;
-		matrix[3][2] = translation.z;
-
-		m_Player.SetTransform(&matrix);
-
 
 		ImGui::End();
 

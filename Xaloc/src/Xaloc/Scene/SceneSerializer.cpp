@@ -53,7 +53,12 @@ namespace Xaloc {
 
         pugi::xml_node entitiesRoot = root.child("entities");
 
-        for (pugi::xml_node entity = entitiesRoot.child("entity"); entity; entity = entity.next_sibling("entity"))
+        //for (pugi::xml_node entity = entitiesRoot.child("entity"); entity; entity = entity.next_sibling("entity"))
+        //{
+        //    DeserializeEntity(entity, scene);
+        //}
+
+        for (pugi::xml_node entity = entitiesRoot.last_child(); entity; entity = entity.previous_sibling())
         {
             DeserializeEntity(entity, scene);
         }
@@ -68,6 +73,7 @@ namespace Xaloc {
         XA_CORE_TRACE("    Loading entity. Id = {}", id);
 
         auto entity = scene->CreateEntity("New Entity");
+        entity.GetComponent<IdComponent>().ID = id;
 
         
         pugi::xml_node tagNode = entityNode.child("TagComponent");
@@ -133,7 +139,8 @@ namespace Xaloc {
             std::string path = rendererNode.attribute("path").value();
             
             Ref<Texture2D> tilemap = Texture2D::Create(path);
-            Ref<SubTexture2D> subTex = SubTexture2D::CreateFromAbsCoords(tilemap, { texcoords[0], texcoords[1] }, { width, height });
+            Ref<SubTexture2D> subTex = SubTexture2D::CreateFromAbsCoords(tilemap, 
+                { texcoords[0] * tilemap->GetWidth(), texcoords[1] * tilemap->GetHeight() }, { width, height });
 
             entity.AddComponent<SpriteRendererComponent>(subTex);
 
