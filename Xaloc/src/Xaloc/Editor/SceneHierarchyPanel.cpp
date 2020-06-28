@@ -29,6 +29,7 @@ namespace Xaloc {
 	void SceneHierarchyPanel::SetSelected(Entity entity)
 	{
 		m_SelectionContext = entity;
+		m_ShowProperties = true;
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
@@ -56,7 +57,7 @@ namespace Xaloc {
 		// =========================================== PROPERTIES ========================================== //
 
 		ImGui::Begin("Properties");
-		if (m_SelectionContext)
+		if (m_ShowProperties)
 		{
 			DrawComponents(m_SelectionContext);
 		
@@ -74,7 +75,10 @@ namespace Xaloc {
 		ImGuiTreeNodeFlags node_flags = (entity == m_SelectionContext ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		bool opened = ImGui::TreeNodeEx((void*)(uint32_t)entity, node_flags, name);
 		if (ImGui::IsItemClicked())
+		{
 			m_SelectionContext = entity;
+			m_ShowProperties = true;
+		}
 
 		bool entityDeleted = false;
 		if (ImGui::BeginPopupContextItem())
@@ -94,7 +98,10 @@ namespace Xaloc {
 		{
 			m_Scene->DestroyEntity(entity);
 			if (entity == m_SelectionContext)
+			{
 				m_SelectionContext = {};
+				m_ShowProperties = false;
+			}
 		}
 	}
 	

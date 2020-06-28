@@ -47,7 +47,7 @@ namespace Xaloc {
 	void EditorLayer::OnAttach()
 	{
 		// TODO
-		Scene::Load("assets/scenes/testScene.xaloc");
+		Scene::Load("assets/scenes/serializedScene.xaloc");
 		
 		m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
 

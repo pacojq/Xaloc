@@ -6,12 +6,72 @@
 
 namespace Xaloc {
 
-	Ref<Scene> SceneSerializer::Deserialize(pugi::xml_document& doc, pugi::xml_parse_result& result)
+	Ref<Scene> SceneSerializer::Deserialize(pugi::xml_document& doc)
 	{
-		Ref<Scene> scene = CreateRef<Scene>("Sandbox Scene");
+        pugi::xml_node root = doc.child("scene");
+
+        uint32_t id = root.attribute("id").as_uint();
+        std::string name = root.child("name").child_value();
+
+        XA_CORE_TRACE("Loading scene. Id = {0}. Name = '{1}'", id, name);
+        
+		Ref<Scene> scene = CreateRef<Scene>(name);
+        scene->m_SceneID = id;
+
+
+        pugi::xml_node entitiesRoot = root.child("entities");
+
+        for (pugi::xml_node entity = entitiesRoot.child("entity"); entity; entity = entity.next_sibling("entity"))
+        {
+            DeserializeEntity(entity, scene);
+        }
 
 		return scene;
 	}
+
+
+    void SceneSerializer::DeserializeEntity(pugi::xml_node& entityNode, const Ref<Scene>& scene)
+    {
+        uint32_t id = entityNode.attribute("id").as_uint();
+        XA_CORE_TRACE("    Loading entity. Id = {}", id);
+
+        auto entity = scene->CreateEntity("New Entity");
+
+        
+        pugi::xml_node tagNode = entityNode.child("TagComponent");
+        if (tagNode)
+        {
+            std::string tag = tagNode.attribute("tag").value();
+            entity.GetComponent<TagComponent>().Tag = tag;
+
+            XA_CORE_TRACE("        TagComponent: {}", tag);
+        }
+
+        pugi::xml_node transformNode = entityNode.child("TransformComponent");
+        if (transformNode)
+        {
+            // TODO
+        }
+
+        pugi::xml_node behaviourNode = entityNode.child("BehaviourComponent");
+        if (behaviourNode)
+        {
+            std::string name = behaviourNode.attribute("name").value();
+            entity.AddComponent<BehaviourComponent>(name);
+
+            XA_CORE_TRACE("        BehaviourComponent: {}", name);
+        }
+
+        pugi::xml_node rendererNode = entityNode.child("SpriteRendererComponent");
+        if (rendererNode)
+        {
+            // TODO
+        }
+    }
+
+
+
+
 
 	pugi::xml_document SceneSerializer::Serialize(const Ref<Scene>& scene)
 	{

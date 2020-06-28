@@ -105,7 +105,7 @@ namespace Xaloc {
 			}
 		}
 		
-		return SceneSerializer::Deserialize(doc, result);
+		return SceneSerializer::Deserialize(doc);
 	}
 
 
