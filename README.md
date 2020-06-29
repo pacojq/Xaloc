@@ -62,11 +62,11 @@ scripting project is generated appart from the main Sandbox application.
 
 ## Current Features
 
-Right now, Xaloc is very bare-bones. Its most basic features are:
+Right now, Xaloc is very bare-bones. Its most remarkable features are:
 
 | Feature | Description | Status |
 | ------- | ----------- | ------ |
-| **Scene system** | Scene-based entity management. Scene serialization with XML. | WIP 💻 |
+| **Scene system** | Scene-based entity management. Scene serialization with XML. | Done✔️ |
 | **ECS support** | Entity Component System approach through *entt*. Sort list of components, including `TransformComponent`, `SpriteRenderer`, `TagComponent` and `BehaviourComponent`. | Done✔️ |
 | **C# scripting** | Basic scripting in C# using mono. | Done✔️ |
 | **2D Renderer** | 2D batch renderer supporting OpenGL. | Done✔️ |
@@ -81,6 +81,7 @@ Right now, Xaloc is very bare-bones. Its most basic features are:
 | Feature | Description | Status |
 | ------- | ----------- | ------ |
 | **Vulkan support** | Extend the Renderer to supports Vulkan. | WIP 💻 |
+| **Asset manager** | Basic asset handling API. | WIP 💻 |
 | **Physics system** | Own 2D physics API. | TODO 📋 |
 | **Audio system** | Sound API. | TODO 📋 |
 | **Font support** | Extend the Renderer capabilities so it can draw text. | TODO 📋 |
@@ -114,5 +115,6 @@ Projects are generated with [Premake 5](https://github.com/premake/premake-core/
 
 Huge shout out to:
 
-  - TheCherno's [video series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT). Original code at [TheCherno/Hazel](https://github.com/TheCherno/Hazel).
+  - Yan Chernikov's [video series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT). Original code at [TheCherno/Hazel](https://github.com/TheCherno/Hazel).
   - Alexander Overvoorde's [Vulkan tutorial](https://vulkan-tutorial.com/Introduction).
+  - Jason Gregory's [Game Engine Architecture](https://www.gameenginebook.com) book.
