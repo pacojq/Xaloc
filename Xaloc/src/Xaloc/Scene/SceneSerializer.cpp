@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "Components.h"
 
+#include "Xaloc/Core/Assets/AssetManager.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 
@@ -135,17 +137,16 @@ namespace Xaloc {
             uint32_t width = rendererNode.attribute("width").as_uint();
             uint32_t height = rendererNode.attribute("height").as_uint();
 
-            // TODO use asset IDs
-            std::string path = rendererNode.attribute("path").value();
+            std::string assetID = rendererNode.attribute("assetID").value();
             
-            Ref<Texture2D> tilemap = Texture2D::Create(path);
+            Ref<Texture2D> tilemap = AssetManager::GetTexture(assetID);
             Ref<SubTexture2D> subTex = SubTexture2D::CreateFromAbsCoords(tilemap, 
                 { texcoords[0] * tilemap->GetWidth(), texcoords[1] * tilemap->GetHeight() }, { width, height });
 
             entity.AddComponent<SpriteRendererComponent>(subTex);
 
-            XA_CORE_TRACE("        SpriteRendererComponent: texcoords = {0}    width = {1}    height = {2}    path = {3}",
-                strTexcoords, width, height, path);
+            XA_CORE_TRACE("        SpriteRendererComponent: texcoords = {0}    width = {1}    height = {2}    assetID = {3}",
+                strTexcoords, width, height, assetID);
         }
     }
 
@@ -240,7 +241,7 @@ namespace Xaloc {
             rendererNode.append_attribute("texcoords").set_value(strTexcoords.c_str());
             rendererNode.append_attribute("width").set_value(subTex->GetWidth());
             rendererNode.append_attribute("height").set_value(subTex->GetHeight());
-            rendererNode.append_attribute("path").set_value(tex->GetPath().c_str());
+            rendererNode.append_attribute("assetID").set_value(tex->AssetID().c_str());
         }
     }
 

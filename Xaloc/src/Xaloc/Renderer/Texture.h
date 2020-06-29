@@ -32,7 +32,12 @@ namespace Xaloc {
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);
 		static Ref<Texture2D> Create(const std::string& path);
 
-		virtual const std::string& GetPath() const = 0;
+		virtual const std::string& AssetID() const { return m_AssetID; }
+
+	private:
+		std::string m_AssetID = "";
+
+		friend class AssetManager;
 	};
 	
 }

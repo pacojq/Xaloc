@@ -25,6 +25,11 @@
 #include "Xaloc/Core/Input/MouseButtonCodes.h"
 
 
+// --- Assets -------------------------------------
+
+#include "Xaloc/Core/Assets/AssetManager.h"
+
+
 // --- Math -------------------------------------
 
 #include "Xaloc/Core/Math/AABB.h"

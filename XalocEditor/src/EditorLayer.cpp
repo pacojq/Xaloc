@@ -37,6 +37,13 @@ namespace Xaloc {
 		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 	{
+		// Load Assets
+
+		AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
+
+
+		// Init Editor
+
 		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
 
 		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
@@ -65,7 +72,7 @@ namespace Xaloc {
 
 
 
-		Xaloc::Ref<Xaloc::Texture2D> tilemap = Xaloc::Texture2D::Create("assets/game/textures/tilemap.png");
+		Xaloc::Ref<Xaloc::Texture2D> tilemap = AssetManager::GetTexture("TILEMAP");
 
 		glm::vec2 size = { 16.0f, 16.0f };
 		glm::vec2 pad = { 0.0f, 0.0f };
@@ -279,10 +286,10 @@ namespace Xaloc {
 
 			if (ImGui::BeginMenu("Scene"))
 			{
-				if (ImGui::MenuItem("Save"))
-				{
+				//if (ImGui::MenuItem("Save"))
+				//{
 					// TODO
-				}
+				//}
 				if (ImGui::MenuItem("Save as..."))
 				{
 					std::string filename = Application::Get().SaveFile("*.xaloc");

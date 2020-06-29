@@ -302,7 +302,8 @@ namespace Xaloc {
 		}
 
 
-		/*
+		/* TODO camera
+
 		if (entity.HasComponent<CameraComponent>())
 		{
 			auto& cc = entity.GetComponent<CameraComponent>();
@@ -320,6 +321,14 @@ namespace Xaloc {
 			auto& src = entity.GetComponent<SpriteRendererComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(SpriteRendererComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 			{
+				BeginPropertyGrid();
+				Property("Asset ID", src.SubTexture->GetTexture()->AssetID().c_str());
+
+				EndPropertyGrid();
+				if (ImGui::Button("Apply"))
+				{
+					// TODO
+				}
 				ImGui::TreePop();
 			}
 			ImGui::Separator();
