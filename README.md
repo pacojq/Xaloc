@@ -75,8 +75,6 @@ Right now, Xaloc is very bare-bones. Its most remarkable features are:
 
  > For in-development features, check the [dev branch](https://github.com/pacojq/Xaloc/tree/dev).
  
- > For in-development features, check the [dev branch](https://github.com/pacojq/Xaloc/tree/dev).
- 
 
 ## Planned Features
 
