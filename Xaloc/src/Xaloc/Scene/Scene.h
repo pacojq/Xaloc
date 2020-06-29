@@ -8,6 +8,7 @@
 namespace Xaloc {
 
 	class Entity;
+	class SceneSerializer;
 
 	struct SceneComponent
 	{
@@ -17,6 +18,10 @@ namespace Xaloc {
 	class Scene
 	{
 	public:
+
+		static void Save(const Ref<Scene>& scene, const std::string& filename);
+		static Ref<Scene> Load(const std::string& filename);
+
 		Scene(const std::string& name = "Scene");
 		~Scene();
 
@@ -37,7 +42,6 @@ namespace Xaloc {
 	private:
 
 
-
 	private:
 		uint32_t m_SceneID;
 		entt::entity m_SceneEntity;
@@ -45,9 +49,11 @@ namespace Xaloc {
 
 		std::string m_Name;
 
+		uint32_t m_NextEntityId = 0; // TODO move to universal ID
 		
 		friend class Entity;
 		friend class SceneHierarchyPanel;
+		friend class SceneSerializer;
 	};
 
 }

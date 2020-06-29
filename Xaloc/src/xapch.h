@@ -1,5 +1,9 @@
 #pragma once
 
+#define XALOC_VERSION_MAJOR 0
+#define XALOC_VERSION_MINOR 0
+#define XALOC_VERSION_PATCH 1
+
 #ifdef XA_PLATFORM_WINDOWS
 
 	#ifndef NOMINMAX

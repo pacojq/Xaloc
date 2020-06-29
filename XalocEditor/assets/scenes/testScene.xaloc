@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scene>
-  <entities>
-  
-	<entity>
-		<TagComponent tag="transform entity" />
-		<TransformComponent position="[0, 0, 0]" rotation="[1, 0, 0, 0]" scale="[1, 1, 1]" />
-	</entity>
-  
-	<entity>
-		<TagComponent tag="player" />
-		<TransformComponent position="[0, 0, 0]" rotation="[1, 0, 0, 0]" scale="[1, 1, 1]" />
-		<ScriptComponent name="SandboxCs.PlayerEntity" />
-	</entity>
-  
-  </entities>
+<scene id="0">
+
+	<name>Serialized Scene</name>
+
+	<entities>
+	
+		<entity id="1">
+			<TagComponent tag="transform entity" />
+			<TransformComponent position="[0, 0, 0]" rotation="[1, 0, 0, 0]" scale="[1, 1, 1]" />
+		</entity>
+	
+		<entity id="2">
+			<TagComponent tag="player" />
+			<TransformComponent position="[0, 0, 0]" rotation="[1, 0, 0, 0]" scale="[1, 1, 1]" />
+			<BehaviourComponent name="SandboxCs.PlayerEntity" />
+			
+			<!-- TODO replace this for an ASSET ID -->
+			<SpriteRendererComponent min="[0,0]" max="[1,1]" path="assets/game/textures/tilemap.png" />
+		</entity>
+		
+		<entity id="3">
+			<TagComponent tag="camera" />
+			<TransformComponent position="[0, 0, 0]" rotation="[1, 0, 0, 0]" scale="[1, 1, 1]" />
+			<!-- TODO CameraComponent -->
+		</entity>
+	
+	</entities>
+
 </scene>

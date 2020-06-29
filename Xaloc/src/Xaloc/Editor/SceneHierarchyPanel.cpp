@@ -5,10 +5,10 @@
 
 #include "Xaloc/Scripting/ScriptEngine.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtc/type_ptr.hpp>
+//#define GLM_ENABLE_EXPERIMENTAL
+//#include <glm/gtx/quaternion.hpp>
+//#include <glm/gtx/matrix_decompose.hpp>
+//#include <glm/gtc/type_ptr.hpp>
 
 // TODO:
 // - Eventually change imgui node IDs to be entity/asset GUID
@@ -24,15 +24,20 @@ namespace Xaloc {
 	void SceneHierarchyPanel::SetScene(const Ref<Scene>& scene)
 	{
 		m_Scene = scene;
+		m_SelectionContext = {};
+		m_ShowProperties = false;
 	}
 
 	void SceneHierarchyPanel::SetSelected(Entity entity)
 	{
 		m_SelectionContext = entity;
+		m_ShowProperties = true;
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
+		// ======================================== SCENE HIERARCHY ======================================== //
+		
 		ImGui::Begin("Scene Hierarchy");
 		uint32_t entityCount = 0, meshCount = 0;
 		m_Scene->m_Registry.each([&](auto entity)
@@ -48,36 +53,19 @@ namespace Xaloc {
 			}
 			ImGui::EndPopup();
 		}
-
 		ImGui::End();
+
+
+		// =========================================== PROPERTIES ========================================== //
 
 		ImGui::Begin("Properties");
-
-		//if (m_SelectionContext)
-		//{
-		//	DrawComponents(m_SelectionContext);
-		//}
-
-		ImGui::End();
-
-		#if TODO
-		ImGui::Begin("Mesh Debug");
-		if (ImGui::CollapsingHeader(mesh->m_FilePath.c_str()))
+		if (m_ShowProperties)
 		{
-			if (mesh->m_IsAnimated)
-			{
-				if (ImGui::CollapsingHeader("Animation"))
-				{
-					if (ImGui::Button(mesh->m_AnimationPlaying ? "Pause" : "Play"))
-						mesh->m_AnimationPlaying = !mesh->m_AnimationPlaying;
-
-					ImGui::SliderFloat("##AnimationTime", &mesh->m_AnimationTime, 0.0f, (float)mesh->m_Scene->mAnimations[0]->mDuration);
-					ImGui::DragFloat("Time Scale", &mesh->m_TimeMultiplier, 0.05f, 0.0f, 10.0f);
-				}
-			}
+			DrawComponents(m_SelectionContext);
+		
+			// TODO add component
 		}
 		ImGui::End();
-		#endif
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
@@ -89,7 +77,10 @@ namespace Xaloc {
 		ImGuiTreeNodeFlags node_flags = (entity == m_SelectionContext ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		bool opened = ImGui::TreeNodeEx((void*)(uint32_t)entity, node_flags, name);
 		if (ImGui::IsItemClicked())
+		{
 			m_SelectionContext = entity;
+			m_ShowProperties = true;
+		}
 
 		bool entityDeleted = false;
 		if (ImGui::BeginPopupContextItem())
@@ -101,7 +92,6 @@ namespace Xaloc {
 		}
 		if (opened)
 		{
-			
 			ImGui::TreePop();
 		}
 
@@ -110,19 +100,13 @@ namespace Xaloc {
 		{
 			m_Scene->DestroyEntity(entity);
 			if (entity == m_SelectionContext)
+			{
 				m_SelectionContext = {};
+				m_ShowProperties = false;
+			}
 		}
 	}
 	
-	static std::tuple<glm::vec3, glm::quat, glm::vec3> GetTransformDecomposition(const glm::mat4& transform)
-	{
-		glm::vec3 scale, translation, skew;
-		glm::vec4 perspective;
-		glm::quat orientation;
-		glm::decompose(transform, scale, orientation, translation, skew, perspective);
-
-		return { translation, orientation, scale };
-	}
 
 	static int s_UIContextID = 0;
 	static uint32_t s_Counter = 0;
@@ -318,7 +302,8 @@ namespace Xaloc {
 		}
 
 
-		/*
+		/* TODO camera
+
 		if (entity.HasComponent<CameraComponent>())
 		{
 			auto& cc = entity.GetComponent<CameraComponent>();
@@ -336,7 +321,14 @@ namespace Xaloc {
 			auto& src = entity.GetComponent<SpriteRendererComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(SpriteRendererComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 			{
+				BeginPropertyGrid();
+				Property("Asset ID", src.SubTexture->GetTexture()->AssetID().c_str());
 
+				EndPropertyGrid();
+				if (ImGui::Button("Apply"))
+				{
+					// TODO
+				}
 				ImGui::TreePop();
 			}
 			ImGui::Separator();

@@ -50,8 +50,17 @@ namespace Xaloc {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
+
+		// TODO move somewhere else
+		std::string OpenFile(const std::string& filter) const;
+		// TODO move somewhere else
+		std::string SaveFile(const std::string& filter) const;
+
+
 		inline static Application& Get() { return *s_Instance; }
 		inline Window& GetWindow() { return *m_Window; }
+
+		inline ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
 
 		inline static std::string GetName() { return s_Instance->m_Name; }
 

@@ -30,14 +30,23 @@ namespace Xaloc {
 
 
 	EditorLayer::EditorLayer()
-		: Layer("Sandbox 2D"),
+		: Layer("Editor Layer"),
 		m_CameraController(1280.0f / 720.0f, true),
 		m_TilingFactor(1.0f),
 		m_Rotation(0.0f),
 		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 	{
-		m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");
+		// Load Assets
+
+		AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
+
+
+		// Init Editor
+
+		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
+
+		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
 		
 		m_CameraController.SetZoomLevel(5.0f);
@@ -45,20 +54,25 @@ namespace Xaloc {
 
 
 	void EditorLayer::OnAttach()
-	{
+	{		
 		m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
 
 
 		Xaloc::FramebufferSpec framebufferSpec;
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
-		m_Framebuffer = Xaloc::Framebuffer::Create(framebufferSpec);
+		framebufferSpec.ClearColor = { 0.1f, 0.1f, 0.1f, 1 };
+		Ref<Xaloc::Framebuffer> framebuffer = Xaloc::Framebuffer::Create(framebufferSpec);
+
+		Xaloc::RenderPassSpecification renderPassSpec;
+		renderPassSpec.TargetFramebuffer = framebuffer;
+		m_RenderPass = Xaloc::RenderPass::Create(renderPassSpec);
+		
+		m_GuizmoRenderPass = Xaloc::RenderPass::Create(renderPassSpec);
 
 
 
-
-
-		Xaloc::Ref<Xaloc::Texture2D> tilemap = Xaloc::Texture2D::Create("assets/game/textures/tilemap.png");
+		Xaloc::Ref<Xaloc::Texture2D> tilemap = AssetManager::GetTexture("TILEMAP");
 
 		glm::vec2 size = { 16.0f, 16.0f };
 		glm::vec2 pad = { 0.0f, 0.0f };
@@ -84,41 +98,6 @@ namespace Xaloc {
 		m_TileWater = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 9.0f, 10.0f }, size, pad, off);
 
 
-
-		// PLAYER
-
-		Xaloc::Ref<Xaloc::SubTexture2D> tilePlayer = Xaloc::SubTexture2D::CreateFromGrid(tilemap,
-			{ 24.0f, 17.0f }, size, pad, off);
-
-		m_Player = m_Scene->CreateEntity("Player");
-		m_Player.AddComponent<Xaloc::SpriteRendererComponent>(tilePlayer);
-		m_Player.AddComponent<Xaloc::BehaviourComponent>("SandboxCs.PlayerEntity");
-
-
-
-		
-		// TREES
-		
-		Ref<SubTexture2D> tree_0 = SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 7.0f }, size, pad, off);
-		Ref<SubTexture2D> tree_1 = SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 8.0f }, size, pad, off);
-
-		uint32_t treeCount = 5;
-		Ref<SubTexture2D> treeSprites[] = { tree_0 , tree_1, tree_0 , tree_1, tree_0 };
-		glm::vec3 treePositions[] = { {-4, 2, 0}, {2, -3, 0}, {4, 0, 0}, {-2, -1, 0}, {3, 2, 0} };
-		
-		for (uint32_t i = 0; i < treeCount; i++)
-		{
-			Entity tree = m_Scene->CreateEntity("Tree " + std::to_string(i));
-			tree.AddComponent<SpriteRendererComponent>(treeSprites[i]);
-
-			glm::mat4 matrix = tree.Transform();
-
-			matrix[3][0] = treePositions[i].x;
-			matrix[3][1] = treePositions[i].y;
-			matrix[3][2] = treePositions[i].z;
-
-			tree.SetTransform(&matrix);
-		}
 	}
 
 	void EditorLayer::OnDetach()
@@ -130,18 +109,24 @@ namespace Xaloc {
 	{
 		// UPDATE
 
-		m_CameraController.OnUpdate(ts);
-
+		Application::Get().GetImGuiLayer()->SetBlockEvents(!(m_ViewportFocused && m_ViewportHovered));
+		if (m_ViewportFocused)
+		{
+			m_CameraController.OnUpdate(ts);
+		}
 
 
 		// RENDER
 
 		Xaloc::Renderer2D::ResetStats();
 
-		m_Framebuffer->Bind();
+		// TODO begin render pass
+		//m_Framebuffer->Bind();
+		//m_RenderPass->GetSpecification().TargetFramebuffer->Bind();
+		Renderer::BeginRenderPass(m_RenderPass);
 
-		Xaloc::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-		Xaloc::RenderCommand::Clear();
+		//Xaloc::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		//Xaloc::RenderCommand::Clear();
 
 		#if false   	
 		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
@@ -203,17 +188,39 @@ namespace Xaloc {
 		Xaloc::Renderer2D::EndScene();
 
 
+
+		// TODO end render pass
+		//m_Framebuffer->Unbind();
+		Renderer::EndRenderPass();
+
+		
 		// DRAW SELECTED ENTITIES GUI
 		
 		if (m_SelectionContext.size())
 		{
-			// TODO
+			Entity selection = m_SelectionContext[0].Entity;
+
+			Xaloc::Renderer::BeginRenderPass(m_GuizmoRenderPass, false);
+			Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
+
+			// TODO get app pixels per unit
+			float pxPerUnit = 16.0f;
+			
+			glm::vec4 sprMin = selection.Transform() * glm::vec4{ -0.5f - 1.0f / pxPerUnit, -0.5f - 1.0f / pxPerUnit, 0.0f, 1.0f };        // Get sprite quad min vertex
+			glm::vec4 sprMax = selection.Transform() * glm::vec4{ 0.5f + 1.0f / pxPerUnit, 0.5f + 1.0f / pxPerUnit, 0.0f, 1.0f };          // Get sprite quad max vertex
+			
+			//glm::vec4 color = { 0.549f, 0.976f, 1.0f, 1.0f };
+			glm::vec4 color = glm::vec4(1.0f);
+			
+			Renderer2D::DrawLine({ sprMin.x, sprMin.y }, { sprMax.x, sprMin.y }, color, 0.5f);
+			Renderer2D::DrawLine({ sprMax.x, sprMin.y }, { sprMax.x, sprMax.y }, color, 0.5f);
+			Renderer2D::DrawLine({ sprMax.x, sprMax.y }, { sprMin.x, sprMax.y }, color, 0.5f);
+			Renderer2D::DrawLine({ sprMin.x, sprMax.y }, { sprMin.x, sprMin.y }, color, 0.5f);
+
+			Xaloc::Renderer2D::EndScene();
+			Xaloc::Renderer::EndRenderPass();
 		}
 
-		
-		
-
-		m_Framebuffer->Unbind();
 	}
 
 
@@ -277,6 +284,32 @@ namespace Xaloc {
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("Scene"))
+			{
+				//if (ImGui::MenuItem("Save"))
+				//{
+					// TODO
+				//}
+				if (ImGui::MenuItem("Save as..."))
+				{
+					std::string filename = Application::Get().SaveFile("*.xaloc");
+					if (filename != "")
+						Scene::Save(m_Scene, filename);
+				}
+				if (ImGui::MenuItem("Load..."))
+				{
+					std::string filename = Application::Get().OpenFile("*.xaloc");
+					if (filename != "")
+					{
+						m_Scene.reset();
+						m_Scene = Scene::Load(filename);
+
+						m_SceneHierarchyPanel->SetScene(m_Scene);
+					}
+				}
+				ImGui::EndMenu();
+			}
+
 			if (ImGui::BeginMenu("Window"))
 			{
 				if (ImGui::MenuItem("Render Stats")) m_ShowWindowRenderStats = true;
@@ -302,30 +335,6 @@ namespace Xaloc {
 		ImGui::Separator();
 
 		ImGui::DragFloat("Tiles depth", &m_TilesDepth, 0.1f, -10.0f, 10.0f);
-
-		//float depth = m_SpriteRenderer->GetDepth();
-		//if (ImGui::DragFloat("SpriteRenderer depth", &depth, 0.1f, -10.0f, 10.0f))
-		//{
-		//	m_SpriteRenderer->SetDepth(depth);
-		//}
-
-
-		ImGui::Separator();
-		ImGui::Text("Player data");
-
-		glm::mat4 matrix = m_Player.Transform();
-		glm::vec3 translation = { matrix[3][0], matrix[3][1], matrix[3][2] };
-
-		ImGui::DragFloat("X", &translation.x, 0.1f);
-		ImGui::DragFloat("Y", &translation.y, 0.1f);
-		ImGui::DragFloat("Z", &translation.z, 0.1f);
-
-		matrix[3][0] = translation.x;
-		matrix[3][1] = translation.y;
-		matrix[3][2] = translation.z;
-
-		m_Player.SetTransform(&matrix);
-
 
 		ImGui::End();
 
@@ -355,13 +364,17 @@ namespace Xaloc {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Scene");
+
+		m_ViewportFocused = ImGui::IsWindowFocused();
+		m_ViewportHovered = ImGui::IsWindowHovered();
 		
 		auto viewportOffset = ImGui::GetCursorPos();
 		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
 		
 		if (m_ViewportSize != *((glm::vec2*) & viewportSize))
 		{
-			m_Framebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+			m_RenderPass->GetSpecification().TargetFramebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+			//m_Framebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 			m_ViewportSize = { viewportSize.x, viewportSize.y };
 
 			// TODO OnWindow resize, call m_CameraController.OnResize again 
@@ -381,7 +394,8 @@ namespace Xaloc {
 		// TODO m_AllowViewportCameraEvents = ImGui::IsMouseHoveringRect(minBound, maxBound);
 
 		
-		uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
+		uint32_t texID = m_RenderPass->GetSpecification().TargetFramebuffer->GetColorAttachmentRendererID();
+		//uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)texID, viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 		ImGui::End();
 		ImGui::PopStyleVar();

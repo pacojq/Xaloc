@@ -8,7 +8,7 @@ namespace Xaloc {
 	{
 	public:
 		OpenGLFramebuffer(const FramebufferSpec& spec);
-		virtual ~OpenGLFramebuffer();
+		virtual ~OpenGLFramebuffer() override;
 				
 		/// <summary>
 		/// Recreates the frame buffer.
@@ -22,7 +22,7 @@ namespace Xaloc {
 
 		virtual uint32_t GetColorAttachmentRendererID() const override { return m_ColorAttachment; }
 
-		virtual const FramebufferSpec& GetSpec() const override { return m_Spec; }
+		virtual const FramebufferSpec& GetSpecification() const override { return m_Spec; }
 
 	private:
 		uint32_t m_RendererID = 0;

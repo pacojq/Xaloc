@@ -48,13 +48,16 @@ namespace Xaloc {
 		glm::vec4 m_SecondColor;
 		Ref<Texture2D> m_Texture;
 
-		Ref<Framebuffer> m_Framebuffer;
+		//Ref<Framebuffer> m_Framebuffer;
+		Ref<RenderPass> m_RenderPass;
+		Ref<RenderPass> m_GuizmoRenderPass;
 		
+		bool m_ViewportFocused = false;
+		bool m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
 		
 
-		Entity m_Player;
 
 		Ref<SubTexture2D> m_TileWater;
 		std::unordered_map<char, Ref<SubTexture2D>> s_TextureMap;

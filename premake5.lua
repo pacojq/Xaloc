@@ -61,7 +61,10 @@ project "Xaloc"
 		"%{prj.name}/vendor/stb_image/**.h",
 		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl"
+		"%{prj.name}/vendor/glm/glm/**.inl",
+		
+		"%{prj.name}/vendor/pugixml/**.hpp",
+		"%{prj.name}/vendor/pugixml/**.cpp"
 	}
 	
 	defines
@@ -81,7 +84,8 @@ project "Xaloc"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.mono}",
-		"%{IncludeDir.pugixml}"
+		"%{IncludeDir.pugixml}",
+		"$(VULKAN_SDK)/Include" -- VULKAN SDK must be installed
 	}
 	
 	links
@@ -90,7 +94,13 @@ project "Xaloc"
 		"Glad",
 		"ImGui",
 		"opengl32.lib",
-		"%{LibraryDir.mono}"
+		"%{LibraryDir.mono}",
+		"$(VULKAN_SDK)/Lib/vulkan-1.lib" -- VULKAN SDK must be installed
+	}
+	
+	libdirs 
+	{
+		"$(VULKAN_SDK)/Lib" -- VULKAN SDK must be installed	
 	}
 
 	filter "system:windows"

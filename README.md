@@ -29,59 +29,70 @@ Xaloc is an in-development 2D game engine written in C++, allowing an ECS approa
 I develop it in my spare time as a personal project, so expect frequent periods of time with no activity in this repository.
 
 <p align="center">
-    <img height="400" src="res/sandbox.png" alt="Screenshot of an example application built with Xaloc." />
+    <img height="360" src="res/sandbox.png" alt="Screenshot of an example application built with Xaloc." />
 </p>
 
 ## Set up
-
-The recommended environment to develop the Xaloc Engine is Visual Studio 2019.
 
 You can clone Xaloc using git. Make sure you do a ```--recursive``` clone!
 
 ```git clone --recursive https://github.com/pacojq/Xaloc```
 
-If you are working on Windows, execute the script ```scripts/Win-GenProjects.bat``` 
+Xaloc Engine is built in a Windows environment, using Visual Studio 2019. 
+
+Execute the script `scripts/Win-GenProjects.bat` 
 to generate the solution and project files.
 
+### Vulkan 
 
-## Execution
+To work with the Vulkan API, you should first install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home).
 
-The default startup project is the ```Sandbox``` App.
 
-Remember to build the **entire solution** if you modify the C# files in ```SandboxCs```, since the dll file for the
+## Compiling and Executing
+
+The default startup project is the `Sandbox` App.
+
+Remember to build the **entire solution** if you modify the C# files in `SandboxCs`, since the `.dll` file for the
 scripting project is generated appart from the main Sandbox application.
 
 <p align="center">
-    <img height="400" src="res/csharp-demo.gif" alt="Example of C# scripting." />
+    <img height="300" src="res/csharp-demo.gif" alt="Example of C# scripting." />
 </p>
+
 
 ## Current Features
 
-Right now, Xaloc is very bare-bones. Its most basic features are:
+Right now, Xaloc is very bare-bones. Its most remarkable features are:
 
- - Basic Scene system.
- - ECS support.
- - C# scripting.
- - In-game debug UI using ImGui.
- - Simple 2D batch renderer.
- - OpenGL support.
+| Feature | Description | Status |
+| ------- | ----------- | ------ |
+| **Scene system** | Scene-based entity management. Scene serialization with XML. | Done✔️ |
+| **ECS support** | Entity Component System approach through *entt*. Sort list of components, including `TransformComponent`, `SpriteRenderer`, `TagComponent` and `BehaviourComponent`. | Done✔️ |
+| **C# scripting** | Basic scripting in C# using mono. | Done✔️ |
+| **2D Renderer** | 2D batch renderer supporting OpenGL. | Done✔️ |
+| **ImGui support** | Basic game editor and in-game debug UI using ImGui. | Done✔️ |
+
+
+ > For in-development features, check the [dev branch](https://github.com/pacojq/Xaloc/tree/dev).
  
  > For in-development features, check the [dev branch](https://github.com/pacojq/Xaloc/tree/dev).
  
 
 ## Planned Features
 
-Other features coming up in the future are:
+| Feature | Description | Status |
+| ------- | ----------- | ------ |
+| **Vulkan support** | Extend the Renderer to supports Vulkan. | WIP 💻 |
+| **Asset manager** | Basic asset handling API. | WIP 💻 |
+| **Physics system** | Own 2D physics API. | TODO 📋 |
+| **Audio system** | Sound API. | TODO 📋 |
+| **Font support** | Extend the Renderer capabilities so it can draw text. | TODO 📋 |
 
- - Editor.
- - Audio system.
- - 2D physics.
- - Support for Vulkan.
 
-The game editor is currently work-in-progress:
+The game editor is in continuous development.
 
 <p align="center">
-    <img height="400" src="res/sandbox-editor.png" alt="Screenshot of a work-in-progress editor." />
+    <img height="360" src="res/sandbox-editor.png" alt="Screenshot of a work-in-progress editor." />
 </p>
 
 
@@ -98,9 +109,14 @@ Xaloc has the following dependencies:
   - [entt](https://github.com/skypjack/entt) for ECS management.
   - [spdlog](https://github.com/gabime/spdlog) for logging.
   - [stb_image.h](https://github.com/nothings/stb) for loading textures.
+  - [pugixml](https://pugixml.org) for scene serialization in XML.
 
 Projects are generated with [Premake 5](https://github.com/premake/premake-core/releases).
 
 ## Special Mentions
 
-Huge shout out to TheCherno's [video series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT). Original code at [TheCherno/Hazel](https://github.com/TheCherno/Hazel).
+Huge shout out to:
+
+  - Yan Chernikov's [video series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT). Original code at [TheCherno/Hazel](https://github.com/TheCherno/Hazel).
+  - Alexander Overvoorde's [Vulkan tutorial](https://vulkan-tutorial.com/Introduction).
+  - Jason Gregory's [Game Engine Architecture](https://www.gameenginebook.com) book.

@@ -1,22 +1,22 @@
 #include "xapch.h"
-#include "WindowsInput.h"
+#include "Xaloc/Core/Input/Input.h"
 
 #include <GLFW/glfw3.h>
 #include "Xaloc/Core/Application.h"
 
 namespace Xaloc {
 
-	Scope<Input> Input::s_Instance = CreateScope<WindowsInput>();
+	// TODO handle non-QWERTY keyboards with GLFW
 
 
-	bool WindowsInput::IsKeyPressedImpl(KeyCode keyCode)
+	bool Input::IsKeyPressed(KeyCode keyCode)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetKey(window, static_cast<int32_t>(keyCode));
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
-	bool WindowsInput::IsGamepadButtonPressedImpl(int id, int button)
+	bool Input::IsGamepadButtonPressed(int id, int button)
 	{
 		GLFWgamepadstate gpState;
 
@@ -29,19 +29,19 @@ namespace Xaloc {
 		return false;
 	}
 
-	bool WindowsInput::IsGamepadConnectedImpl(int id)
+	bool Input::IsGamepadConnected(int id)
 	{
 		return glfwJoystickPresent(id) && glfwJoystickIsGamepad(id);
 	}
 
-	bool WindowsInput::IsMouseButtonPressedImpl(int button)
+	bool Input::IsMouseButtonPressed(int button)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetMouseButton(window, button);
 		return state == GLFW_PRESS;
 	}
 
-	std::pair<float, float>  WindowsInput::GetMousePositionImpl()
+	std::pair<float, float>  Input::GetMousePosition()
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		double xPos, yPos;
@@ -49,15 +49,15 @@ namespace Xaloc {
 		return { (float)xPos, (float)yPos };
 	}
 
-	float WindowsInput::GetMouseXImpl()
+	float Input::GetMouseX()
 	{
-		auto[x, y] = GetMousePositionImpl();
+		auto[x, y] = GetMousePosition();
 		return x;
 	}
 
-	float WindowsInput::GetMouseYImpl()
+	float Input::GetMouseY()
 	{
-		auto[x, y] = GetMousePositionImpl();
+		auto[x, y] = GetMousePosition();
 		return y;
 	}
 }

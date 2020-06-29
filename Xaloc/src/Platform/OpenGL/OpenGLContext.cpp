@@ -15,6 +15,8 @@ namespace Xaloc {
 
 	void OpenGLContext::Init()
 	{
+		XA_CORE_TRACE("OpenGL Context initializing...");
+		
 		glfwMakeContextCurrent(m_WindowHandle);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		XA_CORE_ASSERT(status, "Failed to initialize Glad!");
@@ -32,6 +34,8 @@ namespace Xaloc {
 
 		XA_CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "Xaloc requires at least OpenGL version 4.5!");
 #endif
+
+		XA_CORE_TRACE("OpenGL Context ready!");
 	}
 
 

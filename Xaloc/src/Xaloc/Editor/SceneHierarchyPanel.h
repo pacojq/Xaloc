@@ -21,6 +21,8 @@ namespace Xaloc {
 		
 	private:
 		Ref<Scene> m_Scene;
+
+		bool m_ShowProperties = false;
 		Entity m_SelectionContext;
 	};
 

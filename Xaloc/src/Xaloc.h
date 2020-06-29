@@ -1,5 +1,6 @@
 #pragma once
 
+
 // For use by Xaloc applications
 
 #include "Xaloc/Core/Application.h"
@@ -24,6 +25,11 @@
 #include "Xaloc/Core/Input/MouseButtonCodes.h"
 
 
+// --- Assets -------------------------------------
+
+#include "Xaloc/Core/Assets/AssetManager.h"
+
+
 // --- Math -------------------------------------
 
 #include "Xaloc/Core/Math/AABB.h"
@@ -45,10 +51,13 @@
 
 #include "Xaloc/Renderer/Buffer.h"
 #include "Xaloc/Renderer/Shader.h"
-#include "Xaloc/Renderer/Framebuffer.h"
 #include "Xaloc/Renderer/Texture.h"
 #include "Xaloc/Renderer/SubTexture2D.h"
 #include "Xaloc/Renderer/VertexArray.h"
+
+#include "Xaloc/Renderer/Pipeline.h"
+#include "Xaloc/Renderer/RenderPass.h"
+#include "Xaloc/Renderer/Framebuffer.h"
 
 #include "Xaloc/Renderer/OrthographicCamera.h"
 

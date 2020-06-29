@@ -28,11 +28,14 @@ namespace Xaloc {
 		void Begin();
 		void End();
 
+		void SetBlockEvents(bool blockEvents) { m_BlockEvents = blockEvents; }
+
 	private:
 		void RenderFPS();
 
 		
 	private:
+		bool m_BlockEvents = false;
 		float m_Time = 0.0f;
 
 		float m_FpsValues[50];

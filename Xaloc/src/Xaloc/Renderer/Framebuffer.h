@@ -2,6 +2,8 @@
 
 #include "Xaloc/Core/Core.h"
 
+#include <glm/glm.hpp>
+
 namespace Xaloc {
 
 	struct FramebufferSpec
@@ -9,6 +11,8 @@ namespace Xaloc {
 		uint32_t Width;
 		uint32_t Height;
 
+		glm::vec4 ClearColor;
+		
 		// TODO FramebufferFormat Format;
 		
 		uint32_t Samples = 1;
@@ -24,6 +28,8 @@ namespace Xaloc {
 	{
 	public:
 		static Ref<Framebuffer> Create(const FramebufferSpec& spec);
+
+		virtual ~Framebuffer() = default;
 		
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
@@ -32,6 +38,6 @@ namespace Xaloc {
 
 		virtual uint32_t GetColorAttachmentRendererID() const = 0;
 
-		virtual const FramebufferSpec& GetSpec() const = 0;
+		virtual const FramebufferSpec& GetSpecification() const = 0;
 	};
 }

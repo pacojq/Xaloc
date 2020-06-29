@@ -485,6 +485,25 @@ namespace Xaloc {
 
 
 
+	void Renderer2D::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, float width)
+	{
+		glm::vec3 middle = { (p0 + p1) / 2.0f, 1.0f };
+		
+		glm::vec2 delta = p1 - p0;
+		
+		float dist = glm::sqrt(glm::pow(delta.x, 2) + glm::pow(delta.y, 2));
+		float rot = glm::atan(delta.y, delta.x);
+
+		// TODO app pixels per unit
+		float pxPerUnit = 16.0f;
+		glm::vec2 size = { dist, width / pxPerUnit };
+		
+		DrawRotatedQuad(middle, size, rot, color);
+	}
+
+
+
+	
 
 
 
