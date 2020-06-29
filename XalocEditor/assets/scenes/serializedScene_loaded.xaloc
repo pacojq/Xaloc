@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Xaloc Engine. Serialized Scene -->
 <scene id="0">
-	<name>Sandbox Scene</name>
+	<name>Modified Scene</name>
 	<entities>
 		<entity id="5">
 			<TagComponent tag="Tree 4" />

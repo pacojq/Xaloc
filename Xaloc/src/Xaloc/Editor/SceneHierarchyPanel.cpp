@@ -157,8 +157,10 @@ namespace Xaloc {
 		return modified;
 	}
 
-	static void Property(const char* label, const char* value)
+	static bool Property(const char* label, const char* value)
 	{
+		bool modified = false;
+
 		ImGui::Text(label);
 		ImGui::NextColumn();
 		ImGui::PushItemWidth(-1);
@@ -167,10 +169,13 @@ namespace Xaloc {
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		ImGui::InputText(s_IDBuffer, (char*)value, 256, ImGuiInputTextFlags_ReadOnly);
+		if (ImGui::InputText(s_IDBuffer, (char*)value, 256, ImGuiInputTextFlags_ReadOnly))
+			modified = true;
 
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
+
+		return modified;
 	}
 
 	static bool Property(const char* label, int& value)
@@ -301,6 +306,31 @@ namespace Xaloc {
 			ImGui::Separator();
 		}
 
+
+		if (entity.HasComponent<SceneComponent>())
+		{
+			auto& sc = entity.GetComponent<SceneComponent>();
+			if (ImGui::TreeNodeEx((void*)((uint32_t)entity), ImGuiTreeNodeFlags_DefaultOpen, "Scene"))
+			{
+				BeginPropertyGrid();
+
+				ImGui::Text("ID");
+				ImGui::NextColumn();
+				ImGui::PushItemWidth(-1);
+				ImGui::Text(std::to_string(sc.SceneID).c_str());
+				ImGui::PopItemWidth();
+				ImGui::NextColumn();
+
+				if (Property("Name", sc.Name))
+				{
+					m_Scene->m_Name = sc.Name;
+				}
+
+				EndPropertyGrid();
+				ImGui::TreePop();
+			}
+			ImGui::Separator();
+		}
 
 		/* TODO camera
 

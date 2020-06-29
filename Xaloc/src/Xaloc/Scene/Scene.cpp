@@ -119,7 +119,7 @@ namespace Xaloc {
 		m_Registry.on_construct<BehaviourComponent>().connect<&OnBehaviourComponentConstruct>();
 
 		m_SceneEntity = m_Registry.create();
-		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_SceneID);
+		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_SceneID, m_Name);
 		m_Registry.emplace<TagComponent>(m_SceneEntity, "Scene Entity");
 
 		s_ActiveScenes[m_SceneID] = this;

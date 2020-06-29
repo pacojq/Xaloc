@@ -188,9 +188,6 @@ namespace Xaloc {
 		Xaloc::Renderer2D::EndScene();
 
 
-
-		// TODO end render pass
-		//m_Framebuffer->Unbind();
 		Renderer::EndRenderPass();
 
 		
@@ -205,13 +202,14 @@ namespace Xaloc {
 
 			// TODO get app pixels per unit
 			float pxPerUnit = 16.0f;
+			float offset = 1.0f / pxPerUnit;
+
+			glm::vec4 sprMin = selection.Transform() * glm::vec4{ -0.5f - offset, -0.5f - offset, 0.0f, 1.0f };        // Get sprite quad min vertex
+			glm::vec4 sprMax = selection.Transform() * glm::vec4{ 0.5f + offset, 0.5f + offset, 0.0f, 1.0f };          // Get sprite quad max vertex
 			
-			glm::vec4 sprMin = selection.Transform() * glm::vec4{ -0.5f - 1.0f / pxPerUnit, -0.5f - 1.0f / pxPerUnit, 0.0f, 1.0f };        // Get sprite quad min vertex
-			glm::vec4 sprMax = selection.Transform() * glm::vec4{ 0.5f + 1.0f / pxPerUnit, 0.5f + 1.0f / pxPerUnit, 0.0f, 1.0f };          // Get sprite quad max vertex
-			
-			//glm::vec4 color = { 0.549f, 0.976f, 1.0f, 1.0f };
-			glm::vec4 color = glm::vec4(1.0f);
-			
+			glm::vec4 color = { 0.549f, 0.976f, 1.0f, 0.9f };
+			//glm::vec4 color = { 1.0f, 1.0f, 1.0f, 0.9f };
+
 			Renderer2D::DrawLine({ sprMin.x, sprMin.y }, { sprMax.x, sprMin.y }, color, 0.5f);
 			Renderer2D::DrawLine({ sprMax.x, sprMin.y }, { sprMax.x, sprMax.y }, color, 0.5f);
 			Renderer2D::DrawLine({ sprMax.x, sprMax.y }, { sprMin.x, sprMax.y }, color, 0.5f);
@@ -303,7 +301,6 @@ namespace Xaloc {
 					{
 						m_Scene.reset();
 						m_Scene = Scene::Load(filename);
-
 						m_SceneHierarchyPanel->SetScene(m_Scene);
 					}
 				}
@@ -413,7 +410,7 @@ namespace Xaloc {
 
 		if (m_SelectionContext.size())
 		{
-			// TODO
+			// TODO draw guizmo
 
 			/*
 			auto& selection = m_SelectionContext[0];
@@ -481,18 +478,14 @@ namespace Xaloc {
 					auto tex = entity.GetComponent<SpriteRendererComponent>().SubTexture;
 					if (!tex)
 						continue;
-
-
-					// TODO use pixels per unit and SubTexture width and size
 					
+					// TODO use pixels per unit and SubTexture width and size
 					AABB boundingBox;
 					glm::vec4 sprMin = entity.Transform() * glm::vec4{ -0.5f, -0.5f, 0.0f, 1.0f };        // Get sprite quad min vertex
 					glm::vec4 sprMax = entity.Transform() * glm::vec4{ 0.5f, 0.5f, 0.0f, 1.0f };          // Get sprite quad max vertex
 					boundingBox.Min = sprMin * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
 					boundingBox.Max = sprMax * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
-
-					XA_CORE_TRACE("AABB min ({0} , {1});  max ({2}, {3})", boundingBox.Min.x, boundingBox.Min.y, boundingBox.Max.x, boundingBox.Max.y);
-					
+										
 					bool intersects = mouseX > boundingBox.Min.x && mouseX < boundingBox.Max.x
 									&& mouseY > boundingBox.Min.y && mouseY < boundingBox.Max.y;
 
@@ -500,10 +493,8 @@ namespace Xaloc {
 					
 					if (intersects)
 					{
-						XA_CORE_WARN("INTERSECTION!");
 						m_SelectionContext.push_back({ entity });
 					}
-
 				}
 				// TODO std::sort(m_SelectionContext.begin(), m_SelectionContext.end(), [](auto& a, auto& b) { return a.Distance < b.Distance; });
 				if (m_SelectionContext.size())

@@ -9,11 +9,6 @@ namespace Xaloc {
 
 	class Entity;
 	class SceneSerializer;
-
-	struct SceneComponent
-	{
-		uint32_t SceneID;
-	};
 	
 	class Scene
 	{
