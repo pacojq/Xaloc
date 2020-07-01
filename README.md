@@ -99,6 +99,7 @@ The game editor is in continuous development.
 Xaloc has the following dependencies:
 
   - [ImGui](https://github.com/ocornut/imgui) for GUI rendering.
+  - [ImPlot](https://github.com/epezent/implot) as plotting library for the profiler.
   - [mono](https://www.mono-project.com/docs/about-mono/) for C# [scripting](https://www.mono-project.com/docs/advanced/embedding/scripting/).
   - [GLFW](https://github.com/glfw/glfw) for OpenGL, OpenGL ES, window creation 
   and input handling. More info at its [website](https://www.glfw.org/).

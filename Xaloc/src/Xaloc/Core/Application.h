@@ -65,7 +65,11 @@ namespace Xaloc {
 		inline static std::string GetName() { return s_Instance->m_Name; }
 
 		inline static float GetFPS() { return s_Instance->m_FPS; }
+		inline static float GetFrameTime() { return s_Instance->m_Timestep; }
 
+		inline static void SetPaused(bool paused) { s_Instance->m_Paused = paused; }
+		inline static bool IsPaused() { return s_Instance->m_Paused; }
+		
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
@@ -86,7 +90,9 @@ namespace Xaloc {
 
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;
+		
 		float m_FPS = 0.0f;
+		float m_Timestep = 0.0f;
 
 	private:
 		static Application* s_Instance;

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assetdb>
+
+	<group id="MY_GROUP">
+	
+		<asset id="MY_ASSET" path="MyAssetName.png.xasset"/>
+	
+	</group>
+
+</assetdb>

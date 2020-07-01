@@ -1,20 +1,19 @@
 #include "xapch.h"
 #include "SceneHierarchyPanel.h"
 
-#include <imgui.h>
-
 #include "Xaloc/Scripting/ScriptEngine.h"
 
-//#define GLM_ENABLE_EXPERIMENTAL
-//#include <glm/gtx/quaternion.hpp>
-//#include <glm/gtx/matrix_decompose.hpp>
-//#include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
+#include <limits>
 
 // TODO:
 // - Eventually change imgui node IDs to be entity/asset GUID
 
 namespace Xaloc {
 
+	#define FLOAT_MIN std::numeric_limits<float>::min()
+	#define FLOAT_MAX std::numeric_limits<float>::max()
+	
 
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
 		: m_Scene(scene)
@@ -199,7 +198,7 @@ namespace Xaloc {
 		return modified;
 	}
 
-	static bool Property(const char* label, float& value, float delta = 0.1f)
+	static bool Property(const char* label, float& value, float delta = 0.1f, float min = FLOAT_MIN, float max = FLOAT_MAX)
 	{
 		bool modified = false;
 
@@ -211,7 +210,7 @@ namespace Xaloc {
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat(s_IDBuffer, &value, delta))
+		if (ImGui::DragFloat(s_IDBuffer, &value, delta, min, max))
 			modified = true;
 
 		ImGui::PopItemWidth();
@@ -220,7 +219,7 @@ namespace Xaloc {
 		return modified;
 	}
 
-	static bool Property(const char* label, glm::vec2& value, float delta = 0.1f)
+	static bool Property(const char* label, glm::vec2& value, float delta = 0.1f, float min = FLOAT_MIN, float max = FLOAT_MAX)
 	{
 		bool modified = false;
 
@@ -232,7 +231,7 @@ namespace Xaloc {
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat2(s_IDBuffer, glm::value_ptr(value), delta))
+		if (ImGui::DragFloat2(s_IDBuffer, glm::value_ptr(value), delta, min, max))
 			modified = true;
 
 		ImGui::PopItemWidth();
@@ -345,6 +344,19 @@ namespace Xaloc {
 			ImGui::Separator();
 		}
 		*/
+
+		if (entity.HasComponent<ColliderComponent>())
+		{
+			auto& cc = entity.GetComponent<ColliderComponent>();
+			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(ColliderComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Collider"))
+			{
+				BeginPropertyGrid();
+				Property("Size", cc.Size, 0.1f, 0.0f);
+				EndPropertyGrid();
+				ImGui::TreePop();
+			}
+			ImGui::Separator();
+		}
 
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{

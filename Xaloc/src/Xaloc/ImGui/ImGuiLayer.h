@@ -7,6 +7,7 @@
 #include "Xaloc/Events/ApplicationEvent.h"
 
 #include "Modules/ImGuiConsole.h"
+#include "Modules/ImGuiProfiler.h"
 
 namespace Xaloc {
 
@@ -30,16 +31,20 @@ namespace Xaloc {
 
 		void SetBlockEvents(bool blockEvents) { m_BlockEvents = blockEvents; }
 
-	private:
-		void RenderFPS();
 
+		const Ref<ImGuiProfiler>& GetProfiler() const { return m_Profiler; }
+
+		inline void ShowConsole() { m_ShowConsole = true; }
+		inline void ShowProfiler() { m_ShowProfiler = true; }
 		
+
 	private:
 		bool m_BlockEvents = false;
-		float m_Time = 0.0f;
 
-		float m_FpsValues[50];
-		std::vector<float> m_FrameTimes;
+		Ref<ImGuiProfiler> m_Profiler;
+		
+		bool m_ShowConsole = true;
+		bool m_ShowProfiler = true; // TODO debug, change to false by default
 	};
 
 }

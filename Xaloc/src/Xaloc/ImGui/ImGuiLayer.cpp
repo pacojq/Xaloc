@@ -12,12 +12,17 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+#include <implot.h>
+
+#include "imgui_internal.h"
+
 
 namespace Xaloc {
 
 	ImGuiLayer::ImGuiLayer()
 		: Layer("ImGuiLayer")
 	{
+		m_Profiler = CreateRef<ImGuiProfiler>();
 	}
 
 
@@ -108,44 +113,22 @@ namespace Xaloc {
 		//static bool show = false;
 		//ImGui::ShowDemoWindow(&show);
 
-		static bool showConsole = true;
-		ImGuiConsole::OnImGuiRender(&showConsole);
-
-		RenderFPS();
-	}
-
-
-	
-	void ImGuiLayer::RenderFPS()
-	{
-		float avg = 0;
-		float min = 300;
-		float max = 0;
-
-		uint32_t size = m_FrameTimes.size();
-		if (size >= 50)
-			m_FrameTimes.erase(m_FrameTimes.begin());
-
-		//m_FrameTimes.push_back(Xaloc::Application::GetFPS());
-		m_FrameTimes.push_back(ImGui::GetIO().Framerate);
-		for (int i = 0; i < size; i++)
+		if (m_ShowConsole)
 		{
-			m_FpsValues[i] = m_FrameTimes[i];
-			avg += m_FrameTimes[i];
+			ImGuiConsole::OnImGuiRender(&m_ShowConsole);
 		}
-		avg /= size;
+		if (m_ShowProfiler)
+		{
+			m_Profiler->OnImGuiRender(&m_ShowProfiler);
+		}
+
 		
-
-
-		ImGui::Begin("FPS");
-		ImGui::PlotLines("FPS", m_FpsValues, size);
-		ImGui::Text("FPS: %f", avg);
-		ImGui::Text("Frame time (ms): %f", 1.0f / avg * 1000.0f);
+		ImGui::Begin("Graphics");
 
 		bool vSync = Application::Get().GetWindow().IsVSync();
 		ImGui::Checkbox("VSync Enabled", &vSync);
 		Application::Get().GetWindow().SetVSync(vSync);
-		
+
 		ImGui::End();
 	}
 

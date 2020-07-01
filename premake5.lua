@@ -19,6 +19,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Xaloc/vendor/GLFW/include"
 IncludeDir["Glad"] = "Xaloc/vendor/Glad/include"
 IncludeDir["ImGui"] = "Xaloc/vendor/imgui"
+IncludeDir["ImPlot"] = "Xaloc/vendor/implot"
 IncludeDir["stb_image"] = "Xaloc/vendor/stb_image"
 IncludeDir["glm"] = "Xaloc/vendor/glm"
 IncludeDir["entt"] = "Xaloc/vendor/entt/single_include"
@@ -63,6 +64,9 @@ project "Xaloc"
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
 		
+		"%{prj.name}/vendor/implot/implot.h",
+		"%{prj.name}/vendor/implot/implot.cpp",
+		
 		"%{prj.name}/vendor/pugixml/**.hpp",
 		"%{prj.name}/vendor/pugixml/**.cpp"
 	}
@@ -80,6 +84,7 @@ project "Xaloc"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImPlot}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",

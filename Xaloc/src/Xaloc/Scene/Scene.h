@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PhysicSpace.h"
+
 #include "Xaloc/Core/Timestep.h"
 #include "Xaloc/Events/Event.h"
 
@@ -44,11 +46,17 @@ namespace Xaloc {
 
 		std::string m_Name;
 
+		Ref<PhysicSpace> m_PhysicSpace;
+
 		uint32_t m_NextEntityId = 0; // TODO move to universal ID
+
+
 		
 		friend class Entity;
-		friend class SceneHierarchyPanel;
 		friend class SceneSerializer;
+		friend class PhysicSpace;
+
+		friend class SceneHierarchyPanel;
 	};
 
 }

@@ -309,6 +309,8 @@ namespace Xaloc {
 
 			if (ImGui::BeginMenu("Window"))
 			{
+				if (ImGui::MenuItem("Console")) Application::Get().GetImGuiLayer()->ShowConsole();
+				if (ImGui::MenuItem("Profiler")) Application::Get().GetImGuiLayer()->ShowProfiler();
 				if (ImGui::MenuItem("Render Stats")) m_ShowWindowRenderStats = true;
 				ImGui::EndMenu();
 			}

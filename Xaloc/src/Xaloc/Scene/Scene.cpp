@@ -70,20 +70,6 @@ namespace Xaloc {
 		else XA_CORE_INFO("Scene saved in path '{}'", filename);
 	}
 
-
-	
-
-	
-	void print_doc(const char* message, const pugi::xml_document& doc, const pugi::xml_parse_result& result)
-	{
-		std::cout
-			<< message
-			<< "\t: load result '" << result.description() << "'"
-			<< ", first character of root name: U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << pugi::as_wide(doc.first_child().name())[0]
-			<< ", year: " << doc.first_child().first_child().child_value()
-			<< std::endl;
-	}
-	
 	Ref<Scene> Scene::Load(const std::string& filename)
 	{
 		pugi::xml_document doc;
@@ -135,7 +121,10 @@ namespace Xaloc {
 
 	void Scene::Init()
 	{
-
+		auto test = m_Registry.create();
+		m_Registry.emplace<TagComponent>(test, "Test Collider Entity");
+		m_Registry.emplace<TransformComponent>(test, glm::mat4(1.0f));
+		m_Registry.emplace<ColliderComponent>(test, glm::vec2(1.0f));
 	}
 
 
@@ -148,10 +137,44 @@ namespace Xaloc {
 				ScriptEngine::OnUpdateEntity((uint32_t)entity, ts);
 		}
 
+		
+		
+		// For more info on entt groups:
+		// https://skypjack.github.io/2019-04-12-entt-tips-and-tricks-part-1/
+		// https://github.com/skypjack/entt/wiki/Crash-Course:-entity-component-system#groups
+
+		// Physics
+		{
+			// Transform component will be owned by the Rendering group
+			auto group = m_Registry.group<ColliderComponent>(entt::get<TransformComponent>);
+			
+			for (int i = 0; i < group.size(); i++)
+			{
+				auto entity = group[i];
+
+				// Diagonal check
+				for (int j = i+1; j < group.size(); j++)
+				{
+					auto other = group[j];
+
+					// TODO check collision enter
+				}
+			}
+			
+			for (auto entity : group)
+			{
+				//auto [transformComponent, colliderComponent] = view.get<TransformComponent, ColliderComponent>(entity);
+				//auto trans = transformComponent;
+				//auto col = colliderComponent;
+
+				// TODO post-process
+			}
+		}
+		
 		// Render all sprites
 		//Renderer2D::BeginScene(*camera);
 		{
-			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+			auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
 			{
 				auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRendererComponent>(entity);
@@ -162,6 +185,7 @@ namespace Xaloc {
 		}
 
 		//Renderer2D::EndScene();
+
 	}
 
 

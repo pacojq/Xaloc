@@ -2,8 +2,6 @@
 
 namespace Xaloc {
 
-	class Entity;
-
 	struct IdComponent
 	{
 		uint32_t ID;

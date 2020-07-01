@@ -116,15 +116,20 @@ namespace Xaloc {
 			m_LastFrameTime = time;
 
 			m_FPS = 1.0f / timestep;
+			m_Timestep = timestep * 1000.0f; // seconds to milliseconds
 
 			if (!m_Minimized)
 			{
 				if (!m_Paused)
 				{
+					m_ImGuiLayer->GetProfiler()->BeginFrame();
+					
 					XA_PROFILE_SCOPE("LayerStack OnUpdate");
 					
 					for (Layer* layer : m_LayerStack)
 						layer->OnUpdate(timestep);
+
+					m_ImGuiLayer->GetProfiler()->EndFrame();
 				}
 
 				m_ImGuiLayer->Begin();
