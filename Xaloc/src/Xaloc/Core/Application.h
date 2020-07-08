@@ -22,14 +22,33 @@ namespace Xaloc {
 	{
 		std::string Name = "Xaloc App";
 
+		/// <summary>
+		/// Whether the application will use a C# scripting project.
+		/// </summary>
 		bool UseScripting = false;
+
+		/// <summary>
+		/// The path to the C# scripting project DLL.
+		/// This will be required if UseScripting is true.
+		/// </summary>
 		std::string ScriptingDllPath;
 
 		RendererAPI::API TargetGraphics = RendererAPI::API::OpenGL;
 
+		/// <summary>
+		/// Default width of the application display.
+		/// </summary>
 		uint32_t Width = 1280;
+
+		/// <summary>
+		/// Default height of the application display.
+		/// </summary>
 		uint32_t Height = 720;
 
+		/// <summary>
+		/// Whether the game should pause its execution
+		/// when the application window loses focus..
+		/// </summary>
 		bool PauseOnFocusLost = false;
 
 		bool VSyncEnabled = true;
@@ -56,11 +75,9 @@ namespace Xaloc {
 		// TODO move somewhere else
 		std::string SaveFile(const std::string& filter) const;
 
-
+		
+		/// <returns>The Application singleton.</returns>
 		inline static Application& Get() { return *s_Instance; }
-		inline Window& GetWindow() { return *m_Window; }
-
-		inline ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
 
 		inline static std::string GetName() { return s_Instance->m_Name; }
 
@@ -69,6 +86,11 @@ namespace Xaloc {
 
 		inline static void SetPaused(bool paused) { s_Instance->m_Paused = paused; }
 		inline static bool IsPaused() { return s_Instance->m_Paused; }
+		
+		inline Window& GetWindow() { return *m_Window; }
+
+		inline ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
+
 		
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
@@ -80,10 +102,26 @@ namespace Xaloc {
 		ImGuiLayer* m_ImGuiLayer;
 
 		std::string m_Name;
-		
+
+		/// <summary>
+		/// Whether the application is running.
+		/// </summary>
 		bool m_Running = true;
-		bool m_Paused = false; // Whether the game is running in a freezed state
+
+		/// <summary>
+		/// Whether the game is running in a "freeze" state (might be true
+		/// if the application window focus is lost).
+		/// </summary>
+		bool m_Paused = false;
+
+		/// <summary>
+		/// Whether the application window is minimized.
+		/// </summary>
 		bool m_Minimized = false;
+
+		/// <summary>
+		/// Whether the application window has focus.
+		/// </summary>
 		bool m_Focused = true;
 
 		bool m_PauseOnFocusLost;
@@ -94,11 +132,21 @@ namespace Xaloc {
 		float m_FPS = 0.0f;
 		float m_Timestep = 0.0f;
 
+
+		
 	private:
+		/// <summary>
+		/// Application singleton.
+		/// </summary>
 		static Application* s_Instance;
 	};
 
-	// To be defined in the client application
+	
+	/// <summary>
+	/// To be defined in the client code.
+	/// Used at start time  to create the actual client application instance.
+	/// </summary>
+	/// <returns>The client application.</returns>
 	Application* CreateApplication();
 
 }

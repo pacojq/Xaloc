@@ -56,6 +56,7 @@
     <Compile Include="src\Xaloc\Math\Vector.cs" />
     <Compile Include="src\Xaloc\Scene\Component.cs" />
     <Compile Include="src\Xaloc\Scene\Components\BehaviourComponent.cs" />
+    <Compile Include="src\Xaloc\Scene\Components\ColliderComponent.cs" />
     <Compile Include="src\Xaloc\Scene\Components\SpriteRendererComponent.cs" />
     <Compile Include="src\Xaloc\Scene\Components\TagComponent.cs" />
     <Compile Include="src\Xaloc\Scene\Components\TransformComponent.cs" />

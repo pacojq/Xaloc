@@ -36,7 +36,7 @@ SandboxLayer::SandboxLayer()
 	m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 	m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 {
-	m_Scene = Xaloc::Scene::Create("Sandbox Scene");
+	m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");
 	m_CameraController.SetZoomLevel(5.0f);
 }
 

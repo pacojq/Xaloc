@@ -11,9 +11,9 @@
 
 namespace Xaloc {
 
-	/*
-		Xaloc's renderer.
-	*/
+	/// <summary>
+	/// Xaloc's renderer.
+	/// </summary>
 	class Renderer
 	{
 	public:

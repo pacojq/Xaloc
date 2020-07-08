@@ -7,9 +7,9 @@
 
 namespace Xaloc {
 
-	/*
-		Xaloc's 2D renderer.
-	*/
+	/// <summary>
+	/// Xaloc's 2D renderer.
+	/// </summary>
 	class Renderer2D
 	{
 	public:

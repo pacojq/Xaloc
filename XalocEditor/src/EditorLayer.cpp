@@ -1,7 +1,8 @@
 #include "EditorLayer.h"
 
-#include "imgui/imgui.h"
+#include "Xaloc/Scripting/ScriptEngine.h"
 
+#include "imgui/imgui.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -45,6 +46,8 @@ namespace Xaloc {
 		// Init Editor
 
 		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
+		Xaloc::ScriptEngine::SetSceneContext(m_Scene);
+		m_Scene->StartRuntime();
 
 		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);

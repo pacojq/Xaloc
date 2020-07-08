@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <assetdb>
 
-	<group id="MY_GROUP">
+	<assets>
+		<asset uuid="uuid1" name="MY_ASSET" path="MyAssetName.xasset"/>
+		<asset uuid="uuid2" name="MY_ASSET" path="MyAssetName.xasset"/>
+	</assets>
 	
-		<asset id="MY_ASSET" path="MyAssetName.png.xasset"/>
-	
-	</group>
+	<groups>
+		<group name="MY_GROUP_1">
+			<!-- The "path" in engine will be MY_GROUP_1/MY_ASSET -->
+			<assetref uuid="uuid1" />
+			
+			<group name="MY_SUB_GROUP">
+				<!-- The "path" in engine will be MY_GROUP_1/MY_SUB_GROUP/MY_ASSET -->
+				<assetref uuid="uuid2" />
+			</group>
+		</group>
+	</groups>
 
 </assetdb>

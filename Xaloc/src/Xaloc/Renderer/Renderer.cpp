@@ -20,8 +20,8 @@ namespace Xaloc {
 	
 
 	void Renderer::Init()
-	{
-		RenderCommand::Init();
+	{		
+		RenderCommand::Init(GetAPI());
 		Renderer2D::Init();
 	}
 

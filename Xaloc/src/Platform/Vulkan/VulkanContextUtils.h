@@ -6,9 +6,14 @@
 
 namespace Xaloc {
 
+#if XA_DEBUG
 	#define VK_CHECK_RESULT(x, msg) { XA_CORE_ASSERT(x == VK_SUCCESS, msg); }
+#else
+	#define VK_CHECK_RESULT(x, msg) { x; }
+#endif
 
 
+	
 	struct QueueFamilyIndices
 	{
 		std::optional<uint32_t> GraphicsFamily;
@@ -18,6 +23,13 @@ namespace Xaloc {
 		{
 			return GraphicsFamily.has_value() && PresentFamily.has_value();
 		}
+	};
+
+	struct SwapChainSupportDetails
+	{
+		VkSurfaceCapabilitiesKHR Capabilities;
+		std::vector<VkSurfaceFormatKHR> Formats;
+		std::vector<VkPresentModeKHR> PresentModes;
 	};
 
 	
@@ -59,6 +71,16 @@ namespace Xaloc {
 		static QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
 
 		static bool CheckDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<const char*> deviceExtensions);
+
+		static bool IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*> deviceExtensions);
 		
+		/// <summary>
+		/// Populates a SwapChainSupportDetails struct with the current swap chain support.
+		/// </summary>
+		static SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
+
+		static VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+
+		static VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	};
 }

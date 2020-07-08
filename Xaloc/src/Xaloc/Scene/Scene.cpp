@@ -22,8 +22,7 @@ namespace Xaloc {
 
 	static const std::string DefaultEntityName = "New Entity";
 
-	std::unordered_map<uint32_t, Scene*> s_ActiveScenes;
-	static uint32_t s_SceneIDCounter = 0;
+	std::unordered_map<UUID, Scene*> s_ActiveScenes;
 
 
 	void OnTransformConstruct(entt::registry& registry, entt::entity entity)
@@ -39,20 +38,16 @@ namespace Xaloc {
 		XA_CORE_TRACE("New Tag component registered: {0}", tag.Tag);
 	}
 
-	void OnBehaviourComponentConstruct(entt::registry& registry, entt::entity entity)
+	void OnBehaviourComponentConstruct(entt::registry& registry, entt::entity e)
 	{
-		XA_CORE_TRACE("New Behaviour component registered!");
-		
-		// Note: there should be exactly one scene component per registry
 		auto view = registry.view<SceneComponent>();
-		uint32_t sceneID = 0;
-		for (auto entity : view)
-		{
-			auto& scene = registry.get<SceneComponent>(entity);
-			sceneID = scene.SceneID;
-		}
+		UUID sceneID = registry.get<SceneComponent>(view.front()).SceneID;
+		Scene* scene = s_ActiveScenes[sceneID];
+		
+		auto entityID = registry.get<IdComponent>(e).ID;
+		XA_CORE_ASSERT(scene->m_EntityMap.find(entityID) != scene->m_EntityMap.end(), "Could not find Behaviour entity!");
 
-		ScriptEngine::OnInitEntity(registry.get<BehaviourComponent>(entity), (uint32_t)entity, sceneID);
+		ScriptEngine::InitBehaviourEntity(scene->m_EntityMap.at(entityID));
 	}
 
 
@@ -98,7 +93,25 @@ namespace Xaloc {
 	
 	
 	Scene::Scene(const std::string& name)
-		: m_Name(name), m_SceneID(s_SceneIDCounter++)
+		: m_Name(name)
+	{
+		Init();
+	}
+
+	Scene::Scene(const std::string& name, UUID id)
+		: m_Name(name), m_SceneID(id)
+	{
+		Init();
+	}
+	
+
+	Scene::~Scene()
+	{
+		m_Registry.clear();
+		s_ActiveScenes.erase(m_SceneID);
+	}
+
+	void Scene::Init()
 	{
 		m_Registry.on_construct<TransformComponent>().connect<&OnTransformConstruct>();
 		m_Registry.on_construct<TagComponent>().connect<&OnTagConstruct>();
@@ -109,32 +122,43 @@ namespace Xaloc {
 		m_Registry.emplace<TagComponent>(m_SceneEntity, "Scene Entity");
 
 		s_ActiveScenes[m_SceneID] = this;
-
-		Init();
-	}
-
-	Scene::~Scene()
-	{
-		m_Registry.clear();
-		s_ActiveScenes.erase(m_SceneID);
-	}
-
-	void Scene::Init()
-	{
+		
+		
 		auto test = m_Registry.create();
 		m_Registry.emplace<TagComponent>(test, "Test Collider Entity");
 		m_Registry.emplace<TransformComponent>(test, glm::mat4(1.0f));
 		m_Registry.emplace<ColliderComponent>(test, glm::vec2(1.0f));
+
+
 	}
 
+	void Scene::StartRuntime()
+	{
+		// TODO
+		
+		auto view = m_Registry.view<BehaviourComponent>();
+		for (auto entity : view)
+		{
+			Entity e = { entity, this };
+			if (ScriptEngine::ModuleExists(e.GetComponent<BehaviourComponent>().ModuleName))
+				ScriptEngine::InstantiateEntityClass(e);
+		}
+	}
+
+	
 
 	void Scene::OnUpdate(Timestep ts)
 	{
-		// Update all entities
+		// TODO Update all entities
 		{
 			auto view = m_Registry.view<BehaviourComponent>();
 			for (auto entity : view)
-				ScriptEngine::OnUpdateEntity((uint32_t)entity, ts);
+			{
+				UUID entityID = m_Registry.get<IdComponent>(entity).ID;
+				Entity e = { entity, this };
+				if (ScriptEngine::ModuleExists(e.GetComponent<BehaviourComponent>().ModuleName))
+					ScriptEngine::OnUpdateEntity(m_SceneID, entityID, ts);
+			}
 		}
 
 		
@@ -192,17 +216,28 @@ namespace Xaloc {
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		UUID id = {};
+		return CreateEntity(name, id);
+	}
+
+	Entity Scene::CreateEntity(const std::string& name, UUID id)
+	{
 		const std::string& goName = name.empty() ? DefaultEntityName : name;
-		
+
 		auto entity = Entity{ m_Registry.create(), this };
+		auto& idComp = entity.AddComponent<IdComponent>();
+		idComp.ID = id;
+
+		XA_CORE_ASSERT(m_EntityMap.find(idComp.ID) == m_EntityMap.end(), "Repeated entity ID!");
 
 		entity.AddComponent<TransformComponent>(glm::mat4(1.0f));
-		entity.AddComponent<IdComponent>(m_NextEntityId);
 		entity.AddComponent<TagComponent>(goName);
-		
-		m_NextEntityId++;
+
+		XA_CORE_TRACE("Registering entity to the EntityMap. Id = {}", idComp.ID);
+		m_EntityMap[idComp.ID] = entity;
 		return entity;
 	}
+	
 
 	void Scene::DestroyEntity(Entity entity)
 	{

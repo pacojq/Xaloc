@@ -3,8 +3,15 @@
 
 #include <mono/jit/jit.h>
 
-#include "Xaloc/Scene/Components.h"
 #include "Xaloc/Scene/Entity.h"
+
+#include "Xaloc/Scene/Components/BehaviourComponent.h"
+#include "Xaloc/Scene/Components/ColliderComponent.h"
+#include "Xaloc/Scene/Components/IdComponent.h"
+#include "Xaloc/Scene/Components/SceneComponent.h"
+#include "Xaloc/Scene/Components/SpriteRendererComponent.h"
+#include "Xaloc/Scene/Components/TransformComponent.h"
+#include "Xaloc/Scene/Components/TagComponent.h"
 
 #include "ScriptAPI.h"
 
@@ -28,6 +35,11 @@ namespace Xaloc {
 		}\
 	}
 
+	/// <summary>
+	/// Register the C# component classes, including the methods
+	/// Entity::HasComponent and Entity::AddComponent for each component
+	/// type.
+	/// </summary>
 	static void InitComponentTypes()
 	{
 		Component_RegisterType(TagComponent);
@@ -37,26 +49,41 @@ namespace Xaloc {
 
 	void ScriptEngineRegistry::RegisterAll()
 	{
+		// Register C# component classes
 		InitComponentTypes();
 
-		mono_add_internal_call("Xaloc.Log::Fatal_Native", Xaloc::Scripting::Xaloc_Log_Fatal);
-		mono_add_internal_call("Xaloc.Log::Error_Native", Xaloc::Scripting::Xaloc_Log_Error);
-		mono_add_internal_call("Xaloc.Log::Warn_Native", Xaloc::Scripting::Xaloc_Log_Warn);
-		mono_add_internal_call("Xaloc.Log::Info_Native", Xaloc::Scripting::Xaloc_Log_Info);
-		mono_add_internal_call("Xaloc.Log::Trace_Native", Xaloc::Scripting::Xaloc_Log_Trace);
+		
+		// ============================ LOGGING ============================ //
+
+		mono_add_internal_call("Xaloc.Log::Fatal_Native", Scripting::Xaloc_Log_Fatal);
+		mono_add_internal_call("Xaloc.Log::Error_Native", Scripting::Xaloc_Log_Error);
+		mono_add_internal_call("Xaloc.Log::Warn_Native", Scripting::Xaloc_Log_Warn);
+		mono_add_internal_call("Xaloc.Log::Info_Native", Scripting::Xaloc_Log_Info);
+		mono_add_internal_call("Xaloc.Log::Trace_Native", Scripting::Xaloc_Log_Trace);
+
 
 		
-		mono_add_internal_call("Xaloc.Input::IsKeyPressed_Native", Xaloc::Scripting::Xaloc_Input_IsKeyPressed);
+		// ============================= INPUT ============================= //
+		
+		mono_add_internal_call("Xaloc.Input::IsKeyPressed_Native", Scripting::Xaloc_Input_IsKeyPressed);
+
+
+
+
+		// ============================ ENTITIES ============================ //
+		
+		mono_add_internal_call("Xaloc.Entity::GetTransform_Native", Scripting::Xaloc_Entity_GetTransform);
+		mono_add_internal_call("Xaloc.Entity::SetTransform_Native", Scripting::Xaloc_Entity_SetTransform);
+		mono_add_internal_call("Xaloc.Entity::CreateComponent_Native", Scripting::Xaloc_Entity_CreateComponent);
+		mono_add_internal_call("Xaloc.Entity::HasComponent_Native", Scripting::Xaloc_Entity_HasComponent);
+
+
 
 		
-		mono_add_internal_call("Xaloc.Entity::GetTransform_Native", Xaloc::Scripting::Xaloc_Entity_GetTransform);
-		mono_add_internal_call("Xaloc.Entity::SetTransform_Native", Xaloc::Scripting::Xaloc_Entity_SetTransform);
-		mono_add_internal_call("Xaloc.Entity::CreateComponent_Native", Xaloc::Scripting::Xaloc_Entity_CreateComponent);
-		mono_add_internal_call("Xaloc.Entity::HasComponent_Native", Xaloc::Scripting::Xaloc_Entity_HasComponent);
-
-
-		mono_add_internal_call("Xaloc.TagComponent::GetTag_Native", Xaloc::Scripting::Xaloc_TagComponent_GetTag);
-		mono_add_internal_call("Xaloc.TagComponent::SetTag_Native", Xaloc::Scripting::Xaloc_TagComponent_SetTag);
+		// =========================== COMPONENTS =========================== //
+		
+		mono_add_internal_call("Xaloc.TagComponent::GetTag_Native", Scripting::Xaloc_TagComponent_GetTag);
+		mono_add_internal_call("Xaloc.TagComponent::SetTag_Native", Scripting::Xaloc_TagComponent_SetTag);
 	}
 
 }

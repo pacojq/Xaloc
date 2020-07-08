@@ -10,11 +10,11 @@
 
 #include <map>
 #include <set>
+#include <vector>
+#include <optional>
 
 
 namespace Xaloc {
-
-	
 
 	
 	VulkanContext::VulkanContext(GLFWwindow* windowHandle)
@@ -25,10 +25,15 @@ namespace Xaloc {
 #ifdef XA_DEBUG
 		m_EnableValidationLayers = true;
 #else
-		m_EnableValidationLayers = false;
+		m_EnableValidationLayers = true;
 #endif
 		
 		// TODO
+	}
+
+	VulkanContext::~VulkanContext()
+	{
+		
 	}
 
 	
@@ -51,12 +56,48 @@ namespace Xaloc {
 
 		CreateLogicalDevice();
 		XA_CORE_TRACE("    Logical device ready");
+		
+		CreateSwapChain();
+		XA_CORE_TRACE("    Swap chain ready");
+		
+		/* TODO
 
+		CreateRenderPass();
+		LOG("[RENDER PASS READY]");
+
+		CreateDescriptorSetLayout();
+		CreateGraphicsPipeline();
+		LOG("[PIPELINE READY]");
+		
+		CreateCommandPool();
+		LOG("[COMMAND POOL READY]");
+
+		CreateDepthResources();
+		LOG("[DEPTH RESOURCES READY]");
+
+		CreateFrameBuffers();
+		LOG("[FRAME BUFFERS READY]");
+		 
+		 */
 		
 		XA_CORE_TRACE("Vulkan Context ready!");
 	}
 
 
+
+	void VulkanContext::CleanUp()
+	{
+		vkDestroyDevice(m_Device, nullptr);
+
+		if (m_EnableValidationLayers)
+		{
+			VulkanContextUtils::DestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
+		}
+
+		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+		vkDestroyInstance(m_Instance, nullptr);
+	}
+		
 
 
 
@@ -258,6 +299,23 @@ namespace Xaloc {
 
 	
 
+	
+	void VulkanContext::CreateSwapChain()
+	{
+		int width, height;
+		glfwGetFramebufferSize(m_Window, &width, &height);
+
+		VulkanSwapChainSpecification spec;
+		spec.Device = m_Device;
+		spec.PhysicalDevice = m_PhysicalDevice;
+		spec.Surface = m_Surface;
+		spec.Width = width;
+		spec.Height = height;
+		
+		m_SwapChain = CreateRef<VulkanSwapChain>(spec);
+	}
+
+	
 
 
 

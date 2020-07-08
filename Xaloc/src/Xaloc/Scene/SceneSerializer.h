@@ -18,7 +18,7 @@ namespace Xaloc {
 		static void DeserializeEntity(pugi::xml_node& entityNode, const Ref<Scene>& scene);
 
 		static void SerializeEntity(pugi::xml_document& doc, pugi::xml_node& entitiesRoot, 
-			Entity entity, uint32_t id, const Ref<Scene>& scene);
+			Entity entity, UUID id, const Ref<Scene>& scene);
 	};
 	
 }

@@ -32,6 +32,8 @@ namespace Xaloc {
 		bool HasComponent() { return m_Scene->m_Registry.has<T>(m_EntityHandle); }
 
 
+		Scene* const GetScene() const { return m_Scene; }
+		
 		inline glm::mat4& Transform() { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
 		inline const glm::mat4& Transform() const { return m_Scene->m_Registry.get<TransformComponent>(m_EntityHandle); }
 

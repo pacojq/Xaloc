@@ -1,5 +1,6 @@
 workspace "Xaloc"
 	architecture "x64"
+	targetdir "build"
 
 	configurations
 	{
@@ -8,11 +9,9 @@ workspace "Xaloc"
 		"Dist"
 	}
 	
-	startproject "Sandbox"
+	startproject "XalocEditor"
 	
-
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
@@ -35,9 +34,11 @@ group "Dependencies"
 	include "Xaloc/vendor/GLFW"
 	include "Xaloc/vendor/Glad"
 	include "Xaloc/vendor/imgui"
-
 group ""
 
+
+
+group "Core"
 
 project "Xaloc"
 	location "Xaloc"
@@ -80,6 +81,7 @@ project "Xaloc"
 	includedirs
 	{
 		"%{prj.name}/src",
+		"%{prj.name}/vendor",
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
@@ -129,7 +131,7 @@ project "Xaloc"
 	filter "configurations:Dist"
 		defines "XA_DIST"
 		runtime "Release"
-		optimize "on"
+		optimize "On"
 
 		
 		
@@ -146,7 +148,11 @@ project "XalocSharp"
 		"%{prj.name}/src/**.cs", 
 	}
 	
+group ""
 
+
+
+group "Tools"
 
 project "XalocEditor"
 	location "XalocEditor"
@@ -187,6 +193,11 @@ project "XalocEditor"
 	
 	filter "system:windows"
 		systemversion "latest"
+		
+		defines
+		{
+			"XA_PLATFORM_WINDOWS"
+		}
 
 	filter "configurations:Debug"
 		defines "XA_DEBUG"
@@ -219,9 +230,7 @@ project "XalocEditor"
 			'{COPY} "../Xaloc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
 		}
 
-
-
-
+group ""
 
 
 

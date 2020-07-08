@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UUID.h"
 #include "PhysicSpace.h"
 
 #include "Xaloc/Core/Timestep.h"
@@ -10,6 +11,8 @@
 namespace Xaloc {
 
 	class Entity;
+	using EntityMap = std::unordered_map<UUID, Entity>;
+	
 	class SceneSerializer;
 	
 	class Scene
@@ -20,14 +23,18 @@ namespace Xaloc {
 		static Ref<Scene> Load(const std::string& filename);
 
 		Scene(const std::string& name = "Scene");
+		Scene(const std::string& name, UUID id);
 		~Scene();
 
 		void Init();
+
+		void StartRuntime();
 
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 
 		Entity Scene::CreateEntity(const std::string& name);
+		Entity Scene::CreateEntity(const std::string& name, UUID id);
 		void DestroyEntity(Entity entity);
 
 		template<typename T>
@@ -36,19 +43,20 @@ namespace Xaloc {
 			return m_Registry.view<T>();
 		}
 
-	private:
+		UUID const GetID() const { return m_SceneID; }
+		const EntityMap& const GetEntityMap() const { return m_EntityMap; }
 
-
 	private:
-		uint32_t m_SceneID;
+		UUID m_SceneID;
 		entt::entity m_SceneEntity;
 		entt::registry m_Registry;
+
+		EntityMap m_EntityMap;
 
 		std::string m_Name;
 
 		Ref<PhysicSpace> m_PhysicSpace;
 
-		uint32_t m_NextEntityId = 0; // TODO move to universal ID
 
 
 		
@@ -57,6 +65,8 @@ namespace Xaloc {
 		friend class PhysicSpace;
 
 		friend class SceneHierarchyPanel;
+		
+		friend void OnBehaviourComponentConstruct(entt::registry& registry, entt::entity entity);
 	};
 
 }

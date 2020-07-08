@@ -1,6 +1,7 @@
 #pragma once
-
 #include "Xaloc/Renderer/GraphicsContext.h"
+
+#include "VulkanSwapChain.h"
 
 #include <vulkan/vulkan.h>
 
@@ -12,17 +13,23 @@ namespace Xaloc {
 	{
 	public:
 		VulkanContext(GLFWwindow* windowHandle);
+		virtual ~VulkanContext() override;
 
 		virtual void Init() override;
 		virtual void SwapBuffers() override;
 
 
 	private:
+
+		void CleanUp();
+		
 		void CreateInstance();
 		void SetupDebugMessenger();
 		
 		void PickPhysicalDevice();
-		void VulkanContext::CreateLogicalDevice();
+		void CreateLogicalDevice();
+		
+		void CreateSwapChain();
 
 
 
@@ -30,8 +37,6 @@ namespace Xaloc {
 		
 		bool CheckValidationLayerSupport() const;
 		std::vector<const char*> GetRequiredExtensions() const;
-
-
 
 		
 	private:
@@ -57,11 +62,15 @@ namespace Xaloc {
 		VkQueue m_GraphicsQueue;
 
 
-		
 		// Vulkan presentation queue
 		
 		VkQueue m_PresentQueue;
 		size_t m_CurrentFrame = 0;
+
+
+		// Swap chain
+
+		Ref<VulkanSwapChain> m_SwapChain;
 
 		
 

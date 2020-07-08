@@ -7,15 +7,15 @@ namespace Xaloc
     {
         public string Tag
         {
-            get => GetTag_Native(Entity.SceneID, Entity.EntityID);
-            set => SetTag_Native(Entity.SceneID, Entity.EntityID, value);
+            get => GetTag_Native(Entity.ID);
+            set => SetTag_Native(Entity.ID, value);
         }
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern string GetTag_Native(uint sceneID, uint entityID);
+        public static extern string GetTag_Native(ulong entityID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern void SetTag_Native(uint sceneID, uint entityID, string tag);
+        public static extern void SetTag_Native(ulong entityID, string tag);
 
     }
 }

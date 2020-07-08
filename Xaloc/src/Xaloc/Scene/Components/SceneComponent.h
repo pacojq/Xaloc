@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Xaloc/Scene/UUID.h"
+
 namespace Xaloc {
 
 	struct SceneComponent
 	{
-		uint32_t SceneID;
+		UUID SceneID;
 		std::string Name;
 	};
 

@@ -1,6 +1,8 @@
 #include "xapch.h"
 #include "SceneHierarchyPanel.h"
 
+#include "PropertyDrawer.h"
+
 #include "Xaloc/Scripting/ScriptEngine.h"
 
 #include <imgui.h>
@@ -10,11 +12,7 @@
 // - Eventually change imgui node IDs to be entity/asset GUID
 
 namespace Xaloc {
-
-	#define FLOAT_MIN std::numeric_limits<float>::min()
-	#define FLOAT_MAX std::numeric_limits<float>::max()
 	
-
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
 		: m_Scene(scene)
 	{
@@ -107,144 +105,8 @@ namespace Xaloc {
 	}
 	
 
-	static int s_UIContextID = 0;
-	static uint32_t s_Counter = 0;
-	static char s_IDBuffer[16];
 
-	static void PushID()
-	{
-		ImGui::PushID(s_UIContextID++);
-		s_Counter = 0;
-	}
 
-	static void PopID()
-	{
-		ImGui::PopID();
-		s_UIContextID--;
-	}
-
-	static void BeginPropertyGrid()
-	{
-		PushID();
-		ImGui::Columns(2);
-	}
-
-	static bool Property(const char* label, std::string& value)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		char buffer[256];
-		strcpy(buffer, value.c_str());
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::InputText(s_IDBuffer, buffer, 256))
-		{
-			value = buffer;
-			modified = true;
-		}
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, const char* value)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::InputText(s_IDBuffer, (char*)value, 256, ImGuiInputTextFlags_ReadOnly))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, int& value)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragInt(s_IDBuffer, &value))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, float& value, float delta = 0.1f, float min = FLOAT_MIN, float max = FLOAT_MAX)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat(s_IDBuffer, &value, delta, min, max))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static bool Property(const char* label, glm::vec2& value, float delta = 0.1f, float min = FLOAT_MIN, float max = FLOAT_MAX)
-	{
-		bool modified = false;
-
-		ImGui::Text(label);
-		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat2(s_IDBuffer, glm::value_ptr(value), delta, min, max))
-			modified = true;
-
-		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-
-		return modified;
-	}
-
-	static void EndPropertyGrid()
-	{
-		ImGui::Columns(1);
-		PopID();
-	}
 
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
@@ -260,10 +122,23 @@ namespace Xaloc {
 			{
 				tag = std::string(buffer);
 			}
-
-			ImGui::Separator();
 		}
+		else
+		{
+			ImGui::TextDisabled("Unnamed entity");
+		}
+		
+		if (entity.HasComponent<IdComponent>())
+		{
+			UUID id = entity.GetComponent<IdComponent>().ID;
+			ImGui::SameLine();
+			ImGui::TextDisabled("%llx", id);
+		}
+		ImGui::Separator();
 
+
+
+		
 		if (entity.HasComponent<TransformComponent>())
 		{
 			auto& tc = entity.GetComponent<TransformComponent>();
@@ -311,21 +186,21 @@ namespace Xaloc {
 			auto& sc = entity.GetComponent<SceneComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity), ImGuiTreeNodeFlags_DefaultOpen, "Scene"))
 			{
-				BeginPropertyGrid();
+				PropertyDrawer::BeginPropertyGrid();
 
-				ImGui::Text("ID");
+				ImGui::Text("Scene ID");
 				ImGui::NextColumn();
 				ImGui::PushItemWidth(-1);
-				ImGui::Text(std::to_string(sc.SceneID).c_str());
+				ImGui::Text("%llx", sc.SceneID);
 				ImGui::PopItemWidth();
 				ImGui::NextColumn();
 
-				if (Property("Name", sc.Name))
+				if (PropertyDrawer::String("Name", sc.Name))
 				{
 					m_Scene->m_Name = sc.Name;
 				}
 
-				EndPropertyGrid();
+				PropertyDrawer::EndPropertyGrid();
 				ImGui::TreePop();
 			}
 			ImGui::Separator();
@@ -350,9 +225,9 @@ namespace Xaloc {
 			auto& cc = entity.GetComponent<ColliderComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(ColliderComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Collider"))
 			{
-				BeginPropertyGrid();
-				Property("Size", cc.Size, 0.1f, 0.0f);
-				EndPropertyGrid();
+				PropertyDrawer::BeginPropertyGrid();
+				PropertyDrawer::Vec2("Size", cc.Size, 0.1f, 0.0f);
+				PropertyDrawer::EndPropertyGrid();
 				ImGui::TreePop();
 			}
 			ImGui::Separator();
@@ -363,10 +238,10 @@ namespace Xaloc {
 			auto& src = entity.GetComponent<SpriteRendererComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(SpriteRendererComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 			{
-				BeginPropertyGrid();
-				Property("Asset ID", src.SubTexture->GetTexture()->AssetID().c_str());
+				PropertyDrawer::BeginPropertyGrid();
+				PropertyDrawer::String("Asset ID", src.SubTexture->GetTexture()->AssetID().c_str());
 
-				EndPropertyGrid();
+				PropertyDrawer::EndPropertyGrid();
 				if (ImGui::Button("Apply"))
 				{
 					// TODO
@@ -376,59 +251,78 @@ namespace Xaloc {
 			ImGui::Separator();
 		}
 
-		if (entity.HasComponent<BehaviourComponent>())
+		if (entity.HasComponent<BehaviourComponent>() && entity.HasComponent<IdComponent>())
 		{
+			UUID id = entity.GetComponent<IdComponent>().ID;
+			
 			auto& sc = entity.GetComponent<BehaviourComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(BehaviourComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Script"))
 			{
-				BeginPropertyGrid();
-				Property("Module Name", sc.ModuleName.c_str());
+				PropertyDrawer::BeginPropertyGrid();
+				std::string oldName = sc.ModuleName;
+				if (PropertyDrawer::String("Module Name", sc.ModuleName, !ScriptEngine::ModuleExists(sc.ModuleName))) // TODO: no live edit
+				{
+					// Shutdown old script
+					if (ScriptEngine::ModuleExists(oldName))
+						ScriptEngine::ShutdownBehaviourEntity(entity, oldName);
+
+					if (ScriptEngine::ModuleExists(sc.ModuleName))
+						ScriptEngine::InitBehaviourEntity(entity);
+				}
 
 				// Public Fields
-				auto& fieldMap = ScriptEngine::GetFieldMap();
-				if (fieldMap.find(sc.ModuleName) != fieldMap.end())
+				if (ScriptEngine::ModuleExists(sc.ModuleName))
 				{
-					auto& publicFields = fieldMap.at(sc.ModuleName);
-					for (auto& field : publicFields)
+					EntityInstanceFields& entityInstanceFields = ScriptEngine::GetEntityInstanceFields(entity.GetScene()->GetID(), id);
+					auto& moduleFieldMap = entityInstanceFields.ModuleFieldMap;
+					if (moduleFieldMap.find(sc.ModuleName) != moduleFieldMap.end())
 					{
-						switch (field.Type)
+						auto& publicFields = moduleFieldMap.at(sc.ModuleName);
+						for (auto& [name, field] : publicFields)
 						{
-						case FieldType::Int:
-						{
-							int value = field.GetValue<int>();
-							if (Property(field.Name.c_str(), value))
+							switch (field.Type)
 							{
-								field.SetValue(value);
-							}
-							break;
-						}
-						case FieldType::Float:
-						{
-							float value = field.GetValue<float>();
-							if (Property(field.Name.c_str(), value, 0.2f))
+							case FieldType::Int:
 							{
-								field.SetValue(value);
+								int value = field.GetValue<int>();
+								if (PropertyDrawer::Int(field.Name.c_str(), value))
+									field.SetValue(value);
+								break;
 							}
-							break;
-						}
-						case FieldType::Vec2:
-						{
-							glm::vec2 value = field.GetValue<glm::vec2>();
-							if (Property(field.Name.c_str(), value, 0.2f))
+							case FieldType::Float:
 							{
-								field.SetValue(value);
+								float value = field.GetValue<float>();
+								if (PropertyDrawer::Float(field.Name.c_str(), value, 0.2f))
+									field.SetValue(value);
+								break;
 							}
-							break;
-						}
+							case FieldType::Vec2:
+							{
+								glm::vec2 value = field.GetValue<glm::vec2>();
+								if (PropertyDrawer::Vec2(field.Name.c_str(), value, 0.2f))
+									field.SetValue(value);
+								break;
+							}
+							case FieldType::Vec3:
+							{
+								glm::vec3 value = field.GetValue<glm::vec3>();
+								if (PropertyDrawer::Vec3(field.Name.c_str(), value, 0.2f))
+									field.SetValue(value);
+								break;
+							}
+							case FieldType::Vec4:
+							{
+								glm::vec4 value = field.GetValue<glm::vec4>();
+								if (PropertyDrawer::Vec4(field.Name.c_str(), value, 0.2f))
+									field.SetValue(value);
+								break;
+							}
+							}
 						}
 					}
 				}
 
-				EndPropertyGrid();
-				if (ImGui::Button("Run Script"))
-				{
-					ScriptEngine::OnCreateEntity(entity);
-				}
+				PropertyDrawer::EndPropertyGrid();
 				ImGui::TreePop();
 			}
 			ImGui::Separator();
