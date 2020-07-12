@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<svg version="1.2" baseProfile="tiny" width="70mm" height="70mm" viewBox="0 0 7000 7000" preserveAspectRatio="xMidYMid" fill-rule="evenodd" stroke-width="28.222" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+ <g visibility="visible" id="MasterSlide_1_Predeterminado">
+  <desc>Master slide
+  </desc>
+  <rect fill="none" stroke="none" x="0" y="0" width="7000" height="7000"/>
+ </g>
+ <g visibility="visible" id="Slide_1_page3">
+  <g id="DrawingGroup_1">
+   <g>
+    <path fill="rgb(128,128,128)" stroke="none" d="M 4000,4200 L 3500,5300 3000,4200 3500,3500 4000,4200 Z"/>
+    <rect fill="none" stroke="none" x="3000" y="3500" width="1001" height="1801"/>
+   </g>
+   <g>
+    <path fill="rgb(221,221,221)" stroke="none" d="M 4000,2800 L 3500,1700 3000,2800 3500,3400 4000,2800 Z"/>
+    <rect fill="none" stroke="none" x="3000" y="1699" width="1001" height="1702"/>
+   </g>
+   <g>
+    <path fill="rgb(153,153,153)" stroke="none" d="M 4100,3000 L 5200,3500 4100,4000 3500,3500 4100,3000 Z"/>
+    <rect fill="none" stroke="none" x="3500" y="3000" width="1701" height="1001"/>
+   </g>
+   <g>
+    <path fill="rgb(204,204,204)" stroke="none" d="M 2900,3000 L 1800,3500 2900,4000 3500,3500 2900,3000 Z"/>
+    <rect fill="none" stroke="none" x="1800" y="3000" width="1701" height="1001"/>
+   </g>
+   <g>
+    <path fill="rgb(255,211,32)" stroke="none" d="M 6000,6000 L 3800,3500 3500,3800 5400,6000 6000,6000 Z"/>
+    <path fill="none" stroke="rgb(0,0,0)" id="Drawing_5_0" stroke-width="20" stroke-linejoin="round" d="M 6000,6000 L 3800,3500 3500,3800 5400,6000 6000,6000 Z"/>
+   </g>
+   <g>
+    <path fill="rgb(51,102,153)" stroke="none" d="M 1000,6000 L 3200,3500 1000,1000 1600,1000 3500,3100 5400,1000 6000,1000 3800,3500 1600,6000 1000,6000 Z"/>
+    <path fill="none" stroke="rgb(0,0,0)" id="Drawing_6_0" stroke-width="20" stroke-linejoin="round" d="M 1000,6000 L 3200,3500 1000,1000 1600,1000 3500,3100 5400,1000 6000,1000 3800,3500 1600,6000 1000,6000 Z"/>
+   </g>
+  </g>
+ </g>
+</svg>
