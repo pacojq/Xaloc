@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  <img height="200" src="res/xaloc-logo.png" alt="Xaloc Engine logo" />
+  <img height="300" src="res/xaloc-logo.svg" alt="Xaloc Engine logo" />
 </p>
 
 <p align="center">
