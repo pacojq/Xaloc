@@ -3,6 +3,12 @@
 <scene uuid="669af856a46dfe5b">
 	<name>Sandbox Scene</name>
 	<entities>
+		<entity uuid="5c80d91a8e96628">
+			<TagComponent tag="Player" />
+			<TransformComponent position="[0.000000, 0.000000, 0.000000]" rotation="[1.000000, 0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
+			<BehaviourComponent name="SandboxCs.PlayerEntity" />
+			<SpriteRendererComponent texcoords="[0.890830, 0.947541]" width="16" height="16" assetID="TILEMAP" />
+		</entity>
 		<entity uuid="7801834c534af574">
 			<TagComponent tag="Tree 4" />
 			<TransformComponent position="[3.000000, 2.000000, 0.000000]" rotation="[1.000000, 0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
@@ -27,12 +33,6 @@
 			<TagComponent tag="Tree 0" />
 			<TransformComponent position="[-4.000000, 2.000000, 0.000000]" rotation="[1.000000, 0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
 			<SpriteRendererComponent texcoords="[0.816594, 0.390164]" width="16" height="16" assetID="TILEMAP" />
-		</entity>
-		<entity uuid="5c80d91a8e96628">
-			<TagComponent tag="Player" />
-			<TransformComponent position="[0.000000, 0.000000, 0.000000]" rotation="[1.000000, 0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
-			<BehaviourComponent name="SandboxCs.PlayerEntity" />
-			<SpriteRendererComponent texcoords="[0.890830, 0.947541]" width="16" height="16" assetID="TILEMAP" />
 		</entity>
 	</entities>
 </scene>

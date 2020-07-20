@@ -395,6 +395,8 @@ namespace Xaloc {
 		XA_CORE_ASSERT(entityInstance.ScriptClass, "No behaviour found!");
 		entityInstance.Handle = Instantiate(*entityInstance.ScriptClass);
 
+		XA_CORE_TRACE("Entity Behaviour instanciated with handle {0}", entityInstance.Handle);
+		
 		MonoProperty* entityIDPropery = mono_class_get_property_from_name(entityInstance.ScriptClass->Class, "ID");
 		mono_property_get_get_method(entityIDPropery);
 		MonoMethod* entityIDSetMethod = mono_property_get_set_method(entityIDPropery);

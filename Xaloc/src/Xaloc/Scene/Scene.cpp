@@ -40,6 +40,8 @@ namespace Xaloc {
 
 	void OnBehaviourComponentConstruct(entt::registry& registry, entt::entity e)
 	{
+		XA_CORE_TRACE("");
+		
 		auto view = registry.view<SceneComponent>();
 		UUID sceneID = registry.get<SceneComponent>(view.front()).SceneID;
 		Scene* scene = s_ActiveScenes[sceneID];
@@ -134,7 +136,9 @@ namespace Xaloc {
 
 	void Scene::StartRuntime()
 	{
-		// TODO
+		// TODO we should know if we are on runtime or not, since ScriptEngine::InstantiateEntityClass will need to be called on behaviors created AFTER this point
+		
+		XA_CORE_INFO("Starting Script Runtime...");
 		
 		auto view = m_Registry.view<BehaviourComponent>();
 		for (auto entity : view)
@@ -142,6 +146,7 @@ namespace Xaloc {
 			Entity e = { entity, this };
 			if (ScriptEngine::ModuleExists(e.GetComponent<BehaviourComponent>().ModuleName))
 				ScriptEngine::InstantiateEntityClass(e);
+			else XA_CORE_WARN("Could not initialize behaviour '{0}'. Module does not exist.", e.GetComponent<BehaviourComponent>().ModuleName);
 		}
 	}
 
@@ -149,7 +154,7 @@ namespace Xaloc {
 
 	void Scene::OnUpdate(Timestep ts)
 	{
-		// TODO Update all entities
+		// Update all entities
 		{
 			auto view = m_Registry.view<BehaviourComponent>();
 			for (auto entity : view)

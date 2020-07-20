@@ -153,6 +153,7 @@ namespace Xaloc {
 		#endif
 
 
+		#if false
 		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
 
 		for (uint32_t y = 0; y < s_mapHeight; y++)
@@ -181,7 +182,7 @@ namespace Xaloc {
 		}
 
 		Xaloc::Renderer2D::EndScene();
-
+		#endif
 
 		
 		// UPDATE AND RENDER SCENE

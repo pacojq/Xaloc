@@ -6,6 +6,10 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+// TODO temporary
+#include "Xaloc/Scripting/ScriptEngine.h"
+
+
 static const uint32_t s_mapWidth = 24;
 static const uint32_t s_mapHeight = 14;
 
@@ -36,7 +40,7 @@ SandboxLayer::SandboxLayer()
 	m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 	m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 {
-	m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");
+	m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");	
 	m_CameraController.SetZoomLevel(5.0f);
 }
 
@@ -111,6 +115,10 @@ void SandboxLayer::OnAttach()
 		}
 	}
 	*/
+
+
+	Xaloc::ScriptEngine::SetSceneContext(m_Scene); // TODO find a cleaner way to do this
+	m_Scene->StartRuntime();
 }
 
 void SandboxLayer::OnDetach()
