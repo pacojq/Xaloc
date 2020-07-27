@@ -27,7 +27,9 @@ namespace Xaloc {
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 
-		inline virtual void* GetNativeWindow() const { return m_Window; };
+		inline void* GetNativeWindow() const override { return m_Window; }
+
+		inline virtual GraphicsContext* GetContext() const override  { return m_Context.get(); }
 
 	private:
 		virtual void Init(const WindowProps& props);

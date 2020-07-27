@@ -1,12 +1,14 @@
 #include "xapch.h"
-#include "VulkanContextUtils.h"
+#include "VulkanUtils.h"
 
 #include <set>
+
+#include "VulkanShared.h"
 
 namespace Xaloc {
 
 
-	VkResult VulkanContextUtils::CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+	VkResult VulkanUtils::CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 	{
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
@@ -20,7 +22,7 @@ namespace Xaloc {
 		}
 	}
 
-	void VulkanContextUtils::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
+	void VulkanUtils::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
 	{
 		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
 		if (func != nullptr)
@@ -36,7 +38,7 @@ namespace Xaloc {
 	/// </summary>
 	/// <param name="device"></param>
 	/// <returns></returns>
-	int VulkanContextUtils::RateDeviceSuitability(VkPhysicalDevice device)
+	int VulkanUtils::RateDeviceSuitability(VkPhysicalDevice device)
 	{
 		VkPhysicalDeviceProperties deviceProperties;
 		vkGetPhysicalDeviceProperties(device, &deviceProperties);
@@ -62,7 +64,7 @@ namespace Xaloc {
 
 
 
-	QueueFamilyIndices VulkanContextUtils::FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
+	QueueFamilyIndices VulkanUtils::FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
 	{
 		QueueFamilyIndices indices;
 
@@ -97,7 +99,7 @@ namespace Xaloc {
 		return indices;
 	}
 
-	bool VulkanContextUtils::CheckDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<const char*> deviceExtensions)
+	bool VulkanUtils::CheckDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<const char*> deviceExtensions)
 	{
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -116,7 +118,7 @@ namespace Xaloc {
 	}
 
 
-	bool VulkanContextUtils::IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*> deviceExtensions)
+	bool VulkanUtils::IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*> deviceExtensions)
 	{
 		QueueFamilyIndices indices = FindQueueFamilies(device, surface);
 
@@ -137,7 +139,7 @@ namespace Xaloc {
 
 	
 
-	SwapChainSupportDetails VulkanContextUtils::QuerySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface)
+	SwapChainSupportDetails VulkanUtils::QuerySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface)
 	{
 		SwapChainSupportDetails details;
 
@@ -169,7 +171,7 @@ namespace Xaloc {
 
 
 
-	VkSurfaceFormatKHR VulkanContextUtils::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+	VkSurfaceFormatKHR VulkanUtils::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
 		for (const auto& availableFormat : availableFormats)
 		{
@@ -181,7 +183,7 @@ namespace Xaloc {
 		return availableFormats[0];
 	}
 
-	VkPresentModeKHR VulkanContextUtils::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+	VkPresentModeKHR VulkanUtils::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
 	{
 		/*
 			VK_PRESENT_MODE_IMMEDIATE_KHR -> may result in tearing
@@ -197,6 +199,56 @@ namespace Xaloc {
 			}
 		}
 		return VK_PRESENT_MODE_FIFO_KHR;
+	}
+
+
+
+
+
+	uint32_t VulkanUtils::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+	{
+		VkPhysicalDeviceMemoryProperties memProperties;
+		vkGetPhysicalDeviceMemoryProperties(VulkanShared::Resources().PhysicalDevice, &memProperties);
+
+		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+		{
+			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+			{
+				return i;
+			}
+		}
+
+		XA_CORE_ASSERT(false, "Failed to find suitable memory type!");
+		return 0;
+	}
+
+	VkFormat VulkanUtils::FindDepthFormat()
+	{
+		return FindSupportedFormat(
+			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+		);
+	}
+
+	VkFormat VulkanUtils::FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+	{
+		for (VkFormat format : candidates)
+		{
+			VkFormatProperties props;
+			vkGetPhysicalDeviceFormatProperties(VulkanShared::Resources().PhysicalDevice, format, &props);
+
+			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+			{
+				return format;
+			}
+			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+			{
+				return format;
+			}
+
+			throw std::runtime_error("failed to find supported format!");
+		}
 	}
 	
 

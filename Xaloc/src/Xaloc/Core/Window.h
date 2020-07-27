@@ -5,6 +5,7 @@
 #include "Xaloc/Core/Core.h"
 #include "Xaloc/Events/Event.h"
 #include "Xaloc/Core/Log.h"
+#include "Xaloc/Renderer/GraphicsContext.h"
 
 namespace Xaloc {
 
@@ -51,6 +52,8 @@ namespace Xaloc {
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetNativeWindow() const = 0;
+		
+		virtual GraphicsContext* GetContext() const = 0;
 
 		static Window* Create(const WindowProps& props = WindowProps());
 	};

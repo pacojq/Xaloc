@@ -33,12 +33,12 @@ static const char* s_MapTiles =
 
 
 SandboxLayer::SandboxLayer()
-	: Layer("Sandbox 2D"),
-	m_CameraController(1280.0f / 720.0f, true),
-	m_TilingFactor(1.0f),
-	m_Rotation(0.0f),
-	m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
-	m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
+		: Layer("Sandbox 2D"),
+		m_CameraController(1280.0f / 720.0f, true),
+		m_TilingFactor(1.0f),
+		m_Rotation(0.0f),
+		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
+		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 {
 	m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");	
 	m_CameraController.SetZoomLevel(5.0f);
@@ -47,6 +47,9 @@ SandboxLayer::SandboxLayer()
 
 void SandboxLayer::OnAttach()
 {
+	Xaloc::Application::Get().SetImGuiEnabled(false);
+
+	
 	m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
 
 

@@ -2,8 +2,10 @@
 #include "ImGuiLayer.h"
 
 #include "imgui.h"
+
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
+// TODO include imgui_impl_vulkan stuff
 
 #include "Xaloc/Core/Application.h"
 #include "Xaloc/Core/Log.h"
@@ -56,8 +58,16 @@ namespace Xaloc {
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
 		// Setup Platform/Renderer bindings
-		ImGui_ImplGlfw_InitForOpenGL(window, true);
-		ImGui_ImplOpenGL3_Init("#version 410");
+		// TODO
+		if (Renderer::GetAPI() == RendererAPI::API::OpenGL)
+		{
+			ImGui_ImplGlfw_InitForOpenGL(window, true);
+			ImGui_ImplOpenGL3_Init("#version 410");
+		}
+		else
+		{
+			XA_CORE_WARN("Unkown render API initializing ImGui!");
+		}
 	}
 
 	void ImGuiLayer::OnDetach()

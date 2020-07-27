@@ -12,7 +12,7 @@ namespace Xaloc {
 	{
 		Ref<Shader> Shader;
 		BufferLayout VertexBufferLayout;
-		Ref<RenderPass> RenderPass;
+		Ref<RenderPass> RenderPass; // TODO maybe this shouldn't be here
 	};
 
 	class Pipeline

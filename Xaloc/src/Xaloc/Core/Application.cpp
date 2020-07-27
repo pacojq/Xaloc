@@ -132,14 +132,17 @@ namespace Xaloc {
 					m_ImGuiLayer->GetProfiler()->EndFrame();
 				}
 
-				m_ImGuiLayer->Begin();
+				if (m_ImGuiEnabled)
 				{
-					XA_PROFILE_SCOPE("LayerStack OnImGuiRender");
-					
-					for (Layer* layer : m_LayerStack)
-						layer->OnImGuiRender();
+					m_ImGuiLayer->Begin();
+					{
+						XA_PROFILE_SCOPE("LayerStack OnImGuiRender");
+
+						for (Layer* layer : m_LayerStack)
+							layer->OnImGuiRender();
+					}
+					m_ImGuiLayer->End();
 				}
-				m_ImGuiLayer->End();
 			}
 
 			m_Window->OnUpdate();

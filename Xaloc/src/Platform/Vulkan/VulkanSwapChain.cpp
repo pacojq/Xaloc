@@ -1,7 +1,7 @@
 #include "xapch.h"
 #include "VulkanSwapChain.h"
 
-#include "VulkanContextUtils.h"
+#include "VulkanUtils.h"
 
 
 namespace Xaloc {
@@ -16,10 +16,10 @@ namespace Xaloc {
 
 	void VulkanSwapChain::CreateSelf(const VulkanSwapChainSpecification& spec)
 	{
-		SwapChainSupportDetails swapChainSupport = VulkanContextUtils::QuerySwapChainSupport(spec.PhysicalDevice, spec.Surface);
+		SwapChainSupportDetails swapChainSupport = VulkanUtils::QuerySwapChainSupport(spec.PhysicalDevice, spec.Surface);
 
-		VkSurfaceFormatKHR surfaceFormat = VulkanContextUtils::ChooseSwapSurfaceFormat(swapChainSupport.Formats);
-		VkPresentModeKHR presentMode = VulkanContextUtils::ChooseSwapPresentMode(swapChainSupport.PresentModes);
+		VkSurfaceFormatKHR surfaceFormat = VulkanUtils::ChooseSwapSurfaceFormat(swapChainSupport.Formats);
+		VkPresentModeKHR presentMode = VulkanUtils::ChooseSwapPresentMode(swapChainSupport.PresentModes);
 		VkExtent2D extent = ChooseSwapExtent(swapChainSupport.Capabilities, spec.Width, spec.Height);
 
 		uint32_t imageCount = swapChainSupport.Capabilities.minImageCount + 1;
@@ -40,7 +40,7 @@ namespace Xaloc {
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-		QueueFamilyIndices indices = VulkanContextUtils::FindQueueFamilies(spec.PhysicalDevice, spec.Surface);
+		QueueFamilyIndices indices = VulkanUtils::FindQueueFamilies(spec.PhysicalDevice, spec.Surface);
 		uint32_t queueFamilyIndices[] = { indices.GraphicsFamily.value(), indices.PresentFamily.value() };
 
 		if (indices.GraphicsFamily != indices.PresentFamily)

@@ -75,6 +75,17 @@ namespace Xaloc {
 		// TODO move somewhere else
 		std::string SaveFile(const std::string& filter) const;
 
+
+		
+		inline Window& GetWindow() { return *m_Window; }
+
+		inline void SetImGuiEnabled(bool enabled) { s_Instance->m_ImGuiEnabled = enabled; }
+		inline bool IsImGuiEnabled() { return s_Instance->m_ImGuiEnabled; }
+
+		inline ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
+		
+		
+
 		
 		/// <returns>The Application singleton.</returns>
 		inline static Application& Get() { return *s_Instance; }
@@ -86,10 +97,6 @@ namespace Xaloc {
 
 		inline static void SetPaused(bool paused) { s_Instance->m_Paused = paused; }
 		inline static bool IsPaused() { return s_Instance->m_Paused; }
-		
-		inline Window& GetWindow() { return *m_Window; }
-
-		inline ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
 
 		
 	private:
@@ -125,6 +132,8 @@ namespace Xaloc {
 		bool m_Focused = true;
 
 		bool m_PauseOnFocusLost;
+
+		bool m_ImGuiEnabled = true;
 
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;

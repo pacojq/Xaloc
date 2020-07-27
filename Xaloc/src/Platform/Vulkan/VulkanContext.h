@@ -9,6 +9,7 @@ struct GLFWwindow;
 
 namespace Xaloc {
 
+	
 	class VulkanContext : public GraphicsContext
 	{
 	public:
@@ -18,12 +19,23 @@ namespace Xaloc {
 		virtual void Init() override;
 		virtual void SwapBuffers() override;
 
+		inline const VkDevice& GetDevice() const { return m_Device; }
+		inline const VkPhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
+		inline const VkQueue& GetGraphicsQueue() const { return m_GraphicsQueue; }
+
+		inline const VkSurfaceKHR& GetSurface() const { return m_Surface; }
+
+
+		inline const VkCommandPool& GetCommandPool() const { return m_CommandPool; }
+		const const std::vector<VkCommandBuffer>& GetDrawCommandBuffers() const { return m_CommandBuffers; }	
+
 
 	private:
 
 		void CleanUp();
 		
 		void CreateInstance();
+		void CreateSurface();
 		void SetupDebugMessenger();
 		
 		void PickPhysicalDevice();
@@ -31,7 +43,16 @@ namespace Xaloc {
 		
 		void CreateSwapChain();
 
+		
+		// Temp
+		void CreateRenderPass();
+		
+		void CreateDescriptorSetLayout();
+		void CreateGraphicsPipeline();
 
+		void CreateCommandPool();
+
+		
 
 		// UTIL FUNCTIONS
 		
@@ -71,6 +92,20 @@ namespace Xaloc {
 		// Swap chain
 
 		Ref<VulkanSwapChain> m_SwapChain;
+
+
+
+
+		// Temp
+		
+		VkDescriptorSetLayout m_DescriptorSetLayout;
+		VkPipelineLayout m_PipelineLayout;
+		VkRenderPass m_RenderPass;
+		VkPipeline m_GraphicsPipeline;
+		
+		VkCommandPool m_CommandPool;
+		std::vector<VkCommandBuffer> m_CommandBuffers;
+
 
 		
 
