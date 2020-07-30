@@ -153,11 +153,20 @@ namespace Xaloc {
 				PropertyDrawer::BeginPropertyGrid();
 				
 				change |=  PropertyDrawer::Vec3("Translation", translation);
-				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-				change |= PropertyDrawer::Vec3("Scale", scale);
-				ImGui::PopItemFlag();
-				ImGui::PopStyleVar();
+
+				if (entity.HasComponent<CameraComponent>())
+				{
+					ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+					ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+					change |= PropertyDrawer::Vec3("Scale", scale);
+					ImGui::PopItemFlag();
+					ImGui::PopStyleVar();
+				}
+				else
+				{
+					change |= PropertyDrawer::Vec3("Scale", scale);
+				}
+				
 				change |= PropertyDrawer::Vec3("Rotation", rotation);
 
 
