@@ -32,7 +32,7 @@ namespace Xaloc {
 
 	EditorLayer::EditorLayer()
 		: Layer("Editor Layer"),
-		m_CameraController(1280.0f / 720.0f, true),
+		//m_CameraController(1280.0f / 720.0f, true),
 		m_TilingFactor(1.0f),
 		m_Rotation(0.0f),
 		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
@@ -41,18 +41,53 @@ namespace Xaloc {
 		// Load Assets
 
 		AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
+		
 
-
-		// Init Editor
+		// Init Scene
 
 		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
+
+		m_FirstCamera = m_Scene->CreateEntity("Orthographic Camera");
+		auto& orthoData = m_FirstCamera.AddComponent<OrthographicCameraDataComponent>();
+		auto& firstCamera = m_FirstCamera.AddComponent<CameraComponent>(orthoData.CalculateProjectionMatrix());
+
+
+		
+		//m_SecondCamera = m_Scene->CreateEntity("Editor Camera");
+		//auto& perspData = m_SecondCamera.AddComponent<PerspectiveCameraDataComponent>();
+		//auto& secondCamera = m_SecondCamera.AddComponent<CameraComponent>(perspData.CalculateProjectionMatrix()); // (glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+		//secondCamera.Priority = 1;
+		
+		
 		Xaloc::ScriptEngine::SetSceneContext(m_Scene);
 		m_Scene->StartRuntime();
 
+		
+
+		
+		// Init Editor
+
+		m_EditorCameraData = {};
+		m_EditorCameraData.Fov = 45.0f;
+		m_EditorCameraData.Width = 1280.0f;
+		m_EditorCameraData.Height = 720.0f;
+		m_EditorCameraData.ZFar = 1000.0f;
+		m_EditorCameraData.ZNear = 0.01f;
+
+		m_EditorCameraTransform = {};
+		m_EditorCameraTransform.Transform = glm::translate(glm::mat4(1.0f), { 0.0f, 0.0f, 10.0f })
+			* glm::scale(glm::mat4(1.0f), { 1.0f, 1.0f, 1.0f });
+
+		m_EditorCamera = CreateRef<Camera>(m_EditorCameraData.CalculateProjectionMatrix());
+		
+		
 		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
+
+		m_GameViewport = CreateRef<EditorViewport>("Game Preview");
+		m_SceneViewport = CreateRef<EditorViewport>("Scene");
 		
-		m_CameraController.SetZoomLevel(5.0f);
+		//m_CameraController.SetZoomLevel(5.0f);
 	}
 
 
@@ -61,17 +96,25 @@ namespace Xaloc {
 		m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
 
 
-		Xaloc::FramebufferSpec framebufferSpec;
+		FramebufferSpec framebufferSpec;
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
 		framebufferSpec.ClearColor = { 0.1f, 0.1f, 0.1f, 1 };
-		Ref<Xaloc::Framebuffer> framebuffer = Xaloc::Framebuffer::Create(framebufferSpec);
+		Ref<Framebuffer> framebuffer = Framebuffer::Create(framebufferSpec);
 
-		Xaloc::RenderPassSpecification renderPassSpec;
+		RenderPassSpecification renderPassSpec;
 		renderPassSpec.TargetFramebuffer = framebuffer;
-		m_RenderPass = Xaloc::RenderPass::Create(renderPassSpec);
+		m_RenderPass = RenderPass::Create(renderPassSpec);
+
 		
-		m_GuizmoRenderPass = Xaloc::RenderPass::Create(renderPassSpec);
+		Ref<Framebuffer> editorFramebuffer = Framebuffer::Create(framebufferSpec);
+		RenderPassSpecification editorRenderPassSpec;
+		editorRenderPassSpec.TargetFramebuffer = editorFramebuffer;
+		
+		m_EditorRenderPass = RenderPass::Create(editorRenderPassSpec);
+
+
+		m_GuizmoRenderPass = RenderPass::Create(renderPassSpec);
 
 
 
@@ -112,10 +155,13 @@ namespace Xaloc {
 	{
 		// UPDATE
 
-		Application::Get().GetImGuiLayer()->SetBlockEvents(!(m_ViewportFocused && m_ViewportHovered));
-		if (m_ViewportFocused)
+		bool blockEv = !(m_GameViewport->IsFocused() && m_GameViewport->IsHovered());
+		
+		Application::Get().GetImGuiLayer()->SetBlockEvents(blockEv);
+		if (m_GameViewport->IsFocused())
 		{
-			m_CameraController.OnUpdate(ts);
+			// TODO update editor camera
+			//m_CameraController.OnUpdate(ts);
 		}
 
 
@@ -123,106 +169,55 @@ namespace Xaloc {
 
 		Xaloc::Renderer2D::ResetStats();
 
-		// TODO begin render pass
-		//m_Framebuffer->Bind();
-		//m_RenderPass->GetSpecification().TargetFramebuffer->Bind();
-		Renderer::BeginRenderPass(m_RenderPass);
 
-		//Xaloc::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-		//Xaloc::RenderCommand::Clear();
-
-		#if false   	
-		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
-		//Xaloc::Renderer2D::DrawRotatedQuad({ -0.5f, 0.5f }, { 0.8f, 0.8f }, m_Rotation, m_SecondColor);
-		Xaloc::Renderer2D::DrawQuad({ -0.5f, 0.5f, 1.0f }, { 0.8f, 0.8f }, m_SecondColor);
-		Xaloc::Renderer2D::DrawQuad({ 0.25f, -0.25f }, { 1.2f, 1.2f }, m_FirstColor);
-		Xaloc::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, m_Texture, m_TilingFactor, { 1.0f, 1.0f, 1.0f, 1.0f });
-		Xaloc::Renderer2D::DrawRotatedQuad({ -2.0f, 0.0f, 0.0f }, { 2.0f, 2.0f }, glm::radians(m_Rotation), m_Texture, 0.5f);
-
-		for (float y = -5.0f; y < 5.0f; y += 0.5f)
-		{
-			for (float x = -5.0f; x < 5.0f; x += 0.5f)
-			{
-				glm::vec4 color = { (x + 5.0f) / 10.0f, (y + 5.0f) / 10.0f, 1.0f, 0.5f };
-				Xaloc::Renderer2D::DrawQuad({ x, y }, { 0.45f, 0.45f }, color);
-			}
-		}
-
-		Xaloc::Renderer2D::EndScene();
-		#endif
-
-
-		#if false
-		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
-		for (uint32_t y = 0; y < s_mapHeight; y++)
-		{
-			for (uint32_t x = 0; x < s_mapWidth; x++)
-			{
-				char tileType = s_MapTiles[((s_mapHeight - 1) - y) * s_mapWidth + x];
-
-				glm::vec3 pos = { x - (s_mapWidth / 2.0f), y - (s_mapHeight / 2.0f), m_TilesDepth };
-				glm::vec3 waterPos = { pos.x, pos.y, m_TilesDepth - 0.0001f };
-				Xaloc::Renderer2D::DrawQuad(waterPos, { 1.0f, 1.0f }, m_TileWater);
-
-				if (tileType == 'W')
-					continue;
-
-				if (s_TextureMap.find(tileType) != s_TextureMap.end())
-				{
-					Xaloc::Ref<Xaloc::SubTexture2D> tex = s_TextureMap[tileType];
-					Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, tex);
-				}
-				else
-				{
-					Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f });
-				}
-			}
-		}
-
-		Xaloc::Renderer2D::EndScene();
-		#endif
-
-		
 		// UPDATE AND RENDER SCENE
 		
-		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
+		Renderer::BeginRenderPass(m_RenderPass);
 		m_Scene->OnUpdate(ts);
-		Xaloc::Renderer2D::EndScene();
+		Renderer::EndRenderPass();
 
 
+		
+		// RENDER SCENE FROM EDITOR CAMERA
+
+		Renderer::BeginRenderPass(m_EditorRenderPass);
+		m_Scene->RenderScene(*m_EditorCamera.get(), m_EditorCameraTransform.Transform);
 		Renderer::EndRenderPass();
 
 		
-		// DRAW SELECTED ENTITIES GUI
-		
+		// TODO DRAW SELECTED ENTITIES GUI
+		/*
 		if (m_SelectionContext.size())
 		{
-			Entity selection = m_SelectionContext[0].Entity;
+			Camera* mainCamera = m_Scene->GetMainCamera();
 
-			Xaloc::Renderer::BeginRenderPass(m_GuizmoRenderPass, false);
-			Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
+			if (mainCamera)
+			{
+				Entity selection = m_SelectionContext[0].Entity;
 
-			// TODO get app pixels per unit
-			float pxPerUnit = 16.0f;
-			float offset = 1.0f / pxPerUnit;
+				Xaloc::Renderer::BeginRenderPass(m_GuizmoRenderPass, false);
+				Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
 
-			glm::vec4 sprMin = selection.Transform() * glm::vec4{ -0.5f - offset, -0.5f - offset, 0.0f, 1.0f };        // Get sprite quad min vertex
-			glm::vec4 sprMax = selection.Transform() * glm::vec4{ 0.5f + offset, 0.5f + offset, 0.0f, 1.0f };          // Get sprite quad max vertex
-			
-			glm::vec4 color = { 0.549f, 0.976f, 1.0f, 0.9f };
-			//glm::vec4 color = { 1.0f, 1.0f, 1.0f, 0.9f };
+				// TODO get app pixels per unit
+				float pxPerUnit = 16.0f;
+				float offset = 1.0f / pxPerUnit;
 
-			Renderer2D::DrawLine({ sprMin.x, sprMin.y }, { sprMax.x, sprMin.y }, color, 0.5f);
-			Renderer2D::DrawLine({ sprMax.x, sprMin.y }, { sprMax.x, sprMax.y }, color, 0.5f);
-			Renderer2D::DrawLine({ sprMax.x, sprMax.y }, { sprMin.x, sprMax.y }, color, 0.5f);
-			Renderer2D::DrawLine({ sprMin.x, sprMax.y }, { sprMin.x, sprMin.y }, color, 0.5f);
+				glm::vec4 sprMin = selection.Transform() * glm::vec4{ -0.5f - offset, -0.5f - offset, 0.0f, 1.0f };        // Get sprite quad min vertex
+				glm::vec4 sprMax = selection.Transform() * glm::vec4{ 0.5f + offset, 0.5f + offset, 0.0f, 1.0f };          // Get sprite quad max vertex
 
-			Xaloc::Renderer2D::EndScene();
-			Xaloc::Renderer::EndRenderPass();
+				glm::vec4 color = { 0.549f, 0.976f, 1.0f, 0.9f };
+				//glm::vec4 color = { 1.0f, 1.0f, 1.0f, 0.9f };
+
+				Renderer2D::DrawLine({ sprMin.x, sprMin.y }, { sprMax.x, sprMin.y }, color, 0.5f);
+				Renderer2D::DrawLine({ sprMax.x, sprMin.y }, { sprMax.x, sprMax.y }, color, 0.5f);
+				Renderer2D::DrawLine({ sprMax.x, sprMax.y }, { sprMin.x, sprMax.y }, color, 0.5f);
+				Renderer2D::DrawLine({ sprMin.x, sprMax.y }, { sprMin.x, sprMin.y }, color, 0.5f);
+
+				Xaloc::Renderer2D::EndScene();
+				Xaloc::Renderer::EndRenderPass();
+			}
 		}
-
+		*/
 	}
 
 
@@ -363,53 +358,33 @@ namespace Xaloc {
 		
 
 		
-		// ============================================= VIEWPORT ============================================= //
+		// ============================================= VIEWPORTS ============================================= //
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Scene");
-
-		m_ViewportFocused = ImGui::IsWindowFocused();
-		m_ViewportHovered = ImGui::IsWindowHovered();
-		
-		auto viewportOffset = ImGui::GetCursorPos();
-		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-		
-		if (m_ViewportSize != *((glm::vec2*) & viewportSize))
+		if (m_GameViewport->Render(m_RenderPass))
 		{
-			m_RenderPass->GetSpecification().TargetFramebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-			//m_Framebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-			m_ViewportSize = { viewportSize.x, viewportSize.y };
-
 			// TODO OnWindow resize, call m_CameraController.OnResize again 
-			m_CameraController.OnResize(viewportSize.x, viewportSize.y);
+			//m_CameraController.OnResize(viewportSize.x, viewportSize.y);
 		}
 
-		auto windowSize = ImGui::GetWindowSize();
-		ImVec2 minBound = ImGui::GetWindowPos();
-		minBound.x += viewportOffset.x;
-		minBound.y += viewportOffset.y;
+		if (m_SceneViewport->Render(m_EditorRenderPass))
+		{
+			m_EditorCameraData.Width = m_SceneViewport->GetSize().x;
+			m_EditorCameraData.Height = m_SceneViewport->GetSize().y;
+			m_EditorCamera = CreateRef<Camera>(m_EditorCameraData.CalculateProjectionMatrix());
+		}
 
-		ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
-
-		m_ViewportBounds[0] = { minBound.x, minBound.y };
-		m_ViewportBounds[1] = { maxBound.x, maxBound.y };
-
-		// TODO m_AllowViewportCameraEvents = ImGui::IsMouseHoveringRect(minBound, maxBound);
-
-		
-		uint32_t texID = m_RenderPass->GetSpecification().TargetFramebuffer->GetColorAttachmentRendererID();
-		//uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)texID, viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-		ImGui::End();
-		ImGui::PopStyleVar();
-
-
+		/*
 		ImGui::Begin("Viewport Info");
 		ImGui::Text("Min bound: [%f, %f]", m_ViewportBounds[0].x, m_ViewportBounds[0].y);
 		ImGui::Text("Max bound: [%f, %f]", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
 		ImGui::Separator();
 		ImGui::Text("Window size: [%f, %f]", viewportSize.x, viewportSize.y);
 		ImGui::End();
+		*/
+
+
+
+		
 		
 
 		// ============================================= GUIZMO ============================================= //
@@ -458,14 +433,31 @@ namespace Xaloc {
 	void EditorLayer::OnEvent(Xaloc::Event& e)
 	{
 		// TODO remove this
-		m_CameraController.OnEvent(e);
+		//m_CameraController.OnEvent(e);
 
 		m_Scene->OnEvent(e);
 		
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<MouseButtonPressedEvent>(XA_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
+
+		dispatcher.Dispatch<MouseScrolledEvent>(XA_BIND_EVENT_FN(EditorLayer::OnMouseScroled));
+		dispatcher.Dispatch<WindowResizeEvent>(XA_BIND_EVENT_FN(EditorLayer::OnWindowResized));
 	}
 
+
+	bool EditorLayer::OnMouseScroled(MouseScrolledEvent& e)
+	{
+		// TODO move editor camera back and forward
+		return false;
+	}
+
+	bool EditorLayer::OnWindowResized(WindowResizeEvent& e)
+	{
+		m_EditorCameraData.Width = (float)e.GetWidth();
+		m_EditorCameraData.Height = (float)e.GetHeight();
+		m_EditorCamera = CreateRef<Camera>(m_EditorCameraData.CalculateProjectionMatrix());
+		return false;
+	}
 
 
 	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
@@ -489,8 +481,15 @@ namespace Xaloc {
 					AABB boundingBox;
 					glm::vec4 sprMin = entity.Transform() * glm::vec4{ -0.5f, -0.5f, 0.0f, 1.0f };        // Get sprite quad min vertex
 					glm::vec4 sprMax = entity.Transform() * glm::vec4{ 0.5f, 0.5f, 0.0f, 1.0f };          // Get sprite quad max vertex
-					boundingBox.Min = sprMin * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
-					boundingBox.Max = sprMax * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
+
+					//                   Projection matrix               * View matrix
+					glm::mat4 viewProj = m_EditorCamera->GetProjection() * glm::inverse(m_EditorCameraTransform.Transform);
+
+					boundingBox.Min = sprMin * viewProj;  // Translate it to screen space
+					boundingBox.Max = sprMax * viewProj;  // Translate it to screen space
+
+					//boundingBox.Min = sprMin * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
+					//boundingBox.Max = sprMax * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
 										
 					bool intersects = mouseX > boundingBox.Min.x && mouseX < boundingBox.Max.x
 									&& mouseY > boundingBox.Min.y && mouseY < boundingBox.Max.y;
@@ -520,13 +519,24 @@ namespace Xaloc {
 
 	
 
+	// TODO move to EditorViewport
 	std::pair<float, float> EditorLayer::GetMouseViewportSpace()
 	{
+		glm::vec2 bounds0 = m_SceneViewport->GetBounds(0);
+		glm::vec2 bounds1 = m_SceneViewport->GetBounds(1);
+		
+		if (!m_SceneViewport->IsHovered() && m_GameViewport->IsHovered())
+		{
+			bounds0 = m_GameViewport->GetBounds(0);
+			bounds1 = m_GameViewport->GetBounds(1);
+		}
+
+		
 		auto [mx, my] = ImGui::GetMousePos(); // Input::GetMousePosition();
-		mx -= m_ViewportBounds[0].x;
-		my -= m_ViewportBounds[0].y;
-		auto viewportWidth = m_ViewportBounds[1].x - m_ViewportBounds[0].x;
-		auto viewportHeight = m_ViewportBounds[1].y - m_ViewportBounds[0].y;
+		mx -= bounds0.x;
+		my -= bounds0.y;
+		auto viewportWidth = bounds1.x - bounds0.x;
+		auto viewportHeight = bounds1.y - bounds0.y;
 
 		return { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
 	}

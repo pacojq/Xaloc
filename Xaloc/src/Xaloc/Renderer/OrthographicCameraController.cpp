@@ -69,7 +69,7 @@ namespace Xaloc {
 		CalculateView();
 		return false;
 	}
-		
+	
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& e)
 	{
 		OnResize((float) e.GetWidth(), (float) e.GetHeight());

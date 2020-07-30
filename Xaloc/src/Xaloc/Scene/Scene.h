@@ -8,6 +8,8 @@
 
 #include <entt/entt.hpp>
 
+#include "Xaloc/Renderer/Camera.h"
+
 namespace Xaloc {
 
 	class Entity;
@@ -30,8 +32,10 @@ namespace Xaloc {
 
 		void StartRuntime();
 
-		void OnUpdate(Timestep ts);
+		void OnUpdate(Timestep ts);		
 		void OnEvent(Event& e);
+
+		void RenderScene(const Camera& camera, const glm::mat4& transform);
 
 		Entity Scene::CreateEntity(const std::string& name);
 		Entity Scene::CreateEntity(const std::string& name, UUID id);
@@ -56,8 +60,6 @@ namespace Xaloc {
 		std::string m_Name;
 
 		Ref<PhysicSpace> m_PhysicSpace;
-
-
 
 		
 		friend class Entity;

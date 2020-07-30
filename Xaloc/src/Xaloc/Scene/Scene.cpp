@@ -15,7 +15,9 @@
 #include <iomanip>
 #include <iostream>
 
-#include <pugixml.hpp>
+#include <limits>
+
+#include "Xaloc/Renderer/Camera.h"
 
 
 namespace Xaloc {
@@ -199,10 +201,31 @@ namespace Xaloc {
 				// TODO post-process
 			}
 		}
-		
-		// Render all sprites
-		//Renderer2D::BeginScene(*camera);
+
+
+		Camera* mainCamera = nullptr;
+		glm::mat4* cameraTransform = nullptr;
 		{
+			int priority = std::numeric_limits<int>::max();
+
+			auto group = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : group)
+			{
+				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+
+				if (camera.Priority < priority)
+				{
+					mainCamera = &camera.Camera;
+					cameraTransform = &transform.Transform;
+					priority = camera.Priority;
+				}
+			}
+		}
+
+		if (mainCamera)
+		{
+			Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
+
 			auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
 			{
@@ -211,10 +234,29 @@ namespace Xaloc {
 				auto spr = spriteRendererComponent;
 				Renderer2D::DrawQuad(transformComponent.Transform, spriteRendererComponent.SubTexture);
 			}
+
+			Renderer2D::EndScene();
+		}
+	}
+
+
+
+
+
+	void Scene::RenderScene(const Camera& camera, const glm::mat4& transform)
+	{
+		Renderer2D::BeginScene(camera.GetProjection(), transform);
+
+		auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
+		for (auto entity : group)
+		{
+			auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			auto trans = transformComponent;
+			auto spr = spriteRendererComponent;
+			Renderer2D::DrawQuad(transformComponent.Transform, spriteRendererComponent.SubTexture);
 		}
 
-		//Renderer2D::EndScene();
-
+		Renderer2D::EndScene();
 	}
 
 

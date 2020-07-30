@@ -17,6 +17,7 @@ namespace Xaloc {
 		static bool Int(const char* label, int& value);
 
 		static bool Float(const char* label, float& value, float delta = 0.1f);
+		static bool Float(const char* label, float& value, float delta, float min);
 		static bool Float(const char* label, float& value, float delta, float min, float max);
 
 		static bool Vec2(const char* label, glm::vec2& value, float delta = 0.1f);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Xaloc/Scene/Components/BehaviourComponent.h"
+#include "Xaloc/Scene/Components/CameraComponent.h"
 #include "Xaloc/Scene/Components/ColliderComponent.h"
 #include "Xaloc/Scene/Components/IdComponent.h"
 #include "Xaloc/Scene/Components/SceneComponent.h"

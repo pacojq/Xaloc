@@ -134,7 +134,28 @@ namespace Xaloc {
 
 	bool PropertyDrawer::Float(const char* label, float& value, float delta)
 	{
-		return Float(label, value, delta, FLOAT_MIN, FLOAT_MAX);
+		bool modified = false;
+
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragFloat(s_IDBuffer, &value, delta))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+
+		return modified;
+	}
+
+	bool PropertyDrawer::Float(const char* label, float& value, float delta, float min)
+	{
+		return Float(label, value, delta, min, FLOAT_MAX);
 	}
 
 

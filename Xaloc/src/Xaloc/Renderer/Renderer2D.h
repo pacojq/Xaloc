@@ -6,6 +6,7 @@
 #include "SubTexture2D.h"
 
 namespace Xaloc {
+	class Camera;
 
 	/// <summary>
 	/// Xaloc's 2D renderer.
@@ -16,7 +17,7 @@ namespace Xaloc {
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const OrthographicCamera& camera);
+		static void BeginScene(const Camera& camera, const glm::mat4& transform);
 		static void EndScene();
 
 		/// <summary>

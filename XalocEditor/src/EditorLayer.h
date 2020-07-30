@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EditorViewport.h"
 #include "Xaloc.h"
 
 #include "Xaloc/Editor/SceneHierarchyPanel.h"
@@ -20,6 +21,8 @@ namespace Xaloc {
 		void OnEvent(Event& e) override;
 		
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+		bool OnMouseScroled(MouseScrolledEvent& e);
+		bool OnWindowResized(WindowResizeEvent& e);
 
 	private:
 
@@ -40,7 +43,15 @@ namespace Xaloc {
 
 		std::vector<SelectedEntity> m_SelectionContext;
 
-		OrthographicCameraController m_CameraController;
+		//OrthographicCameraController m_CameraController;
+		
+		Entity m_FirstCamera;
+		
+		Ref<Camera> m_EditorCamera;
+		TransformComponent m_EditorCameraTransform;
+		PerspectiveCameraDataComponent m_EditorCameraData;
+		Ref<RenderPass> m_EditorRenderPass;
+		
 
 		float m_TilingFactor;
 		float m_Rotation;
@@ -52,10 +63,8 @@ namespace Xaloc {
 		Ref<RenderPass> m_RenderPass;
 		Ref<RenderPass> m_GuizmoRenderPass;
 		
-		bool m_ViewportFocused = false;
-		bool m_ViewportHovered = false;
-		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
-		glm::vec2 m_ViewportBounds[2];
+		Ref<EditorViewport> m_GameViewport;
+		Ref<EditorViewport> m_SceneViewport;
 		
 
 

@@ -10,9 +10,12 @@ namespace Xaloc {
 		XA_CORE_INFO("Initializing OpenGL Renderer API");
 		
 		glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 
+		//glEnable(GL_MULTISAMPLE);
+		//glEnable(GL_STENCIL_TEST);
+		
 		glEnable(GL_DEPTH_TEST);
 	}
 

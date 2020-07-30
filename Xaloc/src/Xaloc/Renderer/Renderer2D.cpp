@@ -1,6 +1,8 @@
 #include "xapch.h"
 #include "Renderer2D.h"
 
+#include "Camera.h"
+
 #include "VertexArray.h"
 #include "Shader.h"
 #include "RenderCommand.h"
@@ -122,10 +124,13 @@ namespace Xaloc {
 
 
 
-	void Renderer2D::BeginScene(const OrthographicCamera& camera)
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
+		//                   Projection matrix      * View matrix
+		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
+
 		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProj);
 
 		// Reset pointer to the first element of the Vertex Buffer
 		s_Data.QuadIndexCount = 0;

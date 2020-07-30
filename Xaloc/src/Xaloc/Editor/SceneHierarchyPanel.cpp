@@ -8,6 +8,8 @@
 #include <imgui.h>
 #include <limits>
 
+#include "imgui_internal.h"
+
 // TODO:
 // - Eventually change imgui node IDs to be entity/asset GUID
 
@@ -143,38 +145,30 @@ namespace Xaloc {
 		{
 			auto& tc = entity.GetComponent<TransformComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
-			{
-				auto [translation, rotation, scale] = GetTransformDecomposition(tc);
+			{				
+				bool change = false;
+				auto [translation, rotationQuat, scale] = GetTransformDecomposition(tc);
+				glm::vec3 rotation = glm::degrees(glm::eulerAngles(rotationQuat));
 
-				ImGui::Columns(2);
-				ImGui::Text("Translation");
-				ImGui::NextColumn();
-				ImGui::PushItemWidth(-1);
+				PropertyDrawer::BeginPropertyGrid();
+				
+				change |=  PropertyDrawer::Vec3("Translation", translation);
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+				change |= PropertyDrawer::Vec3("Scale", scale);
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+				change |= PropertyDrawer::Vec3("Rotation", rotation);
 
-				if (ImGui::DragFloat3("##translation", glm::value_ptr(translation), 0.25f))
+
+				if (change)
 				{
-					tc.Transform[3] = glm::vec4(translation, 1.0f);
+					tc.Transform = glm::translate(glm::mat4(1.0f), translation) *
+						glm::toMat4(glm::quat(glm::radians(rotation))) *
+						glm::scale(glm::mat4(1.0f), scale);
 				}
 
-				ImGui::PopItemWidth();
-				ImGui::NextColumn();
-
-				ImGui::Text("Scale");
-				ImGui::NextColumn();
-				ImGui::PushItemWidth(-1);
-
-				if (ImGui::DragFloat3("##scale", glm::value_ptr(scale), 0.25f))
-				{
-
-				}
-
-				ImGui::PopItemWidth();
-				ImGui::NextColumn();
-
-				ImGui::Columns(1);
-
-				// ImGui::Text("Translation: %.2f, %.2f, %.2f", translation.x, translation.y, translation.z);
-				// ImGui::Text("Scale: %.2f, %.2f, %.2f", scale.x, scale.y, scale.z);
+				PropertyDrawer::EndPropertyGrid();
 				ImGui::TreePop();
 			}
 			ImGui::Separator();
@@ -206,19 +200,83 @@ namespace Xaloc {
 			ImGui::Separator();
 		}
 
-		/* TODO camera
-
 		if (entity.HasComponent<CameraComponent>())
 		{
+			if (entity.HasComponent<TransformComponent>())
+			{
+				auto& tc = entity.GetComponent<TransformComponent>();
+				auto [translation, rotationQuat, scale] = GetTransformDecomposition(tc);
+
+				if (scale.x != 1.0f || scale.y != 1.0f || scale.z != 1.0f)
+				{
+					scale = glm::vec3(1.0f, 1.0f, 1.0f);
+					tc.Transform = glm::translate(glm::mat4(1.0f), translation) *
+						glm::toMat4(rotationQuat) *
+						glm::scale(glm::mat4(1.0f), scale);
+				}
+			}
+			
 			auto& cc = entity.GetComponent<CameraComponent>();
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(CameraComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
 			{
-
+				PropertyDrawer::BeginPropertyGrid();
+				PropertyDrawer::Int("Priority", cc.Priority);
+				PropertyDrawer::EndPropertyGrid();
 				ImGui::TreePop();
 			}
 			ImGui::Separator();
 		}
-		*/
+
+		if (entity.HasComponent<OrthographicCameraDataComponent>())
+		{
+			auto& ortho = entity.GetComponent<OrthographicCameraDataComponent>();
+			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(OrthographicCameraDataComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Orthographic Camera Data"))
+			{
+				bool change = false;
+				
+				PropertyDrawer::BeginPropertyGrid();
+				change |= PropertyDrawer::Float("Width", ortho.Width, 0.1f, 0.1f);
+				change |= PropertyDrawer::Float("Height", ortho.Height, 0.1f, 0.1f);
+				change |= PropertyDrawer::Float("Zoom Level", ortho.Zoom, 0.1f, 0.1f);
+				change |= PropertyDrawer::Float("Z-Near", ortho.ZNear);
+				change |= PropertyDrawer::Float("Z-Far", ortho.ZFar);
+				PropertyDrawer::EndPropertyGrid();
+				ImGui::TreePop();
+
+				if (change && entity.HasComponent<CameraComponent>())
+				{
+					auto& camera = entity.GetComponent<CameraComponent>();
+					camera.Camera.SetProjection(ortho.CalculateProjectionMatrix());
+				}
+			}
+			ImGui::Separator();
+		}
+
+		if (entity.HasComponent<PerspectiveCameraDataComponent>())
+		{
+			auto& persp = entity.GetComponent<PerspectiveCameraDataComponent>();
+			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(PerspectiveCameraDataComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Perspective Camera Data"))
+			{
+				bool change = false;
+
+				PropertyDrawer::BeginPropertyGrid();
+				change |= PropertyDrawer::Float("Width", persp.Width, 0.1f, 0.1f);
+				change |= PropertyDrawer::Float("Height", persp.Height, 0.1f, 0.1f);
+				change |= PropertyDrawer::Float("FOV Degrees", persp.Fov, 0.1f, 0.1f);
+				change |= PropertyDrawer::Float("Z-Near", persp.ZNear, 0.1f, 0.0f);
+				change |= PropertyDrawer::Float("Z-Far", persp.ZFar, 0.1f, 0.1f);
+				PropertyDrawer::EndPropertyGrid();
+				ImGui::TreePop();
+
+				if (change && entity.HasComponent<CameraComponent>())
+				{
+					auto& camera = entity.GetComponent<CameraComponent>();
+					camera.Camera.SetProjection(persp.CalculateProjectionMatrix());
+				}
+			}
+			ImGui::Separator();
+		}
+		
 
 		if (entity.HasComponent<ColliderComponent>())
 		{
