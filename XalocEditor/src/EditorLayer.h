@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EditorCamera.h"
 #include "EditorViewport.h"
 #include "Xaloc.h"
 
@@ -21,7 +22,6 @@ namespace Xaloc {
 		void OnEvent(Event& e) override;
 		
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
-		bool OnMouseScroled(MouseScrolledEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);
 
 	private:
@@ -32,8 +32,6 @@ namespace Xaloc {
 			// TODO cast a ray and get distance float Distance;
 		};
 		void OnEntitySelected(const SelectedEntity& selection);
-		
-		std::pair<float, float> GetMouseViewportSpace();
 
 		
 	private:
@@ -45,11 +43,9 @@ namespace Xaloc {
 
 		//OrthographicCameraController m_CameraController;
 		
-		Entity m_FirstCamera;
+		Entity m_MainCamera;
 		
-		Ref<Camera> m_EditorCamera;
-		TransformComponent m_EditorCameraTransform;
-		PerspectiveCameraDataComponent m_EditorCameraData;
+		Ref<EditorCamera> m_EditorCamera;
 		Ref<RenderPass> m_EditorRenderPass;
 		
 
@@ -65,12 +61,6 @@ namespace Xaloc {
 		
 		Ref<EditorViewport> m_GameViewport;
 		Ref<EditorViewport> m_SceneViewport;
-		
-
-
-		Ref<SubTexture2D> m_TileWater;
-		std::unordered_map<char, Ref<SubTexture2D>> s_TextureMap;
-		float m_TilesDepth = -0.1f;
 
 
 	// Editor Windows

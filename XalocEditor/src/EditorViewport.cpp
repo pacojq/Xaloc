@@ -53,5 +53,15 @@ namespace Xaloc {
 		return resized;
 	}
 
-	
+
+	std::pair<float, float> EditorViewport::GetMouseViewportSpace()
+	{
+		auto [mx, my] = ImGui::GetMousePos(); // Input::GetMousePosition();
+		mx -= m_Bounds[0].x;
+		my -= m_Bounds[0].y;
+		auto viewportWidth = m_Bounds[1].x - m_Bounds[0].x;
+		auto viewportHeight = m_Bounds[1].y - m_Bounds[0].y;
+
+		return { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
+	}
 }

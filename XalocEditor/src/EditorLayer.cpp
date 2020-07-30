@@ -9,26 +9,6 @@
 
 namespace Xaloc {
 
-	static const uint32_t s_mapWidth = 24;
-	static const uint32_t s_mapHeight = 14;
-
-	static const char* s_MapTiles =
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWW3TTTT2WWWWWWWWWWW"
-		"WWWWW3T5GGGG4TTT2WWWWWWW"
-		"WWWWW06GGGGG7BB642WWWWWW"
-		"WWWWWWLGGGGGRWWLG42WWWWW"
-		"WWWWWW06GGGGRWWLGGRWWWWW"
-		"WWWWWWW0BB6G4TT5G71WWWWW"
-		"WWWWWWWWWW0BB6GGGRWWWWWW"
-		"WWWWWWWWWWWWW0BBB1WWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		;
-
 
 	EditorLayer::EditorLayer()
 		: Layer("Editor Layer"),
@@ -47,19 +27,11 @@ namespace Xaloc {
 
 		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
 
-		m_FirstCamera = m_Scene->CreateEntity("Orthographic Camera");
-		auto& orthoData = m_FirstCamera.AddComponent<OrthographicCameraDataComponent>();
-		auto& firstCamera = m_FirstCamera.AddComponent<CameraComponent>(orthoData.CalculateProjectionMatrix());
-
-
+		m_MainCamera = m_Scene->CreateEntity("Orthographic Camera");
+		auto& orthoData = m_MainCamera.AddComponent<OrthographicCameraDataComponent>();
+		auto& firstCamera = m_MainCamera.AddComponent<CameraComponent>(orthoData.CalculateProjectionMatrix());
 		
-		//m_SecondCamera = m_Scene->CreateEntity("Editor Camera");
-		//auto& perspData = m_SecondCamera.AddComponent<PerspectiveCameraDataComponent>();
-		//auto& secondCamera = m_SecondCamera.AddComponent<CameraComponent>(perspData.CalculateProjectionMatrix()); // (glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
-		//secondCamera.Priority = 1;
-		
-		
-		Xaloc::ScriptEngine::SetSceneContext(m_Scene);
+		ScriptEngine::SetSceneContext(m_Scene);
 		m_Scene->StartRuntime();
 
 		
@@ -67,19 +39,7 @@ namespace Xaloc {
 		
 		// Init Editor
 
-		m_EditorCameraData = {};
-		m_EditorCameraData.Fov = 45.0f;
-		m_EditorCameraData.Width = 1280.0f;
-		m_EditorCameraData.Height = 720.0f;
-		m_EditorCameraData.ZFar = 1000.0f;
-		m_EditorCameraData.ZNear = 0.01f;
-
-		m_EditorCameraTransform = {};
-		m_EditorCameraTransform.Transform = glm::translate(glm::mat4(1.0f), { 0.0f, 0.0f, 10.0f })
-			* glm::scale(glm::mat4(1.0f), { 1.0f, 1.0f, 1.0f });
-
-		m_EditorCamera = CreateRef<Camera>(m_EditorCameraData.CalculateProjectionMatrix());
-		
+		m_EditorCamera = CreateRef<EditorCamera>();		
 		
 		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
@@ -116,34 +76,6 @@ namespace Xaloc {
 
 		m_GuizmoRenderPass = RenderPass::Create(renderPassSpec);
 
-
-
-		Xaloc::Ref<Xaloc::Texture2D> tilemap = AssetManager::GetTexture("TILEMAP");
-
-		glm::vec2 size = { 16.0f, 16.0f };
-		glm::vec2 pad = { 0.0f, 0.0f };
-		glm::vec2 off = { 1.0f, 1.0f };
-
-		s_TextureMap['G'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 16.0f }, size, pad, off);
-
-		s_TextureMap['T'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 17.0f }, size, pad, off);
-		s_TextureMap['B'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 15.0f }, size, pad, off);
-		s_TextureMap['L'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 16.0f }, size, pad, off);
-		s_TextureMap['R'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 16.0f }, size, pad, off);
-
-		s_TextureMap['0'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 15.0f }, size, pad, off);
-		s_TextureMap['1'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 15.0f }, size, pad, off);
-		s_TextureMap['2'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 17.0f }, size, pad, off);
-		s_TextureMap['3'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 17.0f }, size, pad, off);
-
-		s_TextureMap['4'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 5.0f, 16.0f }, size, pad, off);
-		s_TextureMap['5'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 6.0f, 16.0f }, size, pad, off);
-		s_TextureMap['6'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 6.0f, 17.0f }, size, pad, off);
-		s_TextureMap['7'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 5.0f, 17.0f }, size, pad, off);
-
-		m_TileWater = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 9.0f, 10.0f }, size, pad, off);
-
-
 	}
 
 	void EditorLayer::OnDetach()
@@ -151,19 +83,30 @@ namespace Xaloc {
 	}
 
 
-	void EditorLayer::OnUpdate(Xaloc::Timestep ts)
+	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		// UPDATE
 
-		bool blockEv = !(m_GameViewport->IsFocused() && m_GameViewport->IsHovered());
+		// TODO block events just to the viewport that doesn't need them
+
+		bool blockEvents = true;
+
+		if (m_GameViewport->IsFocused() && m_GameViewport->IsHovered())
+		{
+			blockEvents = false;
+		}
+		if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
+		{
+			blockEvents = false;
+		}
 		
-		Application::Get().GetImGuiLayer()->SetBlockEvents(blockEv);
+		Application::Get().GetImGuiLayer()->SetBlockEvents(blockEvents);
 		if (m_GameViewport->IsFocused())
 		{
 			// TODO update editor camera
 			//m_CameraController.OnUpdate(ts);
 		}
-
+		
 
 		// RENDER
 
@@ -180,9 +123,17 @@ namespace Xaloc {
 		
 		// RENDER SCENE FROM EDITOR CAMERA
 
+		Camera editorCamera = *(m_EditorCamera->GetCamera().get());
+		
 		Renderer::BeginRenderPass(m_EditorRenderPass);
-		m_Scene->RenderScene(*m_EditorCamera.get(), m_EditorCameraTransform.Transform);
+		m_Scene->RenderScene(editorCamera, m_EditorCamera->GetTransform());
 		Renderer::EndRenderPass();
+
+		if (m_SceneViewport->IsFocused())
+		{
+			m_EditorCamera->OnUpdate(ts);
+		}
+
 
 		
 		// TODO DRAW SELECTED ENTITIES GUI
@@ -324,19 +275,6 @@ namespace Xaloc {
 
 		// ============================================= MISC WINDOWS ============================================= //
 
-		ImGui::Begin("Settings");
-		ImGui::DragFloat("Tiling factor", &m_TilingFactor, 0.1f, 0.1f, 10.0f);
-		ImGui::DragFloat("Rotation", &m_Rotation, 0.1f);
-		ImGui::ColorEdit4("First Color", glm::value_ptr(m_FirstColor));
-		ImGui::ColorEdit4("Second Color", glm::value_ptr(m_SecondColor));
-
-		ImGui::Separator();
-
-		ImGui::DragFloat("Tiles depth", &m_TilesDepth, 0.1f, -10.0f, 10.0f);
-
-		ImGui::End();
-
-
 		if (m_ShowWindowRenderStats)
 		{
 			auto stats = Xaloc::Renderer2D::GetStats();
@@ -364,27 +302,26 @@ namespace Xaloc {
 		{
 			// TODO OnWindow resize, call m_CameraController.OnResize again 
 			//m_CameraController.OnResize(viewportSize.x, viewportSize.y);
+			
+			auto& data = m_MainCamera.GetComponent<OrthographicCameraDataComponent>();
+			data.Width = m_GameViewport->GetSize().x;
+			data.Height = m_GameViewport->GetSize().y;
+
+			auto& camera = m_MainCamera.GetComponent<CameraComponent>();
+			camera.Camera.SetProjection(data.CalculateProjectionMatrix());
 		}
 
 		if (m_SceneViewport->Render(m_EditorRenderPass))
 		{
-			m_EditorCameraData.Width = m_SceneViewport->GetSize().x;
-			m_EditorCameraData.Height = m_SceneViewport->GetSize().y;
-			m_EditorCamera = CreateRef<Camera>(m_EditorCameraData.CalculateProjectionMatrix());
+			auto& data = m_EditorCamera->GetCameraData();
+			Ref<Camera> camera = m_EditorCamera->GetCamera();
+
+			data.Width = m_SceneViewport->GetSize().x;
+			data.Height = m_SceneViewport->GetSize().y;
+			camera->SetProjection(data.CalculateProjectionMatrix());
 		}
 
-		/*
-		ImGui::Begin("Viewport Info");
-		ImGui::Text("Min bound: [%f, %f]", m_ViewportBounds[0].x, m_ViewportBounds[0].y);
-		ImGui::Text("Max bound: [%f, %f]", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
-		ImGui::Separator();
-		ImGui::Text("Window size: [%f, %f]", viewportSize.x, viewportSize.y);
-		ImGui::End();
-		*/
 
-
-
-		
 		
 
 		// ============================================= GUIZMO ============================================= //
@@ -430,32 +367,38 @@ namespace Xaloc {
 
 	}
 
-	void EditorLayer::OnEvent(Xaloc::Event& e)
+	void EditorLayer::OnEvent(Event& e)
 	{
-		// TODO remove this
-		//m_CameraController.OnEvent(e);
-
 		m_Scene->OnEvent(e);
+
+		if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
+		{
+			m_EditorCamera->OnEvent(e);
+		}
 		
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<MouseButtonPressedEvent>(XA_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
-
-		dispatcher.Dispatch<MouseScrolledEvent>(XA_BIND_EVENT_FN(EditorLayer::OnMouseScroled));
 		dispatcher.Dispatch<WindowResizeEvent>(XA_BIND_EVENT_FN(EditorLayer::OnWindowResized));
 	}
 
 
-	bool EditorLayer::OnMouseScroled(MouseScrolledEvent& e)
-	{
-		// TODO move editor camera back and forward
-		return false;
-	}
+
+	
 
 	bool EditorLayer::OnWindowResized(WindowResizeEvent& e)
 	{
-		m_EditorCameraData.Width = (float)e.GetWidth();
-		m_EditorCameraData.Height = (float)e.GetHeight();
-		m_EditorCamera = CreateRef<Camera>(m_EditorCameraData.CalculateProjectionMatrix());
+		if (e.GetWidth() <= 0.0f || e.GetHeight() <= 0.0f) // Minimized
+			return false;
+
+		// TODO when dragging the scene viewport to dock it somewhere else, the camera rotates in a weird way
+		
+		auto& data = m_EditorCamera->GetCameraData();
+		Ref<Camera> camera = m_EditorCamera->GetCamera();
+		
+		data.Width = (float)e.GetWidth();
+		data.Height = (float)e.GetHeight();
+		camera->SetProjection(data.CalculateProjectionMatrix());
+		
 		return false;
 	}
 
@@ -465,7 +408,14 @@ namespace Xaloc {
 		auto [mx, my] = Input::GetMousePosition();
 		if (e.GetMouseButton() == XA_MOUSE_BUTTON_LEFT) // TODO && !Input::IsKeyPressed(KeyCode::LeftAlt) && !ImGuizmo::IsOver())
 		{
-			auto [mouseX, mouseY] = GetMouseViewportSpace();
+			auto [mouseX, mouseY] = m_SceneViewport->GetMouseViewportSpace();
+			if (m_GameViewport->IsFocused() && m_GameViewport->IsHovered())
+			{
+				auto [mx, my] = m_GameViewport->GetMouseViewportSpace();
+				mouseX = mx;
+				mouseY = my;
+			}
+			
 			if (mouseX > -1.0f && mouseX < 1.0f && mouseY > -1.0f && mouseY < 1.0f) // If mouse is on viewport range
 			{				
 				m_SelectionContext.clear();
@@ -483,7 +433,7 @@ namespace Xaloc {
 					glm::vec4 sprMax = entity.Transform() * glm::vec4{ 0.5f, 0.5f, 0.0f, 1.0f };          // Get sprite quad max vertex
 
 					//                   Projection matrix               * View matrix
-					glm::mat4 viewProj = m_EditorCamera->GetProjection() * glm::inverse(m_EditorCameraTransform.Transform);
+					glm::mat4 viewProj = m_EditorCamera->GetCamera()->GetProjection() * glm::inverse(m_EditorCamera->GetTransform().Transform);
 
 					boundingBox.Min = sprMin * viewProj;  // Translate it to screen space
 					boundingBox.Max = sprMax * viewProj;  // Translate it to screen space
@@ -518,28 +468,6 @@ namespace Xaloc {
 	}
 
 	
-
-	// TODO move to EditorViewport
-	std::pair<float, float> EditorLayer::GetMouseViewportSpace()
-	{
-		glm::vec2 bounds0 = m_SceneViewport->GetBounds(0);
-		glm::vec2 bounds1 = m_SceneViewport->GetBounds(1);
-		
-		if (!m_SceneViewport->IsHovered() && m_GameViewport->IsHovered())
-		{
-			bounds0 = m_GameViewport->GetBounds(0);
-			bounds1 = m_GameViewport->GetBounds(1);
-		}
-
-		
-		auto [mx, my] = ImGui::GetMousePos(); // Input::GetMousePosition();
-		mx -= bounds0.x;
-		my -= bounds0.y;
-		auto viewportWidth = bounds1.x - bounds0.x;
-		auto viewportHeight = bounds1.y - bounds0.y;
-
-		return { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
-	}
 
 
 }

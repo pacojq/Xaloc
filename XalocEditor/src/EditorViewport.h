@@ -9,6 +9,7 @@ namespace Xaloc {
 	{
 	public:
 		EditorViewport(const std::string& name);
+		~EditorViewport() = default;
 
 		inline bool IsFocused() const { return m_Focused; }
 		inline bool IsHovered() const { return m_Hovered; }
@@ -22,7 +23,8 @@ namespace Xaloc {
 		/// <param name="renderPass"></param>
 		/// <returns>Whether the viewport has changed size.</returns>
 		bool Render(Ref<RenderPass>& renderPass);
-		
+
+		std::pair<float, float> GetMouseViewportSpace();
 		
 	private:
 		std::string m_Name;
