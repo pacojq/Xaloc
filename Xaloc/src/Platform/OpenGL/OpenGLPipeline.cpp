@@ -1,11 +1,11 @@
 #include "xapch.h"
-#include "OpenGLVertexArray.h"
+#include "OpenGLPipeline.h"
+
+#include "Xaloc/Renderer/Renderer.h"
 
 #include <glad/glad.h>
 
 namespace Xaloc {
-
-
 
 	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
 	{
@@ -15,7 +15,6 @@ namespace Xaloc {
 		case ShaderDataType::Float2:	return GL_FLOAT;
 		case ShaderDataType::Float3:	return GL_FLOAT;
 		case ShaderDataType::Float4:	return GL_FLOAT;
-
 
 		case ShaderDataType::Mat3:		return GL_FLOAT;
 		case ShaderDataType::Mat4:		return GL_FLOAT;
@@ -32,60 +31,61 @@ namespace Xaloc {
 		return 0;
 	}
 
-
-
-
-
-	OpenGLVertexArray::OpenGLVertexArray()
+	OpenGLPipeline::OpenGLPipeline(const PipelineSpecification& spec)
+		: m_Specification(spec)
 	{
-		glCreateVertexArrays(1, &m_RendererID);
+		Invalidate();
 	}
 
-	OpenGLVertexArray::~OpenGLVertexArray()
+	OpenGLPipeline::~OpenGLPipeline()
 	{
-		glDeleteVertexArrays(1, &m_RendererID);
+		GLuint rendererID = m_VertexArrayRendererID;
+		glDeleteVertexArrays(1, &rendererID);
 	}
 
-	void OpenGLVertexArray::Bind() const
-	{
-		glBindVertexArray(m_RendererID);
-	}
 
-	void OpenGLVertexArray::Unbind() const
+
+	void OpenGLPipeline::Invalidate()
 	{
+		XA_CORE_ASSERT(m_Specification.Layout.GetElements().size(), "Layout is empty!");
+
+
+		if (m_VertexArrayRendererID)
+			glDeleteVertexArrays(1, &m_VertexArrayRendererID);
+
+		glGenVertexArrays(1, &m_VertexArrayRendererID);
+		glBindVertexArray(m_VertexArrayRendererID);
+
+		// TODO Bind() ?
+		
 		glBindVertexArray(0);
 	}
 
-	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
-	{
-		XA_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex buffer has no layout!");
+	
 
-		glBindVertexArray(m_RendererID);
-		vertexBuffer->Bind();
-		
-		const auto& layout = vertexBuffer->GetLayout();
+	void OpenGLPipeline::Bind()
+	{
+		XA_CORE_ASSERT(m_Specification.Layout.GetElements().size(), "Vertex buffer has no layout!");
+
+		glBindVertexArray(m_VertexArrayRendererID);
+		//vertexBuffer->Bind();
+
+		const auto& layout = m_Specification.Layout;
+
+		uint32_t attribIndex = 0;
 		for (auto& element : layout)
 		{
-			glEnableVertexAttribArray(m_VertexBufferIndex);
+			glEnableVertexAttribArray(attribIndex);
 			glVertexAttribPointer(
-				m_VertexBufferIndex,
+				attribIndex,
 				element.GetComponentCount(),
 				ShaderDataTypeToOpenGLBaseType(element.Type),
 				element.Normalized ? GL_TRUE : GL_FALSE,
 				layout.GetStride(),
 				(const void*)(intptr_t)element.Offset
 			);
-			m_VertexBufferIndex++;
+			attribIndex++;
 		}
-
-		m_VertexBuffers.push_back(vertexBuffer);
 	}
 
-	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
-	{
-		glBindVertexArray(m_RendererID);
-		indexBuffer->Bind();
-
-		m_IndexBuffer = indexBuffer;
-	}
 }

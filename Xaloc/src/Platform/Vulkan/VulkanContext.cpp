@@ -508,7 +508,7 @@ namespace Xaloc {
 
 
 
-		// TODO use a BufferLayout
+		// TODO use a VertexBufferLayout
 
 		// Vertex Input
 		//		describes the format of the vertex data that will be passed

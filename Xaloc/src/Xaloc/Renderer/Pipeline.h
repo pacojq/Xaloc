@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Xaloc/Core/Core.h"
-#include "Xaloc/Renderer/Buffer.h"
 #include "Xaloc/Renderer/Shader.h"
-#include "Xaloc/Renderer/RenderPass.h"
+#include "Xaloc/Renderer/VertexBuffer.h"
 
 
 namespace Xaloc {
@@ -11,8 +10,7 @@ namespace Xaloc {
 	struct PipelineSpecification
 	{
 		Ref<Shader> Shader;
-		BufferLayout VertexBufferLayout;
-		Ref<RenderPass> RenderPass; // TODO maybe this shouldn't be here
+		VertexBufferLayout Layout;
 	};
 
 	class Pipeline
@@ -20,6 +18,10 @@ namespace Xaloc {
 	public:
 		virtual ~Pipeline() = default;
 
+		virtual void Invalidate() = 0;
+
+		virtual void Bind() = 0;
+		
 		virtual const PipelineSpecification& GetSpecification() const = 0;
 
 		static Ref<Pipeline> Create(const PipelineSpecification& spec);

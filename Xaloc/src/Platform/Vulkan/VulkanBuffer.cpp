@@ -9,7 +9,7 @@ namespace Xaloc {
 	void VulkanBuffer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 	{
 		auto device = VulkanShared::Resources().Device;
-		
+
 		// Create the vertex buffer
 		VkBufferCreateInfo bufferInfo = {};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -49,13 +49,13 @@ namespace Xaloc {
 		EndSingleTimeCommands(commandBuffer);
 	}
 
-	
+
 
 	VkCommandBuffer VulkanBuffer::BeginSingleTimeCommands()
 	{
 		auto context = VulkanShared::Resources().Context;
 		auto device = VulkanShared::Resources().Device;
-		
+
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -79,7 +79,7 @@ namespace Xaloc {
 	{
 		auto context = VulkanShared::Resources().Context;
 		auto device = VulkanShared::Resources().Device;
-		
+
 		vkEndCommandBuffer(commandBuffer);
 
 		VkSubmitInfo submitInfo = {};
@@ -93,76 +93,6 @@ namespace Xaloc {
 		vkFreeCommandBuffers(device, context->GetCommandPool(), 1, &commandBuffer);
 	}
 
-	
 
-
-
-
-	
-	
-
-
-
-	
-
-	// = = = = = = = = = = = = = VERTEX BUFFER = = = = = = = = = = = = = //
-
-	VulkanVertexBuffer::VulkanVertexBuffer(uint32_t size)
-	{
-		// TODO
-	}
-
-	VulkanVertexBuffer::VulkanVertexBuffer(float* vertices, uint32_t size)
-	{
-		// TODO
-	}
-
-	VulkanVertexBuffer::~VulkanVertexBuffer()
-	{
-		// TODO
-	}
-
-	void VulkanVertexBuffer::Bind() const
-	{
-		// TODO
-	}
-
-	void VulkanVertexBuffer::Unbind() const
-	{
-		// TODO
-	}
-
-	void VulkanVertexBuffer::SetData(const void* data, uint32_t size)
-	{
-		// TODO
-	}
-
-
-
-
-
-	// = = = = = = = = = = = = = INDEX BUFFER = = = = = = = = = = = = = //
-
-
-	VulkanIndexBuffer::VulkanIndexBuffer(uint32_t* indices, uint32_t count)
-		: m_Count(count)
-	{
-		// TODO
-	}
-
-	VulkanIndexBuffer::~VulkanIndexBuffer()
-	{
-		// TODO
-	}
-
-	void VulkanIndexBuffer::Bind() const
-	{
-		// TODO
-	}
-
-	void VulkanIndexBuffer::Unbind() const
-	{
-		// TODO
-	}
 
 }

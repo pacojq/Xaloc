@@ -49,11 +49,11 @@
 #include "Xaloc/Renderer/Renderer2D.h"
 #include "Xaloc/Renderer/RenderCommand.h"
 
-#include "Xaloc/Renderer/Buffer.h"
+#include "Xaloc/Renderer/VertexBuffer.h"
+#include "Xaloc/Renderer/IndexBuffer.h"
 #include "Xaloc/Renderer/Shader.h"
 #include "Xaloc/Renderer/Texture.h"
 #include "Xaloc/Renderer/SubTexture2D.h"
-#include "Xaloc/Renderer/VertexArray.h"
 
 #include "Xaloc/Renderer/Pipeline.h"
 #include "Xaloc/Renderer/RenderPass.h"

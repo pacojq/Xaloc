@@ -2,7 +2,7 @@
 
 /*
 	A vertex buffer is used to store the vertices of a mesh.
-	They can be ordered using a given BufferLayout.
+	They can be ordered using a given VertexBufferLayout.
 
 	For example, a "hello-world" triangle would be like:
 
@@ -16,7 +16,7 @@
 			Ref<Xaloc::VertexBuffer> vertexBuffer;
 			vertexBuffer.reset(Xaloc::VertexBuffer::Create(vertices, sizeof(vertices)));
 
-			Xaloc::BufferLayout layout = {
+			Xaloc::VertexBufferLayout layout = {
 				{ Xaloc::ShaderDataType::Float3, "a_Position" },
 				{ Xaloc::ShaderDataType::Float4, "a_Color" }
 			};
@@ -79,7 +79,7 @@ namespace Xaloc {
 		return 0;
 	}
 
-	struct BufferElement
+	struct VertexBufferElement
 	{
 		std::string Name;
 		ShaderDataType Type;
@@ -87,9 +87,9 @@ namespace Xaloc {
 		uint32_t Offset;
 		bool Normalized;
 
-		BufferElement() {}
+		VertexBufferElement() {}
 
-		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
+		VertexBufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
 			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
 		{			
 		}
@@ -127,25 +127,25 @@ namespace Xaloc {
 		Determines how the data inside the VertexBuffer is structured.
 		For each vertex, we will have one or many BufferElements.
 	*/
-	class BufferLayout
+	class VertexBufferLayout
 	{
 	public:
 
-		BufferLayout() {}
+		VertexBufferLayout() {}
 
-		BufferLayout(const std::initializer_list<BufferElement> elements)
+		VertexBufferLayout(const std::initializer_list<VertexBufferElement> elements)
 			: m_Elements(elements)
 		{
 			CalculateOffsetsAndStride();
 		}
 
 		inline uint32_t GetStride() const { return m_Stride; }
-		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
+		inline const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }
 
-		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
-		std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
-		std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
-		std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
+		std::vector<VertexBufferElement>::iterator begin() { return m_Elements.begin(); }
+		std::vector<VertexBufferElement>::iterator end() { return m_Elements.end(); }
+		std::vector<VertexBufferElement>::const_iterator begin() const { return m_Elements.begin(); }
+		std::vector<VertexBufferElement>::const_iterator end() const { return m_Elements.end(); }
 
 	private:
 		void CalculateOffsetsAndStride()
@@ -161,7 +161,7 @@ namespace Xaloc {
 		}
 
 	private:
-		std::vector<BufferElement> m_Elements;
+		std::vector<VertexBufferElement> m_Elements;
 		uint32_t m_Stride;
 	};
 
@@ -177,8 +177,8 @@ namespace Xaloc {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void SetLayout(const BufferLayout& layout) = 0;
-		virtual const BufferLayout& GetLayout() const = 0;
+		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
+		virtual const VertexBufferLayout& GetLayout() const = 0;
 
 		virtual void SetData(const void* data, uint32_t size) = 0;
 
@@ -187,21 +187,5 @@ namespace Xaloc {
 	};
 
 
-
-
-
-
-	class IndexBuffer
-	{
-	public:
-		virtual ~IndexBuffer() = default;
-
-		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
-
-		virtual uint32_t GetCount() const = 0;
-
-		static Ref<IndexBuffer> Create(uint32_t* indeces, uint32_t count);
-	};
 
 }

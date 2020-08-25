@@ -25,7 +25,7 @@ namespace Xaloc {
 		// TODO
 	}
 
-	void VulkanRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	void VulkanRendererAPI::DrawIndexed(uint32_t indexCount)
 	{
 		// TODO
 	}

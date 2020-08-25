@@ -21,7 +21,7 @@ ExampleLayer::ExampleLayer()
 
 	Xaloc::Ref<Xaloc::VertexBuffer> vertexBuffer = Xaloc::VertexBuffer::Create(vertices, sizeof(vertices));
 
-	Xaloc::BufferLayout layout = {
+	Xaloc::VertexBufferLayout layout = {
 		{ Xaloc::ShaderDataType::Float3, "a_Position" },
 		{ Xaloc::ShaderDataType::Float4, "a_Color" }
 	};

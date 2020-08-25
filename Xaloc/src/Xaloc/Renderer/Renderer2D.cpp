@@ -3,7 +3,10 @@
 
 #include "Camera.h"
 
-#include "VertexArray.h"
+#include "Pipeline.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+
 #include "Shader.h"
 #include "RenderCommand.h"
 
@@ -27,8 +30,10 @@ namespace Xaloc {
 		static const uint32_t MaxIndices = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 32; // TODO render capabilities API
 
-		Ref<VertexArray> QuadVertexArray;
+		Ref<Pipeline> QuadPipeline;
+		Ref<IndexBuffer> QuadIndexBuffer;
 		Ref<VertexBuffer> QuadVertexBuffer;
+		
 		Ref<Shader> TextureShader;
 		Ref<Texture2D> WhiteTexture;
 
@@ -51,23 +56,29 @@ namespace Xaloc {
 
 	void Renderer2D::Init()
 	{
-		s_Data.QuadVertexArray = VertexArray::Create();
-
-		s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
-		s_Data.QuadVertexBuffer->SetLayout({
+		// Create pipeline
+		PipelineSpecification pipelineSpecification;
+		pipelineSpecification.Layout = {
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float4, "a_Color" },
 			{ ShaderDataType::Float2, "a_TexCoord" },
 			{ ShaderDataType::Float,  "a_TexIndex" },
 			{ ShaderDataType::Float,  "a_TilingFactor" }
-			});
-		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
+		};
+		s_Data.QuadPipeline = Pipeline::Create(pipelineSpecification);
 
+
+
+		// Create vertex buffer
+		s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
+		
 		// Allocate vertex buffer
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 
+		
+		
 
-
+		// Create index buffer
 		uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
 
 		uint32_t offset = 0;
@@ -84,14 +95,14 @@ namespace Xaloc {
 			offset += 4;
 		}
 
-		Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
-		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
+		s_Data.QuadIndexBuffer = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
 
 		delete[] quadIndices;
 
 
 
 
+		
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
@@ -162,10 +173,11 @@ namespace Xaloc {
 			s_Data.TextureSlots[i]->Bind(i);
 		}
 
-
 		// Draw everything
-		//s_Data.QuadVertexArray->Bind();
-		RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
+		s_Data.QuadPipeline->Bind();
+		// TODO bind vertex buffer?
+		s_Data.QuadIndexBuffer->Bind();
+		RenderCommand::DrawIndexed(s_Data.QuadIndexCount);
 
 
 		s_Data.Stats.DrawCalls++;

@@ -29,7 +29,8 @@ namespace Xaloc {
 		static void BeginRenderPass(Ref<RenderPass> renderPass, bool clear = true);
 		static void EndRenderPass();
 
-		static void Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.0f));
+		// TODO
+		// static void Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.0f));
 		
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }

@@ -1,6 +1,10 @@
 #include "xapch.h"
 #include "Renderer.h"
 
+#include "Pipeline.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+
 #include "Renderer2D.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -68,14 +72,15 @@ namespace Xaloc {
 		s_Data.m_ActiveRenderPass = nullptr;
 	}
 
-	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
+	/* TODO 
+	void Renderer::Submit(const Ref<Pipeline> pipeline, const Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> vertexBuffer, const glm::mat4& transform)
 	{
 		shader->Bind();
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", m_SceneData->ViewProjectionMatrix);
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
 	
-		vertexArray->Bind();
+		vertexBuffer->Bind();
 		RenderCommand::DrawIndexed(vertexArray);
 	}
-
+	*/
 }
