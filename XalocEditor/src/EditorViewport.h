@@ -17,6 +17,10 @@ namespace Xaloc {
 		inline const glm::vec2& GetSize() const { return m_Size; }
 		inline const glm::vec2& GetBounds(int index) const { return m_Bounds[index]; }
 
+
+		void Begin();
+		void End();
+		
 		/// <summary>
 		/// 
 		/// </summary>

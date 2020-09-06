@@ -3,6 +3,7 @@
 #include "Xaloc/Scripting/ScriptEngine.h"
 
 #include "imgui/imgui.h"
+#include "Xaloc/ImGui/ImGuizmo.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -298,6 +299,7 @@ namespace Xaloc {
 		
 		// ============================================= VIEWPORTS ============================================= //
 
+		m_GameViewport->Begin();
 		if (m_GameViewport->Render(m_RenderPass))
 		{
 			// TODO OnWindow resize, call m_CameraController.OnResize again 
@@ -310,7 +312,10 @@ namespace Xaloc {
 			auto& camera = m_MainCamera.GetComponent<CameraComponent>();
 			camera.Camera.SetProjection(data.CalculateProjectionMatrix());
 		}
+		m_GameViewport->End();
 
+
+		m_SceneViewport->Begin();
 		if (m_SceneViewport->Render(m_EditorRenderPass))
 		{
 			auto& data = m_EditorCamera->GetCameraData();
@@ -326,43 +331,47 @@ namespace Xaloc {
 
 		// ============================================= GUIZMO ============================================= //
 
+		auto [camTranslation, camRotationQuat, camScale] = GetTransformDecomposition(m_EditorCamera->GetTransform().Transform);
+		
+		auto& viewMat = glm::translate(glm::mat4(1.0f), camTranslation) * glm::toMat4(camRotationQuat);
+		viewMat = glm::inverse(viewMat);
+		
+		float rw = (float)ImGui::GetWindowWidth();
+		float rh = (float)ImGui::GetWindowHeight();
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
+		
+		// TODO guizmo grid ImGuizmo::DrawGrid(glm::value_ptr(viewMat), glm::value_ptr(m_EditorCamera->GetCamera()->GetProjection()), glm::value_ptr(glm::mat4(1.0f)), 10.0f);
+		
 		if (m_SelectionContext.size())
 		{
-			// TODO draw guizmo
-
-			/*
+			
 			auto& selection = m_SelectionContext[0];
-
-			float rw = (float)ImGui::GetWindowWidth();
-			float rh = (float)ImGui::GetWindowHeight();
-			ImGuizmo::SetOrthographic(true);
-			ImGuizmo::SetDrawlist();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
-
+			
 			// TODO use camera controller
-			auto& camera = m_CameraController.GetCamera();
-			bool snap = false; // TODO Input::IsKeyPressed(HZ_KEY_LEFT_CONTROL);
+			//auto& camera = m_CameraController.GetCamera();
+			bool snap = false; // TODO Input::IsKeyPressed(XA_KEY_LEFT_CONTROL);
 
-			auto& entityTransform = selection.Transform();
+			auto& entityTransform = selection.Entity.Transform();
 			
 			// TODOfloat snapValue[3] = { m_SnapValue, m_SnapValue, m_SnapValue };
 			float snapValue[3] = { 0.1, 0.1, 0.1 };
 			
 			//if (m_SelectionMode == SelectionMode::Entity)
 			{
-				ImGuizmo::Manipulate(glm::value_ptr(camera.GetViewMatrix()),
-					glm::value_ptr(camera.GetProjectionMatrix()),
-					(ImGuizmo::OPERATION)m_GizmoType,
+				ImGuizmo::Manipulate(glm::value_ptr(viewMat),
+					glm::value_ptr(m_EditorCamera->GetCamera()->GetProjection()),
+					(ImGuizmo::OPERATION)ImGuizmo::OPERATION::TRANSLATE,
 					ImGuizmo::LOCAL,
 					glm::value_ptr(entityTransform),
 					nullptr,
-					snap ? snapValue : nullptr);
+					nullptr);
 			}
-			*/
 		}
-
-	
-
+		m_SceneViewport->End();
+		m_EditorCamera->SetFocused(m_SceneViewport->IsFocused());
+		
 		ImGui::End();
 
 	}
@@ -429,8 +438,8 @@ namespace Xaloc {
 					
 					// TODO use pixels per unit and SubTexture width and size
 					AABB boundingBox;
-					glm::vec4 sprMin = entity.Transform() * glm::vec4{ -0.5f, -0.5f, 0.0f, 1.0f };        // Get sprite quad min vertex
-					glm::vec4 sprMax = entity.Transform() * glm::vec4{ 0.5f, 0.5f, 0.0f, 1.0f };          // Get sprite quad max vertex
+					glm::vec4 sprMin = entity.Transform() * glm::vec4{ -0.5f * tex->GetWidth(), -0.5f * tex->GetHeight(), 0.0f, 1.0f };        // Get sprite quad min vertex
+					glm::vec4 sprMax = entity.Transform() * glm::vec4{ 0.5f * tex->GetWidth(), 0.5f * tex->GetHeight(), 0.0f, 1.0f };          // Get sprite quad max vertex
 
 					//                   Projection matrix               * View matrix
 					glm::mat4 viewProj = m_EditorCamera->GetCamera()->GetProjection() * glm::inverse(m_EditorCamera->GetTransform().Transform);
@@ -448,6 +457,7 @@ namespace Xaloc {
 					
 					if (intersects)
 					{
+						// TODO select using the scene hierarchy panel
 						m_SelectionContext.push_back({ entity });
 					}
 				}

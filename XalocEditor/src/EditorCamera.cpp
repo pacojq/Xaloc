@@ -19,6 +19,13 @@ namespace Xaloc {
 		m_Camera = CreateRef<Camera>(m_CameraData.CalculateProjectionMatrix());
 	}
 
+
+	void EditorCamera::SetFocused(bool focused)
+	{
+		m_IsTrackingDelta = focused;
+		m_MousePos = { Input::GetMouseX(), Input::GetMouseY() };
+	}
+
 	
 	void EditorCamera::OnUpdate(Timestep ts)
 	{

@@ -16,6 +16,9 @@ namespace Xaloc {
 		glm::quat orientation;
 		glm::decompose(transform, scale, orientation, translation, skew, perspective);
 
+		if (glm::abs(orientation.y < 0.001f))
+			orientation.y = 0.0f;
+		
 		return { translation, orientation, scale };
 	}
 

@@ -4,14 +4,16 @@
 
 namespace Xaloc {
 
-	class EditorCamera : public Layer
+	class EditorCamera
 	{
 	public:
 		EditorCamera();
 		virtual ~EditorCamera() = default;
 
-		void OnUpdate(Timestep ts) override;
-		void OnEvent(Event& e) override;
+		void EditorCamera::SetFocused(bool focused);
+		
+		void OnUpdate(Timestep ts);
+		void OnEvent(Event& e);
 
 		bool OnMouseScroled(MouseScrolledEvent& e);
 
