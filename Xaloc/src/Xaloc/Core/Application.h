@@ -52,6 +52,8 @@ namespace Xaloc {
 		bool PauseOnFocusLost = false;
 
 		bool VSyncEnabled = true;
+
+		std::string AssetsRootPath = "assets";
 	};
 	
 

@@ -2,8 +2,10 @@
 
 #include "EditorCamera.h"
 #include "EditorViewport.h"
+
 #include "Xaloc.h"
 
+#include "Xaloc/Editor/AssetManagerPanel.h"
 #include "Xaloc/Editor/SceneHierarchyPanel.h"
 
 namespace Xaloc {
@@ -38,6 +40,7 @@ namespace Xaloc {
 
 		Ref<Scene> m_Scene;
 		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		Scope<AssetManagerPanel> m_AssetManagerPanel;
 
 		std::vector<SelectedEntity> m_SelectionContext;
 

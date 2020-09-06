@@ -44,6 +44,7 @@ namespace Xaloc {
 		
 		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
+		m_AssetManagerPanel = CreateScope<AssetManagerPanel>();
 
 		m_GameViewport = CreateRef<EditorViewport>("Game Preview");
 		m_SceneViewport = CreateRef<EditorViewport>("Scene");
@@ -296,6 +297,8 @@ namespace Xaloc {
 		m_SceneHierarchyPanel->OnImGuiRender();
 		
 
+		m_AssetManagerPanel->OnImGuiRender();
+		
 		
 		// ============================================= VIEWPORTS ============================================= //
 

@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Xaloc/Core/Log.h"
+#include "Xaloc/Core/Assets/AssetManager.h"
 
 #include "Xaloc/ImGui/ImGuiStyles.h"
 
@@ -9,13 +10,13 @@
 
 #include "Xaloc/Scripting/ScriptEngine.h"
 
+
 #include <GLFW/glfw3.h>
 
 // TODO this is temporary. Move this and OpenFile somewhere else
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <Windows.h>
-
 
 
 namespace Xaloc {
@@ -35,6 +36,7 @@ namespace Xaloc {
 
 		m_PauseOnFocusLost = spec.PauseOnFocusLost;
 
+		AssetManager::Init(spec.AssetsRootPath);
 		
 		RendererAPI::SetAPI(spec.TargetGraphics);
 
