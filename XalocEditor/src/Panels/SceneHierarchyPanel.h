@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Xaloc/Core/Core.h"
 #include "Xaloc/Scene/Scene.h"
 #include "Xaloc/Scene/Entity.h"
 

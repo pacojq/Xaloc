@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Xaloc/Core/Core.h"
 #include "Xaloc/Core/Assets/AssetManager.h"
 #include "Xaloc/Core/Assets/FileInfo.h"
 

@@ -6,17 +6,15 @@ namespace Xaloc {
 	EditorCamera::EditorCamera()
 	{
 		m_CameraData = {};
-		m_CameraData.Fov = 45.0f;
-		m_CameraData.Width = 1280.0f;
-		m_CameraData.Height = 720.0f;
-		m_CameraData.ZFar = 1000.0f;
-		m_CameraData.ZNear = 0.01f;
-
+		m_CameraData.Camera.SetViewportSize(1280.0, 720.0);
+		m_CameraData.Camera.SetPerspectiveVerticalFOV(45.0f);
+		m_CameraData.Camera.SetPerspectiveNearClip(0.01f);
+		m_CameraData.Camera.SetPerspectiveFarClip(1000.0f);
+		m_CameraData.Camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+		
 		m_CameraTransform = {};
 		m_CameraTransform.Transform = glm::translate(glm::mat4(1.0f), { 0.0f, 0.0f, 10.0f })
 			* glm::scale(glm::mat4(1.0f), { 1.0f, 1.0f, 1.0f });
-
-		m_Camera = CreateRef<Camera>(m_CameraData.CalculateProjectionMatrix());
 	}
 
 
@@ -84,7 +82,8 @@ namespace Xaloc {
 			glm::toMat4(rotationQuat) *
 			glm::scale(glm::mat4(1.0f), scale);
 
-		m_Camera->SetProjection(m_CameraData.CalculateProjectionMatrix());
+		// TODO recalculate
+		//m_CameraData.Camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
 	}
 
 	void EditorCamera::CameraPan(const glm::vec2& delta)
@@ -105,7 +104,8 @@ namespace Xaloc {
 			glm::toMat4(rotationQuat) *
 			glm::scale(glm::mat4(1.0f), scale);
 
-		m_Camera->SetProjection(m_CameraData.CalculateProjectionMatrix());
+		// TODO recalculate
+		//m_CameraData.Camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
 	}
 
 	void EditorCamera::CameraRotate(const glm::vec2& delta)
@@ -125,17 +125,22 @@ namespace Xaloc {
 			glm::toMat4(glm::quat(glm::radians(euler))) *
 			glm::scale(glm::mat4(1.0f), scale);
 
-		m_Camera->SetProjection(m_CameraData.CalculateProjectionMatrix());
+		// TODO recalculate
+		m_CameraData.Camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
 	}
 	
 	
 
 	std::pair<float, float> EditorCamera::CalculatePanSpeed() const
 	{
-		float x = std::min(m_CameraData.Width / 1000.0f, 2.4f); // max = 2.4f
+		// TODO get camera width and height
+		float width = 1280.0f;
+		float height = 720.0f;
+		
+		float x = std::min(width / 1000.0f, 2.4f); // max = 2.4f
 		float xFactor = 0.0366f * (x * x) - 0.1778f * x + 0.3021f;
 
-		float y = std::min(m_CameraData.Height / 1000.0f, 2.4f); // max = 2.4f
+		float y = std::min(height / 1000.0f, 2.4f); // max = 2.4f
 		float yFactor = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
 
 		return { xFactor, yFactor };

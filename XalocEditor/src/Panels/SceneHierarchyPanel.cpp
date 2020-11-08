@@ -1,14 +1,12 @@
-#include "xapch.h"
 #include "SceneHierarchyPanel.h"
 
 #include "PropertyDrawer.h"
 
 #include "Xaloc/Scripting/ScriptEngine.h"
 
-#include <imgui.h>
-#include <limits>
-
-#include "imgui_internal.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
+#include <cstring>
 
 // TODO:
 // - Eventually change imgui node IDs to be entity/asset GUID
@@ -209,84 +207,73 @@ namespace Xaloc {
 			ImGui::Separator();
 		}
 
-		if (entity.HasComponent<CameraComponent>())
-		{
-			if (entity.HasComponent<TransformComponent>())
-			{
-				auto& tc = entity.GetComponent<TransformComponent>();
-				auto [translation, rotationQuat, scale] = GetTransformDecomposition(tc);
 
-				if (scale.x != 1.0f || scale.y != 1.0f || scale.z != 1.0f)
-				{
-					scale = glm::vec3(1.0f, 1.0f, 1.0f);
-					tc.Transform = glm::translate(glm::mat4(1.0f), translation) *
-						glm::toMat4(rotationQuat) *
-						glm::scale(glm::mat4(1.0f), scale);
-				}
-			}
-			
-			auto& cc = entity.GetComponent<CameraComponent>();
+
+
+		
+		if (entity.HasComponent<CameraComponent>())
+		{			
 			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(CameraComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
 			{
-				PropertyDrawer::BeginPropertyGrid();
-				PropertyDrawer::Int("Priority", cc.Priority);
-				PropertyDrawer::EndPropertyGrid();
-				ImGui::TreePop();
-			}
-			ImGui::Separator();
-		}
-
-		if (entity.HasComponent<OrthographicCameraDataComponent>())
-		{
-			auto& ortho = entity.GetComponent<OrthographicCameraDataComponent>();
-			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(OrthographicCameraDataComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Orthographic Camera Data"))
-			{
-				bool change = false;
+				auto& cc = entity.GetComponent<CameraComponent>();
+				auto& camera = cc.Camera;
 				
 				PropertyDrawer::BeginPropertyGrid();
-				change |= PropertyDrawer::Float("Width", ortho.Width, 0.1f, 0.1f);
-				change |= PropertyDrawer::Float("Height", ortho.Height, 0.1f, 0.1f);
-				change |= PropertyDrawer::Float("Zoom Level", ortho.Zoom, 0.1f, 0.1f);
-				change |= PropertyDrawer::Float("Z-Near", ortho.ZNear);
-				change |= PropertyDrawer::Float("Z-Far", ortho.ZFar);
+				PropertyDrawer::Int("Priority", cc.Priority);
+
+				
+				const std::vector<std::string> projectionTypeStrings = { "Perspective", "Orthographic" };
+				const char* currentProjectionType = projectionTypeStrings[(int)camera.GetProjectionType()].c_str();
+				int projIndex;
+
+				if (PropertyDrawer::ComboBox("Projection", projectionTypeStrings, currentProjectionType, &projIndex))
+				{
+					currentProjectionType = projectionTypeStrings[(int)camera.GetProjectionType()].c_str();
+					camera.SetProjectionType((SceneCamera::ProjectionType)projIndex);
+				}
+				
+				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+				{
+					float perspectiveVerticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
+					if (PropertyDrawer::Float("Priority", perspectiveVerticalFov))
+						camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveVerticalFov));
+
+					float perspectiveNear = camera.GetPerspectiveNearClip();
+					if (PropertyDrawer::Float("Near", perspectiveNear))
+						camera.SetPerspectiveNearClip(perspectiveNear);
+
+					float perspectiveFar = camera.GetPerspectiveFarClip();
+					if (PropertyDrawer::Float("Far", perspectiveFar))
+						camera.SetPerspectiveFarClip(perspectiveFar);
+				}
+
+				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
+				{
+					float orthoSize = camera.GetOrthographicSize();
+					if (PropertyDrawer::Float("Size", orthoSize, 0.1f, 0.1f))
+						camera.SetOrthographicSize(orthoSize);
+
+					float orthoNear = camera.GetOrthographicNearClip();
+					float orthoFar = camera.GetOrthographicFarClip();
+					
+					if (PropertyDrawer::Float("Near", orthoNear, 0.1f, -10000.0f, orthoFar - 0.1f))
+						camera.SetOrthographicNearClip(orthoNear);
+					if (PropertyDrawer::Float("Far", orthoFar, 0.1f, orthoNear + 0.1f, 10000.0f))
+						camera.SetOrthographicFarClip(orthoFar);
+
+					ImGui::Checkbox("Fixed Aspect Ratio", &cc.FixedAspectRatio);
+				}
+				
 				PropertyDrawer::EndPropertyGrid();
 				ImGui::TreePop();
-
-				if (change && entity.HasComponent<CameraComponent>())
-				{
-					auto& camera = entity.GetComponent<CameraComponent>();
-					camera.Camera.SetProjection(ortho.CalculateProjectionMatrix());
-				}
 			}
 			ImGui::Separator();
 		}
 
-		if (entity.HasComponent<PerspectiveCameraDataComponent>())
-		{
-			auto& persp = entity.GetComponent<PerspectiveCameraDataComponent>();
-			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(PerspectiveCameraDataComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Perspective Camera Data"))
-			{
-				bool change = false;
 
-				PropertyDrawer::BeginPropertyGrid();
-				change |= PropertyDrawer::Float("Width", persp.Width, 0.1f, 0.1f);
-				change |= PropertyDrawer::Float("Height", persp.Height, 0.1f, 0.1f);
-				change |= PropertyDrawer::Float("FOV Degrees", persp.Fov, 0.1f, 0.1f);
-				change |= PropertyDrawer::Float("Z-Near", persp.ZNear, 0.1f, 0.0f);
-				change |= PropertyDrawer::Float("Z-Far", persp.ZFar, 0.1f, 0.1f);
-				PropertyDrawer::EndPropertyGrid();
-				ImGui::TreePop();
 
-				if (change && entity.HasComponent<CameraComponent>())
-				{
-					auto& camera = entity.GetComponent<CameraComponent>();
-					camera.Camera.SetProjection(persp.CalculateProjectionMatrix());
-				}
-			}
-			ImGui::Separator();
-		}
+
 		
-
 		if (entity.HasComponent<ColliderComponent>())
 		{
 			auto& cc = entity.GetComponent<ColliderComponent>();

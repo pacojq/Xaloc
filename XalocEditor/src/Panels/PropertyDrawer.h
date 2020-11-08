@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Xaloc/Core/Core.h"
 #include "Xaloc/Scene/Scene.h"
 #include "Xaloc/Scene/Entity.h"
 
@@ -26,6 +27,8 @@ namespace Xaloc {
 
 		static bool Vec3(const char* label, glm::vec3& value, float delta = 0.1f);
 		static bool Vec4(const char* label, glm::vec4& value, float delta = 0.1f);
+
+		static bool ComboBox(const char* label, std::vector<std::string> values, const std::string currentValue, int* outIndex);
 	};
 
 }

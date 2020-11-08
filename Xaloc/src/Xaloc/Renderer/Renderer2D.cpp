@@ -49,6 +49,7 @@ namespace Xaloc {
 		Renderer2D::Statistics Stats;
 	};
 
+	static bool s_Init = false;
 	static Renderer2DData s_Data;
 
 
@@ -56,6 +57,9 @@ namespace Xaloc {
 
 	void Renderer2D::Init()
 	{
+		XA_CORE_ASSERT(!s_Init, "Renderer2D is already initialized!");
+		s_Init = true;
+		
 		// Create pipeline
 		PipelineSpecification pipelineSpecification;
 		pipelineSpecification.Layout = {

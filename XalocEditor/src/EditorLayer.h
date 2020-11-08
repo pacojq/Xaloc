@@ -5,8 +5,8 @@
 
 #include "Xaloc.h"
 
-#include "Xaloc/Editor/AssetManagerPanel.h"
-#include "Xaloc/Editor/SceneHierarchyPanel.h"
+#include "Panels/AssetManagerPanel.h"
+#include "Panels/SceneHierarchyPanel.h"
 
 namespace Xaloc {
 

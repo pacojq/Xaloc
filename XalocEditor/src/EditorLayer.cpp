@@ -29,8 +29,10 @@ namespace Xaloc {
 		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
 
 		m_MainCamera = m_Scene->CreateEntity("Orthographic Camera");
-		auto& orthoData = m_MainCamera.AddComponent<OrthographicCameraDataComponent>();
-		auto& firstCamera = m_MainCamera.AddComponent<CameraComponent>(orthoData.CalculateProjectionMatrix());
+		
+		auto& orthoData = m_MainCamera.AddComponent<CameraComponent>();
+		orthoData.Camera.SetViewportSize(1280.0, 720.0);
+		orthoData.Camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
 		
 		ScriptEngine::SetSceneContext(m_Scene);
 		m_Scene->StartRuntime();
@@ -125,7 +127,7 @@ namespace Xaloc {
 		
 		// RENDER SCENE FROM EDITOR CAMERA
 
-		Camera editorCamera = *(m_EditorCamera->GetCamera().get());
+		Camera editorCamera = *(m_EditorCamera->GetCamera());
 		
 		Renderer::BeginRenderPass(m_EditorRenderPass);
 		m_Scene->RenderScene(editorCamera, m_EditorCamera->GetTransform());
@@ -308,12 +310,10 @@ namespace Xaloc {
 			// TODO OnWindow resize, call m_CameraController.OnResize again 
 			//m_CameraController.OnResize(viewportSize.x, viewportSize.y);
 			
-			auto& data = m_MainCamera.GetComponent<OrthographicCameraDataComponent>();
-			data.Width = m_GameViewport->GetSize().x;
-			data.Height = m_GameViewport->GetSize().y;
-
-			auto& camera = m_MainCamera.GetComponent<CameraComponent>();
-			camera.Camera.SetProjection(data.CalculateProjectionMatrix());
+			auto& data = m_MainCamera.GetComponent<CameraComponent>();
+			uint32_t width = (uint32_t)m_GameViewport->GetSize().x;
+			uint32_t height = (uint32_t)m_GameViewport->GetSize().y;
+			data.Camera.SetViewportSize(width, height);
 		}
 		m_GameViewport->End();
 
@@ -321,12 +321,11 @@ namespace Xaloc {
 		m_SceneViewport->Begin();
 		if (m_SceneViewport->Render(m_EditorRenderPass))
 		{
-			auto& data = m_EditorCamera->GetCameraData();
-			Ref<Camera> camera = m_EditorCamera->GetCamera();
+			SceneCamera* camera = m_EditorCamera->GetCamera();
 
-			data.Width = m_SceneViewport->GetSize().x;
-			data.Height = m_SceneViewport->GetSize().y;
-			camera->SetProjection(data.CalculateProjectionMatrix());
+			uint32_t width = (uint32_t)m_SceneViewport->GetSize().x;
+			uint32_t height = (uint32_t)m_SceneViewport->GetSize().y;
+			camera->SetViewportSize(width, height);
 		}
 
 
@@ -404,12 +403,11 @@ namespace Xaloc {
 
 		// TODO when dragging the scene viewport to dock it somewhere else, the camera rotates in a weird way
 		
-		auto& data = m_EditorCamera->GetCameraData();
-		Ref<Camera> camera = m_EditorCamera->GetCamera();
-		
-		data.Width = (float)e.GetWidth();
-		data.Height = (float)e.GetHeight();
-		camera->SetProjection(data.CalculateProjectionMatrix());
+		SceneCamera* camera = m_EditorCamera->GetCamera();
+
+		uint32_t width = e.GetWidth();
+		uint32_t height = e.GetHeight();
+		camera->SetViewportSize(width, height);
 		
 		return false;
 	}

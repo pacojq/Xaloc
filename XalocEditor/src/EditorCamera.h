@@ -17,9 +17,9 @@ namespace Xaloc {
 
 		bool OnMouseScroled(MouseScrolledEvent& e);
 
-		const Ref<Camera>& GetCamera() const { return m_Camera; }
+		SceneCamera* GetCamera() { return &m_CameraData.Camera; }
 		const TransformComponent& GetTransform() const { return m_CameraTransform; }
-		PerspectiveCameraDataComponent& GetCameraData() { return m_CameraData; }
+		CameraComponent& GetCameraData() { return m_CameraData; }
 
 	private:
 		void CameraZoom(float delta);
@@ -30,9 +30,8 @@ namespace Xaloc {
 
 	private:
 
-		Ref<Camera> m_Camera;
 		TransformComponent m_CameraTransform;
-		PerspectiveCameraDataComponent m_CameraData;
+		CameraComponent m_CameraData;
 
 		glm::vec2 m_MousePos = { 0.0f, 0.0f };
 		float m_Pitch = 0;

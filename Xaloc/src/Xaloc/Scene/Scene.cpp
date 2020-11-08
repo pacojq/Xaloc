@@ -224,7 +224,7 @@ namespace Xaloc {
 
 		if (mainCamera)
 		{
-			Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
+			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
 
 			auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
@@ -245,7 +245,7 @@ namespace Xaloc {
 
 	void Scene::RenderScene(const Camera& camera, const glm::mat4& transform)
 	{
-		Renderer2D::BeginScene(camera.GetProjection(), transform);
+		Renderer2D::BeginScene(camera, transform);
 
 		auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 		for (auto entity : group)

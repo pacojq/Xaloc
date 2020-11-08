@@ -1,7 +1,7 @@
-#include "xapch.h"
 #include "PropertyDrawer.h"
 
-#include <imgui.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 #include <limits>
 
 namespace Xaloc {
@@ -59,7 +59,7 @@ namespace Xaloc {
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
 
 		if (error) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.2f, 0.2f, 1.0f));
 		
@@ -88,7 +88,7 @@ namespace Xaloc {
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
 
 		if (error) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.2f, 0.2f, 1.0f));
 		
@@ -119,7 +119,7 @@ namespace Xaloc {
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::DragInt(s_IDBuffer, &value))
 			modified = true;
 
@@ -143,7 +143,7 @@ namespace Xaloc {
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::DragFloat(s_IDBuffer, &value, delta))
 			modified = true;
 
@@ -170,7 +170,7 @@ namespace Xaloc {
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::DragFloat(s_IDBuffer, &value, delta, min, max))
 			modified = true;
 
@@ -207,7 +207,7 @@ namespace Xaloc {
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::DragFloat2(s_IDBuffer, glm::value_ptr(value), delta, min, max))
 			modified = true;
 
@@ -230,7 +230,7 @@ namespace Xaloc {
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::DragFloat3(s_IDBuffer, glm::value_ptr(value), delta))
 			modified = true;
 
@@ -251,7 +251,7 @@ namespace Xaloc {
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::DragFloat4(s_IDBuffer, glm::value_ptr(value), delta))
 			modified = true;
 
@@ -260,5 +260,46 @@ namespace Xaloc {
 
 		return modified;
 	}
+
+
+
+
+
+	bool PropertyDrawer::ComboBox(const char* label, std::vector<std::string> values, const std::string currentValue, int* outIndex)
+	{
+		bool modified = false;
+
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		_itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::BeginCombo(s_IDBuffer, currentValue.c_str()))
+		{
+			int index = -1;
+			for (std::string str : values)
+			{
+				index++;
+				bool isSelected = str.compare(currentValue) == 0;
+				
+				if (ImGui::Selectable(str.c_str(), isSelected))
+				{
+					outIndex = &index;
+					modified = true;
+				}
+				if (isSelected) ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		
+		return modified;
+	}
+	
 	
 }
