@@ -14,7 +14,7 @@ namespace Xaloc {
 	/*
 		Specific layer for ImGui rendering.
 	*/
-	class XALOC_API ImGuiLayer : public Layer
+	class ImGuiLayer : public Layer
 	{
 	public:
 		ImGuiLayer();

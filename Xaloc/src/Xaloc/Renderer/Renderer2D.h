@@ -197,7 +197,9 @@ namespace Xaloc {
 
 	private:
 		static float FindTextureIndex(const Ref<Texture2D> texture);
-		static void FlushAndReset();
+
+		static void StartBatch();
+		static void NextBatch();
 	};
 
 }

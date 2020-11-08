@@ -177,14 +177,14 @@ namespace Xaloc {
 			}
 		}
 		else ImGui::TextDisabled("Unnamed entity");
-		
+
 		if (entity.HasComponent<IdComponent>())
 		{
 			UUID id = entity.GetComponent<IdComponent>().ID;
 			ImGui::SameLine();
 			ImGui::TextDisabled("%llx", id);
 		}
-		ImGui::Separator();
+		
 
 
 		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& tc)
@@ -418,6 +418,59 @@ namespace Xaloc {
 
 			PropertyDrawer::EndPropertyGrid();
 		});
+
+
+
+
+
+		ImGui::Separator();
+		ImGui::PushItemWidth(-1);
+
+		if (ImGui::Button("Add Component"))
+			ImGui::OpenPopup("AddComponent");
+
+		if (ImGui::BeginPopup("AddComponent"))
+		{
+			if (ImGui::MenuItem("Behaviour"))
+			{
+				if (!m_SelectionContext.HasComponent<BehaviourComponent>())
+					m_SelectionContext.AddComponent<BehaviourComponent>();
+				else XA_CORE_WARN("This entity already has the Behaviour Component!");
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Camera"))
+			{
+				if (!m_SelectionContext.HasComponent<CameraComponent>())
+					m_SelectionContext.AddComponent<CameraComponent>();
+				else XA_CORE_WARN("This entity already has the Camera Component!");
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Collider"))
+			{
+				if (!m_SelectionContext.HasComponent<ColliderComponent>())
+					m_SelectionContext.AddComponent<ColliderComponent>();
+				else XA_CORE_WARN("This entity already has the Collider Component!");
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Sprite Renderer"))
+			{
+				if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
+				{
+					// TODO move this white texture to an editor layer property, so we can reuse it
+					Ref<Texture2D> whiteTexture = Texture2D::Create(1, 1);
+					uint32_t whiteTextureData = 0xffffffff;
+					whiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+
+					Ref<SubTexture2D> subTexture = CreateRef<SubTexture2D>(whiteTexture, glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f));
+					m_SelectionContext.AddComponent<SpriteRendererComponent>(subTexture);
+				}
+				else XA_CORE_WARN("This entity already has the Sprite Renderer Component!");
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::PopItemWidth();
 		
 	}
 

@@ -147,19 +147,11 @@ namespace Xaloc {
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProj);
 
-		// Reset pointer to the first element of the Vertex Buffer
-		s_Data.QuadIndexCount = 0;
-		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
-
-		s_Data.TextureSlotIndex = 1; // slot 0 = white texture
+		StartBatch();
 	}
 
 	void Renderer2D::EndScene()
 	{
-		// Upload data to GPU
-		uint32_t dataSize = (uint32_t)( (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase ); // Count how many elements we have by looking at the difference between pointers
-		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
-
 		// Flush everything
 		Flush();
 	}
@@ -171,6 +163,10 @@ namespace Xaloc {
 		if (s_Data.QuadIndexCount == 0)
 			return; // Nothing to draw
 
+		// Upload data to GPU
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase); // Count how many elements we have by looking at the difference between pointers
+		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+		
 		// Bind textures
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 		{
@@ -206,7 +202,19 @@ namespace Xaloc {
 		return textureIndex;
 	}
 
-	void Renderer2D::FlushAndReset()
+
+
+
+	void Renderer2D::StartBatch()
+	{
+		// Reset pointer to the first element of the Vertex Buffer
+		s_Data.QuadIndexCount = 0;
+		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1; // slot 0 = white texture
+	}
+	
+	void Renderer2D::NextBatch()
 	{
 		EndScene();
 
@@ -215,6 +223,9 @@ namespace Xaloc {
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
 		s_Data.TextureSlotIndex = 1; // slot 0 = white texture
+
+		Flush();
+		StartBatch();
 	}
 
 
@@ -238,7 +249,7 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -274,13 +285,13 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = FindTextureIndex(texture);
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 			
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
@@ -334,13 +345,13 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = FindTextureIndex(texture);
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = subTexture->GetTexture();
@@ -384,7 +395,7 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
@@ -418,13 +429,13 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = FindTextureIndex(texture);
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 			
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
@@ -466,13 +477,13 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = FindTextureIndex(texture);
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 			
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;

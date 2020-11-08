@@ -82,11 +82,11 @@ namespace Xaloc {
 		{
 			if (result.status == pugi::xml_parse_status::status_file_not_found)
 			{
-				XA_CORE_ASSERT(false, "Could not load scene. File not found.")
+				XA_CORE_ASSERT(false, "Could not load scene. File not found.");
 			}
 			else
 			{
-				XA_CORE_ASSERT(false, "Could not load scene.")
+				XA_CORE_ASSERT(false, "Could not load scene.");
 			}
 		}
 		

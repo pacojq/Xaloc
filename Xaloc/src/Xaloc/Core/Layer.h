@@ -12,7 +12,7 @@ namespace Xaloc {
 		main loop and execute OnUpdate and OnEvent functions.
 	*/
 
-	class XALOC_API Layer
+	class Layer
 	{
 	public:
 		Layer(const std::string& name = "Layer");

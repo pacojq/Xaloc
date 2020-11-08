@@ -18,7 +18,7 @@ namespace Xaloc {
 		if (type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
 
-		XA_CORE_ASSERT(false, "Unknown shader type: '{0}'", type);
+		XA_CORE_ASSERT(false, "Unknown shader type!");
 		return 0;
 	}
 

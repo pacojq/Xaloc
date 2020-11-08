@@ -9,6 +9,8 @@
 
 #include "Xaloc/Core/Timestep.h"
 
+#include "Xaloc/Debugging/Assert.h"
+
 
 // --- Scene and ECS ----------------------------
 

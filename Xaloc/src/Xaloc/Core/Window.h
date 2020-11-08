@@ -34,7 +34,7 @@ namespace Xaloc {
 	/*
 		Interface representing a desktop system based window
 	*/
-	class XALOC_API Window
+	class Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
