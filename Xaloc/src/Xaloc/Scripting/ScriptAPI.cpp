@@ -69,14 +69,26 @@ namespace Xaloc { namespace Scripting {
 	{
 		Entity entity = FindEntity(entityID);
 		auto& transformComponent = entity.GetComponent<TransformComponent>();
-		memcpy(outTransform, glm::value_ptr(transformComponent.Transform), sizeof(glm::mat4));
+		memcpy(outTransform, glm::value_ptr(transformComponent.GetTransform()), sizeof(glm::mat4));
 	}
 
 	void Xaloc_Entity_SetTransform(uint64_t entityID, glm::mat4* inTransform)
 	{
 		Entity entity = FindEntity(entityID);
+
 		auto& transformComponent = entity.GetComponent<TransformComponent>();
-		memcpy(glm::value_ptr(transformComponent.Transform), inTransform, sizeof(glm::mat4));
+
+		glm::vec3 scale, translation, skew;
+		glm::vec4 perspective;
+		glm::quat orientation;
+		glm::decompose(*inTransform, scale, orientation, translation, skew, perspective);
+
+		if (glm::abs(orientation.y < 0.001f))
+			orientation.y = 0.0f;
+
+		transformComponent.Translation = translation;
+		transformComponent.Rotation = glm::degrees(glm::eulerAngles(orientation));
+		transformComponent.Scale = scale;
 	}
 
 	void Xaloc_Entity_CreateComponent(uint64_t entityID, void* type)

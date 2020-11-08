@@ -130,7 +130,7 @@ namespace Xaloc {
 		
 		auto test = m_Registry.create();
 		m_Registry.emplace<TagComponent>(test, "Test Collider Entity");
-		m_Registry.emplace<TransformComponent>(test, glm::mat4(1.0f));
+		m_Registry.emplace<TransformComponent>(test);
 		m_Registry.emplace<ColliderComponent>(test, glm::vec2(1.0f));
 
 
@@ -204,7 +204,7 @@ namespace Xaloc {
 
 
 		Camera* mainCamera = nullptr;
-		glm::mat4* cameraTransform = nullptr;
+		glm::mat4 cameraTransform;
 		{
 			int priority = std::numeric_limits<int>::max();
 
@@ -216,7 +216,7 @@ namespace Xaloc {
 				if (camera.Priority < priority)
 				{
 					mainCamera = &camera.Camera;
-					cameraTransform = &transform.Transform;
+					cameraTransform = transform.GetTransform();
 					priority = camera.Priority;
 				}
 			}
@@ -224,7 +224,7 @@ namespace Xaloc {
 
 		if (mainCamera)
 		{
-			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
+			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
 			auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
@@ -232,7 +232,7 @@ namespace Xaloc {
 				auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 				auto trans = transformComponent;
 				auto spr = spriteRendererComponent;
-				Renderer2D::DrawQuad(transformComponent.Transform, spriteRendererComponent.SubTexture);
+				Renderer2D::DrawQuad(transformComponent.GetTransform(), spriteRendererComponent.SubTexture);
 			}
 
 			Renderer2D::EndScene();
@@ -253,7 +253,7 @@ namespace Xaloc {
 			auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 			auto trans = transformComponent;
 			auto spr = spriteRendererComponent;
-			Renderer2D::DrawQuad(transformComponent.Transform, spriteRendererComponent.SubTexture);
+			Renderer2D::DrawQuad(trans.GetTransform(), spriteRendererComponent.SubTexture);
 		}
 
 		Renderer2D::EndScene();
@@ -277,7 +277,7 @@ namespace Xaloc {
 
 		XA_CORE_ASSERT(m_EntityMap.find(idComp.ID) == m_EntityMap.end(), "Repeated entity ID!");
 
-		entity.AddComponent<TransformComponent>(glm::mat4(1.0f));
+		entity.AddComponent<TransformComponent>();
 		entity.AddComponent<TagComponent>(goName);
 
 		XA_CORE_TRACE("Registering entity to the EntityMap. Id = {}", idComp.ID);

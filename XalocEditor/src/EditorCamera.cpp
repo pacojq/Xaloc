@@ -13,8 +13,9 @@ namespace Xaloc {
 		m_CameraData.Camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
 		
 		m_CameraTransform = {};
-		m_CameraTransform.Transform = glm::translate(glm::mat4(1.0f), { 0.0f, 0.0f, 10.0f })
-			* glm::scale(glm::mat4(1.0f), { 1.0f, 1.0f, 1.0f });
+		m_CameraTransform.Translation = { 0.0f, 0.0f, 10.0f };
+		m_CameraTransform.Rotation = { 0.0f, 0.0f, 0.0f };
+		m_CameraTransform.Scale = { 1.0f, 1.0f, 1.0f };
 	}
 
 
@@ -28,7 +29,6 @@ namespace Xaloc {
 	void EditorCamera::OnUpdate(Timestep ts)
 	{
 		const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
-		//glm::vec2 delta = (mouse - m_MousePos) * 0.003f;
 		glm::vec2 delta = (mouse - m_MousePos) * 6.5f * ts.GetSeconds();
 		
 		if (Input::IsMouseButtonPressed(XA_MOUSE_BUTTON_MIDDLE))
@@ -73,60 +73,42 @@ namespace Xaloc {
 
 	void EditorCamera::CameraZoom(float delta)
 	{
-		auto [translation, rotationQuat, scale] = GetTransformDecomposition(m_CameraTransform);
-
-		glm::vec3 forward = glm::rotate(rotationQuat, glm::vec3(0.0f, 0.0f, -delta));
-		translation += forward;
-
-		m_CameraTransform.Transform = glm::translate(glm::mat4(1.0f), translation) *
-			glm::toMat4(rotationQuat) *
-			glm::scale(glm::mat4(1.0f), scale);
-
-		// TODO recalculate
-		//m_CameraData.Camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -delta))
+			* m_CameraTransform.GetRotation();
+		
+		m_CameraTransform.Translation = m_CameraTransform.Translation + TransformToTranslation(transform);
 	}
 
 	void EditorCamera::CameraPan(const glm::vec2& delta)
 	{
-		auto [translation, rotationQuat, scale] = GetTransformDecomposition(m_CameraTransform);
-
 		auto [xSpd, ySpd] = CalculatePanSpeed();
 
+		//vec3 degrees = glm::degrees(glm::eulerAngles(orientation));
+
 		float dx = delta.x * xSpd;
-		glm::vec3 right = glm::rotate(rotationQuat, glm::vec3(-dx, 0.0f, 0.0f));
-		translation += right;
+		glm::mat4 right = glm::translate(glm::mat4(1.0f), glm::vec3(-dx, 0.0f, 0.0f))
+			* m_CameraTransform.GetRotation();
+		m_CameraTransform.Translation = m_CameraTransform.Translation + TransformToTranslation(right);
 
 		float dy = delta.y * ySpd;
-		glm::vec3 up = glm::rotate(rotationQuat, glm::vec3(0.0f, dy, 0.0f));
-		translation += up;
-
-		m_CameraTransform.Transform = glm::translate(glm::mat4(1.0f), translation) *
-			glm::toMat4(rotationQuat) *
-			glm::scale(glm::mat4(1.0f), scale);
-
-		// TODO recalculate
-		//m_CameraData.Camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+		glm::mat4 up = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, dy, 0.0f))
+			* m_CameraTransform.GetRotation();
+		m_CameraTransform.Translation = m_CameraTransform.Translation + TransformToTranslation(up);
 	}
 
 	void EditorCamera::CameraRotate(const glm::vec2& delta)
-	{
-		auto [translation, rotationQuat, scale] = GetTransformDecomposition(m_CameraTransform);
-				
+	{		
 		float rotSpd = 0.8f;
-		glm::vec3 up = glm::rotate(rotationQuat, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec3 up = TransformToTranslation(
+			glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+			* m_CameraTransform.GetRotation());
 		
 		float yawSign = up.y < 0 ? -1.0f : 1.0f;
 		m_Yaw += yawSign * delta.x * rotSpd;
 		m_Pitch += delta.y * rotSpd;
 
 		glm::vec3 euler = glm::vec3(-m_Pitch, -m_Yaw, 0.0f);
-		
-		m_CameraTransform.Transform = glm::translate(glm::mat4(1.0f), translation) *
-			glm::toMat4(glm::quat(glm::radians(euler))) *
-			glm::scale(glm::mat4(1.0f), scale);
-
-		// TODO recalculate
-		m_CameraData.Camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+		m_CameraTransform.Rotation = glm::radians(euler);
 	}
 	
 	

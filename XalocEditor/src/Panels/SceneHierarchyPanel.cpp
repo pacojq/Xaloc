@@ -64,6 +64,7 @@ namespace Xaloc {
 		}
 		ImGui::End();
 	}
+	
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
@@ -108,10 +109,62 @@ namespace Xaloc {
 
 
 
+
+
+
+	template<typename T, typename UIFunction>
+	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+	{
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+
+		if (entity.HasComponent<T>())
+		{
+			auto& component = entity.GetComponent<T>();
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+
+			ImGui::Separator();
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+
+			ImGui::PopStyleVar();
+			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+			{
+				ImGui::OpenPopup("ComponentSettings");
+			}
+
+			bool removeComponent = false;
+			if (ImGui::BeginPopup("ComponentSettings"))
+			{
+				if (ImGui::MenuItem("Remove component"))
+					removeComponent = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (open)
+			{
+				uiFunction(component);
+				ImGui::TreePop();
+			}
+			if (removeComponent)
+			{
+				entity.RemoveComponent<T>();
+			}
+		}
+	}
+
+
+	
+
+	
+
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
 		ImGui::AlignTextToFramePadding();
-
+		
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -123,10 +176,7 @@ namespace Xaloc {
 				tag = std::string(buffer);
 			}
 		}
-		else
-		{
-			ImGui::TextDisabled("Unnamed entity");
-		}
+		else ImGui::TextDisabled("Unnamed entity");
 		
 		if (entity.HasComponent<IdComponent>())
 		{
@@ -137,8 +187,29 @@ namespace Xaloc {
 		ImGui::Separator();
 
 
+		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& tc)
+		{
+			PropertyDrawer::BeginPropertyGrid();
 
-		
+			PropertyDrawer::Vec3("Translation", tc.Translation);
+			glm::vec3 rotation = glm::degrees(tc.Rotation);
+			PropertyDrawer::Vec3("Rotation", rotation);
+			tc.Rotation = glm::radians(rotation);
+
+			if (entity.HasComponent<CameraComponent>())
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+				PropertyDrawer::Vec3("Scale", tc.Scale, 1.0f);
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+			else PropertyDrawer::Vec3("Scale", tc.Scale, 1.0f);
+
+			PropertyDrawer::EndPropertyGrid();
+		});
+
+		/*
 		if (entity.HasComponent<TransformComponent>())
 		{
 			auto& tc = entity.GetComponent<TransformComponent>();
@@ -180,208 +251,175 @@ namespace Xaloc {
 			}
 			ImGui::Separator();
 		}
-
-
-		if (entity.HasComponent<SceneComponent>())
-		{
-			auto& sc = entity.GetComponent<SceneComponent>();
-			if (ImGui::TreeNodeEx((void*)((uint32_t)entity), ImGuiTreeNodeFlags_DefaultOpen, "Scene"))
-			{
-				PropertyDrawer::BeginPropertyGrid();
-
-				ImGui::Text("Scene ID");
-				ImGui::NextColumn();
-				ImGui::PushItemWidth(-1);
-				ImGui::Text("%llx", sc.SceneID);
-				ImGui::PopItemWidth();
-				ImGui::NextColumn();
-
-				if (PropertyDrawer::String("Name", sc.Name))
-				{
-					m_Scene->m_Name = sc.Name;
-				}
-
-				PropertyDrawer::EndPropertyGrid();
-				ImGui::TreePop();
-			}
-			ImGui::Separator();
-		}
-
-
-
+		*/
 
 		
-		if (entity.HasComponent<CameraComponent>())
-		{			
-			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(CameraComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
-			{
-				auto& cc = entity.GetComponent<CameraComponent>();
-				auto& camera = cc.Camera;
-				
-				PropertyDrawer::BeginPropertyGrid();
-				PropertyDrawer::Int("Priority", cc.Priority);
-
-				
-				const std::vector<std::string> projectionTypeStrings = { "Perspective", "Orthographic" };
-				const char* currentProjectionType = projectionTypeStrings[(int)camera.GetProjectionType()].c_str();
-				int projIndex;
-
-				if (PropertyDrawer::ComboBox("Projection", projectionTypeStrings, currentProjectionType, &projIndex))
-				{
-					currentProjectionType = projectionTypeStrings[(int)camera.GetProjectionType()].c_str();
-					camera.SetProjectionType((SceneCamera::ProjectionType)projIndex);
-				}
-				
-				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
-				{
-					float perspectiveVerticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-					if (PropertyDrawer::Float("Priority", perspectiveVerticalFov))
-						camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveVerticalFov));
-
-					float perspectiveNear = camera.GetPerspectiveNearClip();
-					if (PropertyDrawer::Float("Near", perspectiveNear))
-						camera.SetPerspectiveNearClip(perspectiveNear);
-
-					float perspectiveFar = camera.GetPerspectiveFarClip();
-					if (PropertyDrawer::Float("Far", perspectiveFar))
-						camera.SetPerspectiveFarClip(perspectiveFar);
-				}
-
-				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
-				{
-					float orthoSize = camera.GetOrthographicSize();
-					if (PropertyDrawer::Float("Size", orthoSize, 0.1f, 0.1f))
-						camera.SetOrthographicSize(orthoSize);
-
-					float orthoNear = camera.GetOrthographicNearClip();
-					float orthoFar = camera.GetOrthographicFarClip();
-					
-					if (PropertyDrawer::Float("Near", orthoNear, 0.1f, -10000.0f, orthoFar - 0.1f))
-						camera.SetOrthographicNearClip(orthoNear);
-					if (PropertyDrawer::Float("Far", orthoFar, 0.1f, orthoNear + 0.1f, 10000.0f))
-						camera.SetOrthographicFarClip(orthoFar);
-
-					ImGui::Checkbox("Fixed Aspect Ratio", &cc.FixedAspectRatio);
-				}
-				
-				PropertyDrawer::EndPropertyGrid();
-				ImGui::TreePop();
-			}
-			ImGui::Separator();
-		}
-
-
-
-
-		
-		if (entity.HasComponent<ColliderComponent>())
+		DrawComponent<SceneComponent>("Scene", entity, [&](auto& sc)
 		{
-			auto& cc = entity.GetComponent<ColliderComponent>();
-			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(ColliderComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Collider"))
+			PropertyDrawer::BeginPropertyGrid();
+
+			ImGui::Text("Scene ID");
+			ImGui::NextColumn();
+			ImGui::PushItemWidth(-1);
+			ImGui::Text("%llx", sc.SceneID);
+			ImGui::PopItemWidth();
+			ImGui::NextColumn();
+
+			if (PropertyDrawer::String("Name", sc.Name))
 			{
+				m_Scene->m_Name = sc.Name;
+			}
+
+			PropertyDrawer::EndPropertyGrid();
+		});
+
+		DrawComponent<CameraComponent>("Camera", entity, [](auto& cc)
+		{
+			auto& camera = cc.Camera;
+
+			PropertyDrawer::BeginPropertyGrid();
+			PropertyDrawer::Int("Priority", cc.Priority);
+
+
+			const std::vector<std::string> projectionTypeStrings = { "Perspective", "Orthographic" };
+			const char* currentProjectionType = projectionTypeStrings[(int)camera.GetProjectionType()].c_str();
+			int projIndex;
+
+			if (PropertyDrawer::ComboBox("Projection", projectionTypeStrings, currentProjectionType, &projIndex))
+			{
+				currentProjectionType = projectionTypeStrings[(int)camera.GetProjectionType()].c_str();
+				camera.SetProjectionType((SceneCamera::ProjectionType)projIndex);
+			}
+
+			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+			{
+				float perspectiveVerticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
+				if (PropertyDrawer::Float("Priority", perspectiveVerticalFov))
+					camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveVerticalFov));
+
+				float perspectiveNear = camera.GetPerspectiveNearClip();
+				if (PropertyDrawer::Float("Near", perspectiveNear))
+					camera.SetPerspectiveNearClip(perspectiveNear);
+
+				float perspectiveFar = camera.GetPerspectiveFarClip();
+				if (PropertyDrawer::Float("Far", perspectiveFar))
+					camera.SetPerspectiveFarClip(perspectiveFar);
+			}
+
+			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
+			{
+				float orthoSize = camera.GetOrthographicSize();
+				if (PropertyDrawer::Float("Size", orthoSize, 0.1f, 0.1f))
+					camera.SetOrthographicSize(orthoSize);
+
+				float orthoNear = camera.GetOrthographicNearClip();
+				float orthoFar = camera.GetOrthographicFarClip();
+
+				if (PropertyDrawer::Float("Near", orthoNear, 0.1f, -10000.0f, orthoFar - 0.1f))
+					camera.SetOrthographicNearClip(orthoNear);
+				if (PropertyDrawer::Float("Far", orthoFar, 0.1f, orthoNear + 0.1f, 10000.0f))
+					camera.SetOrthographicFarClip(orthoFar);
+
+				ImGui::Checkbox("Fixed Aspect Ratio", &cc.FixedAspectRatio);
+			}
+
+			PropertyDrawer::EndPropertyGrid();
+		});
+
+
+		DrawComponent<ColliderComponent>("Collider", entity, [](auto& cc)
+		{
 				PropertyDrawer::BeginPropertyGrid();
 				PropertyDrawer::Vec2("Size", cc.Size, 0.1f, 0.0f);
 				PropertyDrawer::EndPropertyGrid();
-				ImGui::TreePop();
-			}
-			ImGui::Separator();
-		}
+		});
+		
 
-		if (entity.HasComponent<SpriteRendererComponent>())
+		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& src)
 		{
-			auto& src = entity.GetComponent<SpriteRendererComponent>();
-			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(SpriteRendererComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			PropertyDrawer::BeginPropertyGrid();
+			PropertyDrawer::String("Asset ID", src.SubTexture->GetTexture()->AssetID().c_str());
+
+			PropertyDrawer::EndPropertyGrid();
+			if (ImGui::Button("Apply"))
 			{
-				PropertyDrawer::BeginPropertyGrid();
-				PropertyDrawer::String("Asset ID", src.SubTexture->GetTexture()->AssetID().c_str());
-
-				PropertyDrawer::EndPropertyGrid();
-				if (ImGui::Button("Apply"))
-				{
-					// TODO
-				}
-				ImGui::TreePop();
+				// TODO
 			}
-			ImGui::Separator();
-		}
+		});
 
-		if (entity.HasComponent<BehaviourComponent>() && entity.HasComponent<IdComponent>())
+
+		DrawComponent<BehaviourComponent>("Behaviour", entity, [&entity](auto& sc)
 		{
 			UUID id = entity.GetComponent<IdComponent>().ID;
 			
-			auto& sc = entity.GetComponent<BehaviourComponent>();
-			if (ImGui::TreeNodeEx((void*)((uint32_t)entity | typeid(BehaviourComponent).hash_code()), ImGuiTreeNodeFlags_DefaultOpen, "Script"))
+			PropertyDrawer::BeginPropertyGrid();
+			std::string oldName = sc.ModuleName;
+			if (PropertyDrawer::String("Module Name", sc.ModuleName, !ScriptEngine::ModuleExists(sc.ModuleName))) // TODO: no live edit
 			{
-				PropertyDrawer::BeginPropertyGrid();
-				std::string oldName = sc.ModuleName;
-				if (PropertyDrawer::String("Module Name", sc.ModuleName, !ScriptEngine::ModuleExists(sc.ModuleName))) // TODO: no live edit
-				{
-					// Shutdown old script
-					if (ScriptEngine::ModuleExists(oldName))
-						ScriptEngine::ShutdownBehaviourEntity(entity, oldName);
+				// Shutdown old script
+				if (ScriptEngine::ModuleExists(oldName))
+					ScriptEngine::ShutdownBehaviourEntity(entity, oldName);
 
-					if (ScriptEngine::ModuleExists(sc.ModuleName))
-						ScriptEngine::InitBehaviourEntity(entity);
-				}
-
-				// Public Fields
 				if (ScriptEngine::ModuleExists(sc.ModuleName))
+					ScriptEngine::InitBehaviourEntity(entity);
+			}
+
+			// Public Fields
+			if (ScriptEngine::ModuleExists(sc.ModuleName))
+			{
+				EntityInstanceFields& entityInstanceFields = ScriptEngine::GetEntityInstanceFields(entity.GetScene()->GetID(), id);
+				auto& moduleFieldMap = entityInstanceFields.ModuleFieldMap;
+				if (moduleFieldMap.find(sc.ModuleName) != moduleFieldMap.end())
 				{
-					EntityInstanceFields& entityInstanceFields = ScriptEngine::GetEntityInstanceFields(entity.GetScene()->GetID(), id);
-					auto& moduleFieldMap = entityInstanceFields.ModuleFieldMap;
-					if (moduleFieldMap.find(sc.ModuleName) != moduleFieldMap.end())
+					auto& publicFields = moduleFieldMap.at(sc.ModuleName);
+					for (auto& [name, field] : publicFields)
 					{
-						auto& publicFields = moduleFieldMap.at(sc.ModuleName);
-						for (auto& [name, field] : publicFields)
+						switch (field.Type)
 						{
-							switch (field.Type)
-							{
-							case FieldType::Int:
-							{
-								int value = field.GetValue<int>();
-								if (PropertyDrawer::Int(field.Name.c_str(), value))
-									field.SetValue(value);
-								break;
-							}
-							case FieldType::Float:
-							{
-								float value = field.GetValue<float>();
-								if (PropertyDrawer::Float(field.Name.c_str(), value, 0.2f))
-									field.SetValue(value);
-								break;
-							}
-							case FieldType::Vec2:
-							{
-								glm::vec2 value = field.GetValue<glm::vec2>();
-								if (PropertyDrawer::Vec2(field.Name.c_str(), value, 0.2f))
-									field.SetValue(value);
-								break;
-							}
-							case FieldType::Vec3:
-							{
-								glm::vec3 value = field.GetValue<glm::vec3>();
-								if (PropertyDrawer::Vec3(field.Name.c_str(), value, 0.2f))
-									field.SetValue(value);
-								break;
-							}
-							case FieldType::Vec4:
-							{
-								glm::vec4 value = field.GetValue<glm::vec4>();
-								if (PropertyDrawer::Vec4(field.Name.c_str(), value, 0.2f))
-									field.SetValue(value);
-								break;
-							}
-							}
+						case FieldType::Int:
+						{
+							int value = field.GetValue<int>();
+							if (PropertyDrawer::Int(field.Name.c_str(), value))
+								field.SetValue(value);
+							break;
+						}
+						case FieldType::Float:
+						{
+							float value = field.GetValue<float>();
+							if (PropertyDrawer::Float(field.Name.c_str(), value, 0.2f))
+								field.SetValue(value);
+							break;
+						}
+						case FieldType::Vec2:
+						{
+							glm::vec2 value = field.GetValue<glm::vec2>();
+							if (PropertyDrawer::Vec2(field.Name.c_str(), value, 0.2f))
+								field.SetValue(value);
+							break;
+						}
+						case FieldType::Vec3:
+						{
+							glm::vec3 value = field.GetValue<glm::vec3>();
+							if (PropertyDrawer::Vec3(field.Name.c_str(), value, 0.2f))
+								field.SetValue(value);
+							break;
+						}
+						case FieldType::Vec4:
+						{
+							glm::vec4 value = field.GetValue<glm::vec4>();
+							if (PropertyDrawer::Vec4(field.Name.c_str(), value, 0.2f))
+								field.SetValue(value);
+							break;
+						}
 						}
 					}
 				}
-
-				PropertyDrawer::EndPropertyGrid();
-				ImGui::TreePop();
 			}
-			ImGui::Separator();
-		}
 
+			PropertyDrawer::EndPropertyGrid();
+		});
+		
 	}
+
 
 }

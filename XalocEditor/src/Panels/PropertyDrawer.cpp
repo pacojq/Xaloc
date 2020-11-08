@@ -200,63 +200,71 @@ namespace Xaloc {
 	{
 		bool modified = false;
 
+		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		_itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat2(s_IDBuffer, glm::value_ptr(value), delta, min, max))
-			modified = true;
+		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
-		ImGui::PopItemWidth();
+		modified |= VecCoord(0, value.x, delta);
+		modified |= VecCoord(1, value.y, delta);
+
 		ImGui::NextColumn();
+		ImGui::PopStyleVar();
+		ImGui::PopID();
 
 		return modified;
 	}
 
 
 
+
+		
 	bool PropertyDrawer::Vec3(const char* label, glm::vec3& value, float delta)
 	{
 		bool modified = false;
 
+		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		_itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat3(s_IDBuffer, glm::value_ptr(value), delta))
-			modified = true;
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
-		ImGui::PopItemWidth();
+		modified |= VecCoord(0, value.x, delta);
+		modified |= VecCoord(1, value.y, delta);
+		modified |= VecCoord(2, value.z, delta);
+
 		ImGui::NextColumn();
-
+		ImGui::PopStyleVar();
+		ImGui::PopID();
+		
 		return modified;
 	}
+
+
+
 
 	bool PropertyDrawer::Vec4(const char* label, glm::vec4& value, float delta)
 	{
 		bool modified = false;
 
+		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
-		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		_itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat4(s_IDBuffer, glm::value_ptr(value), delta))
-			modified = true;
+		ImGui::PushMultiItemsWidths(4, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
-		ImGui::PopItemWidth();
+		modified |= VecCoord(0, value.x, delta);
+		modified |= VecCoord(1, value.y, delta);
+		modified |= VecCoord(2, value.z, delta);
+		modified |= VecCoord(3, value.w, delta);
+
 		ImGui::NextColumn();
+		ImGui::PopStyleVar();
+		ImGui::PopID();
 
 		return modified;
 	}
@@ -300,6 +308,46 @@ namespace Xaloc {
 		
 		return modified;
 	}
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+	bool PropertyDrawer::VecCoord(int coord, float& value, float delta)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+		bool modified = false;
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+		ImGui::PushStyleColor(ImGuiCol_Button, s_Coords[coord].Color);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, s_Coords[coord].ColorHovered);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, s_Coords[coord].ColorActive);
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button(s_Coords[coord].Label, buttonSize))
+		{
+			value = 0.0f;// TODO reset value resetValue;
+			modified = true;
+		}
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		modified |= ImGui::DragFloat(s_Coords[coord].Id, &value, delta, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		return modified;
+	}
 	
 }

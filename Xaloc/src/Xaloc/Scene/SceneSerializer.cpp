@@ -123,24 +123,16 @@ namespace Xaloc {
 
             std::string strRotation = transformNode.attribute("rotation").value();
             auto vecRotation = ParseVector(strRotation);
-            glm::quat rotation = { vecRotation[0], vecRotation[1], vecRotation[2], vecRotation[3] };
+            glm::vec3 rotation = { vecRotation[0], vecRotation[1], vecRotation[2] };
 
             std::string strScale = transformNode.attribute("scale").value();
             auto vecScale = ParseVector(strScale);
             glm::vec3 scale = { vecScale[0], vecScale[1], vecScale[2] };
 
-            
-            glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-                * glm::mat4_cast( rotation )
-                * glm::scale(glm::mat4(1.0f), scale);
-
-            auto [oPosition, oRotation, oScale] = GetTransformDecomposition(transform);
-
-            XA_ASSERT(oPosition == position, "Failed to deserialize position");
-            XA_ASSERT(oRotation == rotation, "Failed to deserialize rotation");
-            XA_ASSERT(oScale == scale, "Failed to deserialize scale");
-
-            entity.GetComponent<TransformComponent>().Transform = transform;
+        	
+            entity.GetComponent<TransformComponent>().Translation = position;
+            entity.GetComponent<TransformComponent>().Rotation = rotation;
+            entity.GetComponent<TransformComponent>().Scale = scale;
 
             XA_CORE_TRACE("        TransformComponent: position = {0}    rotation = {1}    scale = {2}",
                 strPosition, strRotation, strScale);
@@ -235,14 +227,13 @@ namespace Xaloc {
             auto transform = entity.GetComponent<TransformComponent>();
             auto transformNode = node.append_child("TransformComponent");
 
-            auto [translation, rotation, scale] = GetTransformDecomposition(transform);
-            char buff[64];
+        	char buff[64];
             
-            snprintf(buff, sizeof(buff), "[%f, %f, %f]", translation.r, translation.g, translation.b);
+            snprintf(buff, sizeof(buff), "[%f, %f, %f]", transform.Translation.x, transform.Translation.y, transform.Translation.z);
             std::string strPosition = buff;
-            snprintf(buff, sizeof(buff), "[%f, %f, %f, %f]", rotation.w, rotation.x, rotation.y, rotation.z);
+            snprintf(buff, sizeof(buff), "[%f, %f, %f]", transform.Rotation.x, transform.Rotation.y, transform.Rotation.z);
             std::string strRotation = buff;
-            snprintf(buff, sizeof(buff), "[%f, %f, %f]", scale.r, scale.g, scale.b);
+            snprintf(buff, sizeof(buff), "[%f, %f, %f]", transform.Scale.x, transform.Scale.y, transform.Scale.z);
             std::string strScale = buff;
 
             transformNode.append_attribute("position").set_value(strPosition.c_str());

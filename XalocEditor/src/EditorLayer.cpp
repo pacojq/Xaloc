@@ -33,6 +33,8 @@ namespace Xaloc {
 		auto& orthoData = m_MainCamera.AddComponent<CameraComponent>();
 		orthoData.Camera.SetViewportSize(1280.0, 720.0);
 		orthoData.Camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
+		orthoData.Camera.SetOrthographicNearClip(-100);
+		orthoData.Camera.SetOrthographicFarClip(100);
 		
 		ScriptEngine::SetSceneContext(m_Scene);
 		m_Scene->StartRuntime();
@@ -130,7 +132,7 @@ namespace Xaloc {
 		Camera editorCamera = *(m_EditorCamera->GetCamera());
 		
 		Renderer::BeginRenderPass(m_EditorRenderPass);
-		m_Scene->RenderScene(editorCamera, m_EditorCamera->GetTransform());
+		m_Scene->RenderScene(editorCamera, m_EditorCamera->GetTransform().GetTransform());
 		Renderer::EndRenderPass();
 
 		if (m_SceneViewport->IsFocused())
@@ -333,6 +335,7 @@ namespace Xaloc {
 
 		// ============================================= GUIZMO ============================================= //
 
+		/* TODO guizmo
 		auto [camTranslation, camRotationQuat, camScale] = GetTransformDecomposition(m_EditorCamera->GetTransform().Transform);
 		
 		auto& viewMat = glm::translate(glm::mat4(1.0f), camTranslation) * glm::toMat4(camRotationQuat);
@@ -343,16 +346,16 @@ namespace Xaloc {
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
-		
+		*/
 		// TODO guizmo grid ImGuizmo::DrawGrid(glm::value_ptr(viewMat), glm::value_ptr(m_EditorCamera->GetCamera()->GetProjection()), glm::value_ptr(glm::mat4(1.0f)), 10.0f);
 		
 		if (m_SelectionContext.size())
 		{
-			
 			auto& selection = m_SelectionContext[0];
 			
 			// TODO use camera controller
 			//auto& camera = m_CameraController.GetCamera();
+			/*
 			bool snap = false; // TODO Input::IsKeyPressed(XA_KEY_LEFT_CONTROL);
 
 			auto& entityTransform = selection.Entity.Transform();
@@ -370,7 +373,9 @@ namespace Xaloc {
 					nullptr,
 					nullptr);
 			}
+			*/
 		}
+		
 		m_SceneViewport->End();
 		m_EditorCamera->SetFocused(m_SceneViewport->IsFocused());
 		
@@ -438,12 +443,13 @@ namespace Xaloc {
 						continue;
 					
 					// TODO use pixels per unit and SubTexture width and size
+					TransformComponent trans = entity.GetComponent<TransformComponent>();
 					AABB boundingBox;
-					glm::vec4 sprMin = entity.Transform() * glm::vec4{ -0.5f * tex->GetWidth(), -0.5f * tex->GetHeight(), 0.0f, 1.0f };        // Get sprite quad min vertex
-					glm::vec4 sprMax = entity.Transform() * glm::vec4{ 0.5f * tex->GetWidth(), 0.5f * tex->GetHeight(), 0.0f, 1.0f };          // Get sprite quad max vertex
+					glm::vec4 sprMin = trans.GetTransform() * glm::vec4{ -0.5f * tex->GetWidth(), -0.5f * tex->GetHeight(), 0.0f, 1.0f };        // Get sprite quad min vertex
+					glm::vec4 sprMax = trans.GetTransform() * glm::vec4{ 0.5f * tex->GetWidth(), 0.5f * tex->GetHeight(), 0.0f, 1.0f };          // Get sprite quad max vertex
 
 					//                   Projection matrix               * View matrix
-					glm::mat4 viewProj = m_EditorCamera->GetCamera()->GetProjection() * glm::inverse(m_EditorCamera->GetTransform().Transform);
+					glm::mat4 viewProj = m_EditorCamera->GetCamera()->GetProjection() * glm::inverse(m_EditorCamera->GetTransform().GetTransform());
 
 					boundingBox.Min = sprMin * viewProj;  // Translate it to screen space
 					boundingBox.Max = sprMax * viewProj;  // Translate it to screen space
