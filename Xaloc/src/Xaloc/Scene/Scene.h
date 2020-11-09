@@ -32,7 +32,8 @@ namespace Xaloc {
 
 		void StartRuntime();
 
-		void OnUpdate(Timestep ts);		
+		void OnUpdate(Timestep ts);
+		void OnRender(Timestep ts);
 		void OnEvent(Event& e);
 
 		void RenderScene(const Camera& camera, const glm::mat4& transform);

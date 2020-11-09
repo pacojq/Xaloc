@@ -8,6 +8,8 @@
 #include "Panels/AssetManagerPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
 
+#include "Layers/RuntimeLayer.h"
+
 namespace Xaloc {
 
 	class EditorLayer : public Layer
@@ -38,27 +40,20 @@ namespace Xaloc {
 		
 	private:
 
+		RuntimeLayer* m_RuntimeLayer = nullptr;
+		bool m_OnRuntime = false;
+
 		Ref<Scene> m_Scene;
 		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		Scope<AssetManagerPanel> m_AssetManagerPanel;
 
 		std::vector<SelectedEntity> m_SelectionContext;
 
-		//OrthographicCameraController m_CameraController;
-		
 		Entity m_MainCamera;
 		
 		Ref<EditorCamera> m_EditorCamera;
 		Ref<RenderPass> m_EditorRenderPass;
 		
-
-		float m_TilingFactor;
-		float m_Rotation;
-		glm::vec4 m_FirstColor;
-		glm::vec4 m_SecondColor;
-		Ref<Texture2D> m_Texture;
-
-		//Ref<Framebuffer> m_Framebuffer;
 		Ref<RenderPass> m_RenderPass;
 		Ref<RenderPass> m_GuizmoRenderPass;
 		

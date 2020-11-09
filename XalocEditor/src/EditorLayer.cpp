@@ -11,13 +11,7 @@
 namespace Xaloc {
 
 
-	EditorLayer::EditorLayer()
-		: Layer("Editor Layer"),
-		//m_CameraController(1280.0f / 720.0f, true),
-		m_TilingFactor(1.0f),
-		m_Rotation(0.0f),
-		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
-		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
+	EditorLayer::EditorLayer() : Layer("Editor Layer")
 	{
 		// Load Assets
 
@@ -36,8 +30,8 @@ namespace Xaloc {
 		orthoData.Camera.SetOrthographicNearClip(-100);
 		orthoData.Camera.SetOrthographicFarClip(100);
 		
-		ScriptEngine::SetSceneContext(m_Scene);
-		m_Scene->StartRuntime();
+		//ScriptEngine::SetSceneContext(m_Scene);
+		//m_Scene->StartRuntime();
 
 		
 
@@ -58,10 +52,7 @@ namespace Xaloc {
 
 
 	void EditorLayer::OnAttach()
-	{		
-		m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
-
-
+	{
 		FramebufferSpec framebufferSpec;
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
@@ -122,7 +113,8 @@ namespace Xaloc {
 		// UPDATE AND RENDER SCENE
 		
 		Renderer::BeginRenderPass(m_RenderPass);
-		m_Scene->OnUpdate(ts);
+		//m_Scene->OnUpdate(ts);
+		m_Scene->OnRender(ts);
 		Renderer::EndRenderPass();
 
 
@@ -293,7 +285,37 @@ namespace Xaloc {
 			ImGui::End();
 		}
 
+		// TODO Play / Pause
 
+		ImGui::Begin("Runtime");
+
+		if (m_OnRuntime)
+		{
+			if (ImGui::Button("Stop"))
+			{
+				Xaloc::Application::Get().PopLayer(m_RuntimeLayer);
+				//delete m_RuntimeLayer;
+				m_OnRuntime = false;
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Play"))
+			{
+				if (m_RuntimeLayer != nullptr)
+				{
+					delete m_RuntimeLayer;
+					m_RuntimeLayer = nullptr;
+				}
+				
+				m_RuntimeLayer = new RuntimeLayer(m_Scene);
+				Xaloc::Application::Get().PushLayer(m_RuntimeLayer);
+				m_OnRuntime = true;
+			}
+		}
+
+		ImGui::End();
+		
 
 
 		// ============================================= HIERARCHY ============================================= //

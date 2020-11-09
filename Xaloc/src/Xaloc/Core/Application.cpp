@@ -53,6 +53,8 @@ namespace Xaloc {
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+		m_LayerStack.Flush();
+
 		ImGuiStyles::ApplyDefaultStyle();
 
 		if (spec.UseScripting)
@@ -75,6 +77,13 @@ namespace Xaloc {
 		XA_PROFILE_FUNCTION();
 		
 		m_LayerStack.PushLayer(layer);
+	}
+
+	void Application::PopLayer(Layer* layer)
+	{
+		XA_PROFILE_FUNCTION();
+
+		m_LayerStack.PopLayer(layer);
 	}
 
 	void Application::PushOverlay(Layer* overlay)
@@ -108,6 +117,8 @@ namespace Xaloc {
 	void Application::Run()
 	{
 		XA_PROFILE_FUNCTION();
+
+		m_LayerStack.Flush();
 		
 		while (m_Running)
 		{
@@ -145,6 +156,8 @@ namespace Xaloc {
 					}
 					m_ImGuiLayer->End();
 				}
+
+				m_LayerStack.Flush();
 			}
 
 			m_Window->OnUpdate();

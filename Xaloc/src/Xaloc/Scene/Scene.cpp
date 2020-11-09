@@ -240,6 +240,45 @@ namespace Xaloc {
 	}
 
 
+	void Scene::OnRender(Timestep ts)
+	{
+		Camera* mainCamera = nullptr;
+		glm::mat4 cameraTransform;
+		{
+			int priority = std::numeric_limits<int>::max();
+
+			auto group = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : group)
+			{
+				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+
+				if (camera.Priority < priority)
+				{
+					mainCamera = &camera.Camera;
+					cameraTransform = transform.GetTransform();
+					priority = camera.Priority;
+				}
+			}
+		}
+
+		if (mainCamera)
+		{
+			Renderer2D::BeginScene(*mainCamera, cameraTransform);
+
+			auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
+			for (auto entity : group)
+			{
+				auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				auto trans = transformComponent;
+				auto spr = spriteRendererComponent;
+				Renderer2D::DrawQuad(transformComponent.GetTransform(), spriteRendererComponent.SubTexture);
+			}
+
+			Renderer2D::EndScene();
+		}
+	}
+
+
 
 
 

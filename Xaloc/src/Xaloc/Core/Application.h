@@ -69,6 +69,7 @@ namespace Xaloc {
 		void OnEvent(Event& e);
 
 		void PushLayer(Layer* layer);
+		void PopLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
 
