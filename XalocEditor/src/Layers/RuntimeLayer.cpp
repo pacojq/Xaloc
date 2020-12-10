@@ -51,8 +51,7 @@ namespace Xaloc {
 		// UPDATE AND RENDER SCENE
 
 		Renderer::BeginRenderPass(m_RenderPass);
-		m_Scene->OnUpdate(ts);
-		m_Scene->OnRender(ts);
+		m_Scene->OnUpdateRuntime(ts);
 		Renderer::EndRenderPass();
 	}
 

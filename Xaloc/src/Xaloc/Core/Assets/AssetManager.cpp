@@ -64,7 +64,7 @@ namespace Xaloc {
 	
 	
 
-	void AssetManager::LoadTexture(const std::string& id, const std::string& path)
+	void AssetManager::LoadTexture(const AssetId& id, const std::string& path)
 	{
 		// TODO handle repeated IDs
 		Ref<Texture2D> tex = Texture2D::Create(path);
@@ -73,7 +73,7 @@ namespace Xaloc {
 	}
 
 
-	Ref<Texture2D> AssetManager::GetTexture(const std::string& id)
+	Ref<Texture2D> AssetManager::GetTexture(const AssetId& id)
 	{
 		// TODO handle errors and return pink texture
 		return s_Data.Textures[id];

@@ -38,7 +38,7 @@ namespace Xaloc {
 		
 		// Init Editor
 
-		m_EditorCamera = CreateRef<EditorCamera>();		
+		m_EditorCamera = EditorCamera(glm::perspective(45.0f, 1.778f, 0.01f, 1000.0f));
 		
 		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
@@ -113,23 +113,21 @@ namespace Xaloc {
 		// UPDATE AND RENDER SCENE
 		
 		Renderer::BeginRenderPass(m_RenderPass);
-		//m_Scene->OnUpdate(ts);
-		m_Scene->OnRender(ts);
+		m_Scene->OnUpdateEditor(ts, m_EditorCamera);
 		Renderer::EndRenderPass();
 
 
 		
 		// RENDER SCENE FROM EDITOR CAMERA
 
-		Camera editorCamera = *(m_EditorCamera->GetCamera());
-		
 		Renderer::BeginRenderPass(m_EditorRenderPass);
-		m_Scene->RenderScene(editorCamera, m_EditorCamera->GetTransform().GetTransform());
+		m_Scene->OnUpdateEditor(ts, m_EditorCamera);
+		//m_Scene->RenderScene(editorCamera, m_EditorCamera->GetTransform().GetTransform());
 		Renderer::EndRenderPass();
 
 		if (m_SceneViewport->IsFocused())
 		{
-			m_EditorCamera->OnUpdate(ts);
+			m_EditorCamera.OnUpdate(ts);
 		}
 
 
@@ -345,11 +343,13 @@ namespace Xaloc {
 		m_SceneViewport->Begin();
 		if (m_SceneViewport->Render(m_EditorRenderPass))
 		{
-			SceneCamera* camera = m_EditorCamera->GetCamera();
+			/*
+			SceneCamera* camera = m_EditorCamera.GetCamera();
 
 			uint32_t width = (uint32_t)m_SceneViewport->GetSize().x;
 			uint32_t height = (uint32_t)m_SceneViewport->GetSize().y;
 			camera->SetViewportSize(width, height);
+			*/
 		}
 
 
@@ -399,7 +399,6 @@ namespace Xaloc {
 		}
 		
 		m_SceneViewport->End();
-		m_EditorCamera->SetFocused(m_SceneViewport->IsFocused());
 		
 		ImGui::End();
 
@@ -411,7 +410,7 @@ namespace Xaloc {
 
 		if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
 		{
-			m_EditorCamera->OnEvent(e);
+			m_EditorCamera.OnEvent(e);
 		}
 		
 		EventDispatcher dispatcher(e);
@@ -429,12 +428,10 @@ namespace Xaloc {
 			return false;
 
 		// TODO when dragging the scene viewport to dock it somewhere else, the camera rotates in a weird way
-		
-		SceneCamera* camera = m_EditorCamera->GetCamera();
 
 		uint32_t width = e.GetWidth();
 		uint32_t height = e.GetHeight();
-		camera->SetViewportSize(width, height);
+		m_EditorCamera.SetViewportSize(width, height);
 		
 		return false;
 	}
@@ -471,7 +468,7 @@ namespace Xaloc {
 					glm::vec4 sprMax = trans.GetTransform() * glm::vec4{ 0.5f * tex->GetWidth(), 0.5f * tex->GetHeight(), 0.0f, 1.0f };          // Get sprite quad max vertex
 
 					//                   Projection matrix               * View matrix
-					glm::mat4 viewProj = m_EditorCamera->GetCamera()->GetProjection() * glm::inverse(m_EditorCamera->GetTransform().GetTransform());
+					glm::mat4 viewProj = m_EditorCamera.GetViewProjection();//m_EditorCamera->GetCamera()->GetProjection() * glm::inverse(m_EditorCamera->GetTransform().GetTransform());
 
 					boundingBox.Min = sprMin * viewProj;  // Translate it to screen space
 					boundingBox.Max = sprMax * viewProj;  // Translate it to screen space

@@ -7,6 +7,7 @@
 #include "SceneSerializer.h"
 
 #include "Xaloc/Renderer/Renderer2D.h"
+#include "Xaloc/Renderer/Camera.h"
 
 #include "Xaloc/Scripting/ScriptEngine.h"
 
@@ -17,7 +18,6 @@
 
 #include <limits>
 
-#include "Xaloc/Renderer/Camera.h"
 
 
 namespace Xaloc {
@@ -154,7 +154,7 @@ namespace Xaloc {
 
 	
 
-	void Scene::OnUpdate(Timestep ts)
+	void Scene::OnUpdateRuntime(Timestep ts)
 	{
 		// Update all entities
 		{
@@ -240,51 +240,12 @@ namespace Xaloc {
 	}
 
 
-	void Scene::OnRender(Timestep ts)
+
+
+
+	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
-		Camera* mainCamera = nullptr;
-		glm::mat4 cameraTransform;
-		{
-			int priority = std::numeric_limits<int>::max();
-
-			auto group = m_Registry.view<TransformComponent, CameraComponent>();
-			for (auto entity : group)
-			{
-				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
-
-				if (camera.Priority < priority)
-				{
-					mainCamera = &camera.Camera;
-					cameraTransform = transform.GetTransform();
-					priority = camera.Priority;
-				}
-			}
-		}
-
-		if (mainCamera)
-		{
-			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-
-			auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
-			for (auto entity : group)
-			{
-				auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-				auto trans = transformComponent;
-				auto spr = spriteRendererComponent;
-				Renderer2D::DrawQuad(transformComponent.GetTransform(), spriteRendererComponent.SubTexture);
-			}
-
-			Renderer2D::EndScene();
-		}
-	}
-
-
-
-
-
-	void Scene::RenderScene(const Camera& camera, const glm::mat4& transform)
-	{
-		Renderer2D::BeginScene(camera, transform);
+		Renderer2D::BeginScene(camera);
 
 		auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 		for (auto entity : group)

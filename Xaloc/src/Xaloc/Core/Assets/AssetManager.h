@@ -9,6 +9,8 @@
 namespace Xaloc {
 
 	// TODO create a file manager, so the asset manager can work in multiple platforms
+
+	using AssetId = std::string;
 	
 	class AssetManager
 	{
@@ -19,8 +21,8 @@ namespace Xaloc {
 
 		static DirectoryContent ReadDirectory(const DirectoryInfo& dir);
 
-		static void LoadTexture(const std::string& id, const std::string& path);
-		static Ref<Texture2D> GetTexture(const std::string& id);
+		static void LoadTexture(const AssetId& id, const std::string& path);
+		static Ref<Texture2D> GetTexture(const AssetId& id);
 
 	private:
 		static std::string ParseFileName(const std::string& str, const char delim, std::vector<std::string>& out);

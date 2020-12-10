@@ -6,9 +6,10 @@
 #include "Xaloc/Core/Timestep.h"
 #include "Xaloc/Events/Event.h"
 
+#include "Xaloc/Renderer/EditorCamera.h"
+
 #include <entt/entt.hpp>
 
-#include "Xaloc/Renderer/Camera.h"
 
 namespace Xaloc {
 
@@ -32,11 +33,11 @@ namespace Xaloc {
 
 		void StartRuntime();
 
-		void OnUpdate(Timestep ts);
-		void OnRender(Timestep ts);
+		void OnUpdateRuntime(Timestep ts);
+		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
+		
 		void OnEvent(Event& e);
 
-		void RenderScene(const Camera& camera, const glm::mat4& transform);
 
 		Entity Scene::CreateEntity(const std::string& name);
 		Entity Scene::CreateEntity(const std::string& name, UUID id);

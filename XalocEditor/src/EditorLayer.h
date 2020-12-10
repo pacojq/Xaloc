@@ -1,9 +1,10 @@
 #pragma once
 
-#include "EditorCamera.h"
 #include "EditorViewport.h"
 
 #include "Xaloc.h"
+
+#include "Xaloc/Renderer/EditorCamera.h"
 
 #include "Panels/AssetManagerPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
@@ -51,7 +52,7 @@ namespace Xaloc {
 
 		Entity m_MainCamera;
 		
-		Ref<EditorCamera> m_EditorCamera;
+		EditorCamera m_EditorCamera;
 		Ref<RenderPass> m_EditorRenderPass;
 		
 		Ref<RenderPass> m_RenderPass;
