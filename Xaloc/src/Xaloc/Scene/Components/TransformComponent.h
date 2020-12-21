@@ -10,6 +10,7 @@
 
 namespace Xaloc {
 
+	// TODO find usages and substitute by Math::DecomposeTransform
 	static std::tuple<glm::vec3, glm::quat, glm::vec3> GetTransformDecomposition(const glm::mat4& transform)
 	{
 		glm::vec3 scale, translation, skew;

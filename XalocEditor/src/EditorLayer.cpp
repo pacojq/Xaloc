@@ -5,6 +5,8 @@
 #include "imgui/imgui.h"
 #include "Xaloc/ImGui/ImGuizmo.h"
 
+#include "Xaloc/Math/Math.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 
@@ -130,41 +132,6 @@ namespace Xaloc {
 			m_EditorCamera.OnUpdate(ts);
 		}
 
-
-		
-		// TODO DRAW SELECTED ENTITIES GUI
-		/*
-		if (m_SelectionContext.size())
-		{
-			Camera* mainCamera = m_Scene->GetMainCamera();
-
-			if (mainCamera)
-			{
-				Entity selection = m_SelectionContext[0].Entity;
-
-				Xaloc::Renderer::BeginRenderPass(m_GuizmoRenderPass, false);
-				Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
-				// TODO get app pixels per unit
-				float pxPerUnit = 16.0f;
-				float offset = 1.0f / pxPerUnit;
-
-				glm::vec4 sprMin = selection.Transform() * glm::vec4{ -0.5f - offset, -0.5f - offset, 0.0f, 1.0f };        // Get sprite quad min vertex
-				glm::vec4 sprMax = selection.Transform() * glm::vec4{ 0.5f + offset, 0.5f + offset, 0.0f, 1.0f };          // Get sprite quad max vertex
-
-				glm::vec4 color = { 0.549f, 0.976f, 1.0f, 0.9f };
-				//glm::vec4 color = { 1.0f, 1.0f, 1.0f, 0.9f };
-
-				Renderer2D::DrawLine({ sprMin.x, sprMin.y }, { sprMax.x, sprMin.y }, color, 0.5f);
-				Renderer2D::DrawLine({ sprMax.x, sprMin.y }, { sprMax.x, sprMax.y }, color, 0.5f);
-				Renderer2D::DrawLine({ sprMax.x, sprMax.y }, { sprMin.x, sprMax.y }, color, 0.5f);
-				Renderer2D::DrawLine({ sprMin.x, sprMax.y }, { sprMin.x, sprMin.y }, color, 0.5f);
-
-				Xaloc::Renderer2D::EndScene();
-				Xaloc::Renderer::EndRenderPass();
-			}
-		}
-		*/
 	}
 
 
@@ -357,45 +324,66 @@ namespace Xaloc {
 
 		// ============================================= GUIZMO ============================================= //
 
-		/* TODO guizmo
-		auto [camTranslation, camRotationQuat, camScale] = GetTransformDecomposition(m_EditorCamera->GetTransform().Transform);
+
+		ImGui::Begin("Editor Camera");
+		ImGui::Text("Distance: %f", m_EditorCamera.GetDistance());
+		ImGui::Text("Pitch: %f", m_EditorCamera.GetPitch());
+		ImGui::Text("Yaw: %f", m_EditorCamera.GetYaw());
+		ImGui::End();
 		
-		auto& viewMat = glm::translate(glm::mat4(1.0f), camTranslation) * glm::toMat4(camRotationQuat);
-		viewMat = glm::inverse(viewMat);
+		// Editor Camera
+		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 		
 		float rw = (float)ImGui::GetWindowWidth();
 		float rh = (float)ImGui::GetWindowHeight();
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
-		*/
-		// TODO guizmo grid ImGuizmo::DrawGrid(glm::value_ptr(viewMat), glm::value_ptr(m_EditorCamera->GetCamera()->GetProjection()), glm::value_ptr(glm::mat4(1.0f)), 10.0f);
+		
+		// Guizmo grid
+		float gizmoGridScale = 1.0f;// + glm::log(m_EditorCamera.GetDistance());
+		glm::mat4 gizmoGridTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f))
+			* glm::rotate(glm::mat4(1.0f), 0.0f, { 0.0f, 0.0f, 1.0f })
+			* glm::scale(glm::mat4(1.0f), { gizmoGridScale, gizmoGridScale, gizmoGridScale });
+		
+		ImGuizmo::DrawGrid(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), glm::value_ptr(gizmoGridTransform), 5.0f);
 		
 		if (m_SelectionContext.size())
 		{
 			auto& selection = m_SelectionContext[0];
 			
-			// TODO use camera controller
-			//auto& camera = m_CameraController.GetCamera();
-			/*
-			bool snap = false; // TODO Input::IsKeyPressed(XA_KEY_LEFT_CONTROL);
+			// Entity transform
+			auto& tc = selection.Entity.GetComponent<TransformComponent>();
+			glm::mat4 transform = tc.GetTransform();
 
-			auto& entityTransform = selection.Entity.Transform();
 			
+			bool snap = false; // TODO Input::IsKeyPressed(XA_KEY_LEFT_CONTROL);
 			// TODOfloat snapValue[3] = { m_SnapValue, m_SnapValue, m_SnapValue };
-			float snapValue[3] = { 0.1, 0.1, 0.1 };
+			float snapValues[3] = { 0.1f, 0.1f, 0.1f };
 			
 			//if (m_SelectionMode == SelectionMode::Entity)
 			{
-				ImGuizmo::Manipulate(glm::value_ptr(viewMat),
-					glm::value_ptr(m_EditorCamera->GetCamera()->GetProjection()),
+				ImGuizmo::Manipulate(
+					glm::value_ptr(cameraView),
+					glm::value_ptr(cameraProjection),
 					(ImGuizmo::OPERATION)ImGuizmo::OPERATION::TRANSLATE,
 					ImGuizmo::LOCAL,
-					glm::value_ptr(entityTransform),
+					glm::value_ptr(transform),
 					nullptr,
-					nullptr);
+					snap ? snapValues : nullptr);
+
+				if (ImGuizmo::IsUsing())
+				{
+					glm::vec3 translation, rotation, scale;
+					Math::DecomposeTransform(transform, translation, rotation, scale);
+
+					glm::vec3 deltaRotation = rotation - tc.Rotation;
+					tc.Translation = translation;
+					tc.Rotation += deltaRotation;
+					tc.Scale = scale;
+				}
 			}
-			*/
 		}
 		
 		m_SceneViewport->End();
