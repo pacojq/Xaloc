@@ -34,7 +34,8 @@
 
 // --- Math -------------------------------------
 
-#include "Xaloc/Core/Math/AABB.h"
+#include "Xaloc/Math/Math.h"
+#include "Xaloc/Math/AABB.h"
 
 
 // --- ImGui ------------------------------------

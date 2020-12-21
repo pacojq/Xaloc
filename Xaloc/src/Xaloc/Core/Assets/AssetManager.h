@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FileInfo.h"
+#include "Xaloc/Files/FileInfo.h"
 
 #include "Xaloc/Renderer/Shader.h"
 #include "Xaloc/Renderer/Texture.h"

@@ -5,6 +5,8 @@
 
 #include "Xaloc/Core/Application.h"
 
+#include "Xaloc/Files/FileUtils.h"
+
 namespace Xaloc
 {
 	AssetManagerPanel::AssetManagerPanel()
@@ -140,7 +142,7 @@ namespace Xaloc
 				{
 					if (ImGui::MenuItem("Import New Asset", "Ctrl + O"))
 					{
-						std::string filename = Application::Get().OpenFile("");
+						std::string filename = FileUtils::OpenFileDialog();
 						std::vector<std::string> outData;
 
 						//AssetManager::ProcessAseets(filename);

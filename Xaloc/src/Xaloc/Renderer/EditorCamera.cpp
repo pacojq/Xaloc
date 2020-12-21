@@ -41,8 +41,16 @@ namespace Xaloc {
 		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 	}
 
-	void EditorCamera::Focus()
+	void EditorCamera::Focus(glm::vec3 focusPoint)
 	{
+		m_FocalPoint = focusPoint;
+		if (focusSafeDistance < m_Distance)
+		{
+			float delta = m_Distance - focusSafeDistance;
+			MouseZoom(delta / ZoomSpeed());
+			UpdateCameraView();
+		}
+
 	}
 
 	std::pair<float, float> EditorCamera::PanSpeed() const

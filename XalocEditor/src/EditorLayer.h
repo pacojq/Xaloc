@@ -29,15 +29,6 @@ namespace Xaloc {
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);
 
-	private:
-
-		struct SelectedEntity
-		{
-			Entity Entity;
-			// TODO cast a ray and get distance float Distance;
-		};
-		void OnEntitySelected(const SelectedEntity& selection);
-
 		
 	private:
 
@@ -47,8 +38,6 @@ namespace Xaloc {
 		Ref<Scene> m_Scene;
 		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		Scope<AssetManagerPanel> m_AssetManagerPanel;
-
-		std::vector<SelectedEntity> m_SelectionContext;
 
 		Entity m_MainCamera;
 		
@@ -61,6 +50,9 @@ namespace Xaloc {
 		Ref<EditorViewport> m_GameViewport;
 		Ref<EditorViewport> m_SceneViewport;
 
+
+		static inline std::string s_FilenameFilter = "Xaloc Scene\0*.xaloc\0 All files\0*.*\0";
+		
 
 	// Editor Windows
 	private:

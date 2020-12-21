@@ -1,6 +1,8 @@
 #include "xapch.h"
 #include "ImGuiStyles.h"
 
+#include "Xaloc/Core/Window.h"
+
 #include "imgui.h"
 
 namespace Xaloc {
@@ -9,10 +11,13 @@ namespace Xaloc {
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		//io.Fonts->AddFontFromFileTTF("assets/fonts/Oxygen/OxygenMono-Regular.ttf", 15.0f);
-		io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto/RobotoMono-Regular.ttf", 15.0f);
+		io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto/RobotoMono-Regular.ttf", Window::s_HighDPIScaleFactor * 15.0f);
 		io.Fonts->Build();
 		
 		ImGuiStyle* style = &ImGui::GetStyle();
+
+		style->ScaleAllSizes(Window::s_HighDPIScaleFactor);
+		
 		ImVec4* colors = style->Colors;
 
 		const ImVec4 white_a_1 = ImVec4(1.000f, 1.000f, 1.000f, 1.000f);

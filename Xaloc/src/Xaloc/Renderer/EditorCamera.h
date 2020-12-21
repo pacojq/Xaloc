@@ -13,7 +13,7 @@ namespace Xaloc {
 		EditorCamera() = default;
 		EditorCamera(const glm::mat4& projectionMatrix);
 
-		void Focus();
+		void Focus(glm::vec3 focusPoint);
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 
@@ -59,6 +59,8 @@ namespace Xaloc {
 		float m_Pitch, m_Yaw;
 
 		uint32_t m_ViewportWidth = 1280, m_ViewportHeight = 720;
+
+		float focusSafeDistance = 100.f;
 	};
 
 }

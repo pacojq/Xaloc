@@ -73,12 +73,6 @@ namespace Xaloc {
 		void PushOverlay(Layer* overlay);
 
 
-		// TODO move somewhere else
-		std::string OpenFile(const std::string& filter) const;
-		// TODO move somewhere else
-		std::string SaveFile(const std::string& filter) const;
-
-
 		
 		inline Window& GetWindow() { return *m_Window; }
 

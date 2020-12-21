@@ -2,7 +2,8 @@
 
 #include "Xaloc/Core/Core.h"
 #include "Xaloc/Core/Assets/AssetManager.h"
-#include "Xaloc/Core/Assets/FileInfo.h"
+#include "Xaloc/Core/Assets/AssetType.h"
+#include "Xaloc/Files/FileInfo.h"
 
 #include "Xaloc/Renderer/Texture.h"
 

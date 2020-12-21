@@ -9,6 +9,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Xaloc/Files/FileUtils.h"
+
 
 namespace Xaloc {
 
@@ -203,13 +205,13 @@ namespace Xaloc {
 				//}
 				if (ImGui::MenuItem("Save as..."))
 				{
-					std::string filename = Application::Get().SaveFile("*.xaloc");
+					std::string filename = FileUtils::SaveFileDialog(s_FilenameFilter);
 					if (filename != "")
 						Scene::Save(m_Scene, filename);
 				}
 				if (ImGui::MenuItem("Load..."))
 				{
-					std::string filename = Application::Get().OpenFile("*.xaloc");
+					std::string filename = FileUtils::OpenFileDialog(s_FilenameFilter);
 					if (filename != "")
 					{
 						m_Scene.reset();
@@ -310,13 +312,9 @@ namespace Xaloc {
 		m_SceneViewport->Begin();
 		if (m_SceneViewport->Render(m_EditorRenderPass))
 		{
-			/*
-			SceneCamera* camera = m_EditorCamera.GetCamera();
-
 			uint32_t width = (uint32_t)m_SceneViewport->GetSize().x;
 			uint32_t height = (uint32_t)m_SceneViewport->GetSize().y;
-			camera->SetViewportSize(width, height);
-			*/
+			m_EditorCamera.SetViewportSize(width, height);
 		}
 
 
@@ -324,12 +322,13 @@ namespace Xaloc {
 
 		// ============================================= GUIZMO ============================================= //
 
-
+		/*
 		ImGui::Begin("Editor Camera");
 		ImGui::Text("Distance: %f", m_EditorCamera.GetDistance());
 		ImGui::Text("Pitch: %f", m_EditorCamera.GetPitch());
 		ImGui::Text("Yaw: %f", m_EditorCamera.GetYaw());
 		ImGui::End();
+		*/
 		
 		// Editor Camera
 		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
@@ -346,15 +345,14 @@ namespace Xaloc {
 		glm::mat4 gizmoGridTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f))
 			* glm::rotate(glm::mat4(1.0f), 0.0f, { 0.0f, 0.0f, 1.0f })
 			* glm::scale(glm::mat4(1.0f), { gizmoGridScale, gizmoGridScale, gizmoGridScale });
-		
+
 		ImGuizmo::DrawGrid(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), glm::value_ptr(gizmoGridTransform), 5.0f);
-		
-		if (m_SelectionContext.size())
-		{
-			auto& selection = m_SelectionContext[0];
-			
+
+		Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
+		if (selectedEntity)
+		{			
 			// Entity transform
-			auto& tc = selection.Entity.GetComponent<TransformComponent>();
+			auto& tc = selectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 transform = tc.GetTransform();
 
 			
@@ -437,10 +435,15 @@ namespace Xaloc {
 				mouseX = mx;
 				mouseY = my;
 			}
+
+			// Editor Camera
+			const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+			glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 			
+			// TODO select entity
+			/*
 			if (mouseX > -1.0f && mouseX < 1.0f && mouseY > -1.0f && mouseY < 1.0f) // If mouse is on viewport range
-			{				
-				m_SelectionContext.clear();
+			{
 				auto spriteEntities = m_Scene->FindEntitiesWith<SpriteRendererComponent>();
 				for (auto e : spriteEntities)
 				{
@@ -472,26 +475,17 @@ namespace Xaloc {
 					if (intersects)
 					{
 						// TODO select using the scene hierarchy panel
-						m_SelectionContext.push_back({ entity });
+						m_SceneHierarchyPanel->SetSelected(entity);
 					}
 				}
 				// TODO std::sort(m_SelectionContext.begin(), m_SelectionContext.end(), [](auto& a, auto& b) { return a.Distance < b.Distance; });
-				if (m_SelectionContext.size())
-					OnEntitySelected(m_SelectionContext[0]);
 			}
+			*/
 		}
 		
 		return false;
 	}
 
-
-	void EditorLayer::OnEntitySelected(const SelectedEntity& selection)
-	{
-		XA_CORE_TRACE("Entity Selected: {0}", (uint32_t)selection.Entity);
-		m_SceneHierarchyPanel->SetSelected(selection.Entity);
-	}
-
-	
 
 
 }

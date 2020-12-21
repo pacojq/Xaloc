@@ -7,7 +7,7 @@
 #include "OrthographicCamera.h"
 #include "Shader.h"
 
-#include "Xaloc/Core/Math/AABB.h"
+#include "Xaloc/Math/AABB.h"
 
 namespace Xaloc {
 

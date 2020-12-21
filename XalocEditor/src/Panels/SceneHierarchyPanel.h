@@ -13,6 +13,8 @@ namespace Xaloc {
 
 		void SetScene(const Ref<Scene>& scene);
 		void SetSelected(Entity entity);
+		
+		Entity GetSelectedEntity() const { return m_SelectionContext; }
 
 		void OnImGuiRender();
 		
