@@ -130,7 +130,7 @@ namespace Xaloc {
 
 			ImGui::PopStyleVar();
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight })) // TODO "\u2261" instead of "+"
 			{
 				ImGui::OpenPopup("ComponentSettings");
 			}

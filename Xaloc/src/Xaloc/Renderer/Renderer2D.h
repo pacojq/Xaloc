@@ -18,9 +18,17 @@ namespace Xaloc {
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const Camera& camera, const glm::mat4& transform);
-		static void BeginScene(const EditorCamera& camera);
+		/// <summary>
+		/// Begins a scene with a given view projection matrix.
+		/// </summary>
+		/// <param name="viewProj"></param>
+		static void BeginScene(glm::mat4 viewProj);
 		static void EndScene();
+
+		/// Utility BeginScene
+		static void BeginScene(const Camera& camera, const glm::mat4& transform);
+		/// Utility BeginScene
+		static void BeginScene(const EditorCamera& camera);
 
 		/// <summary>
 		/// Draws the current batch and resets its state.

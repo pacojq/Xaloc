@@ -33,9 +33,11 @@ namespace Xaloc {
 		orthoData.Camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
 		orthoData.Camera.SetOrthographicNearClip(-100);
 		orthoData.Camera.SetOrthographicFarClip(100);
-		
-		//ScriptEngine::SetSceneContext(m_Scene);
-		//m_Scene->StartRuntime();
+
+		// vv ======================================== TODO temporary: start runtime
+		ScriptEngine::SetSceneContext(m_Scene);
+		m_Scene->StartRuntime();
+		// ^^ ============================================= temporary: start runtime
 
 		
 

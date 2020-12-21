@@ -40,8 +40,15 @@ SandboxLayer::SandboxLayer()
 		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 {
-	m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");	
-	m_CameraController.SetZoomLevel(5.0f);
+	// Load Assets
+	Xaloc::AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
+
+	// Init Scene
+	//m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");	
+	m_Scene = Xaloc::Scene::Load("assets/scenes/testScene.xaloc");
+
+	// Init Camera
+	m_CameraController.SetZoomLevel(5.0f); // TODO remove this
 }
 
 
@@ -54,7 +61,7 @@ void SandboxLayer::OnAttach()
 
 
 
-	Xaloc::Ref<Xaloc::Texture2D> tilemap = Xaloc::Texture2D::Create("assets/game/textures/tilemap.png");
+	Xaloc::Ref<Xaloc::Texture2D> tilemap = Xaloc::AssetManager::GetTexture("TILEMAP"); //Xaloc::Texture2D::Create("assets/game/textures/tilemap.png");
 
 	glm::vec2 size = { 16.0f, 16.0f };
 	glm::vec2 pad = { 0.0f, 0.0f };
@@ -80,6 +87,20 @@ void SandboxLayer::OnAttach()
 	m_TileWater = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 9.0f, 10.0f }, size, pad, off);
 
 
+
+	
+	// CAMERA
+	
+	auto m_MainCamera = m_Scene->CreateEntity("Orthographic Camera");
+
+	auto& orthoData = m_MainCamera.AddComponent<Xaloc::CameraComponent>();
+	orthoData.Camera.SetViewportSize(1280.0, 720.0);
+	orthoData.Camera.SetProjectionType(Xaloc::SceneCamera::ProjectionType::Orthographic);
+	orthoData.Camera.SetOrthographicNearClip(-100);
+	orthoData.Camera.SetOrthographicFarClip(100);
+
+
+	
 
 	// PLAYER
 
@@ -166,7 +187,7 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 	#endif
 
 
-	Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera().GetViewProjectionMatrix());
 	
 	for (uint32_t y = 0; y < s_mapHeight; y++)
 	{
@@ -196,9 +217,9 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 	Xaloc::Renderer2D::EndScene();
 
 
-	Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-	m_Scene->OnUpdate(ts);
-	Xaloc::Renderer2D::EndScene();
+	//Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera().GetViewProjectionMatrix());
+	m_Scene->OnUpdateRuntime(ts);
+	//Xaloc::Renderer2D::EndScene();
 }
 
 
@@ -225,7 +246,7 @@ void SandboxLayer::OnImGuiRender()
 	ImGui::Separator();
 	ImGui::Text("Player data");
 
-	glm::mat4 matrix = m_Player.Transform();
+	glm::mat4 matrix = m_Player.GetComponent<Xaloc::TransformComponent>().GetTransform();
 	glm::vec3 translation = {matrix[3][0], matrix[3][1], matrix[3][2] };
 
 	//glm::vec3 playerPos = m_Player->GetPosition();
