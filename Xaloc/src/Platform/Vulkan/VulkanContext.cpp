@@ -9,7 +9,6 @@
 #include "VulkanUtils.h"
 
 #include <map>
-#include <set>
 #include <vector>
 #include <optional>
 
@@ -25,13 +24,7 @@ namespace Xaloc {
 		: m_Window(windowHandle)
 	{
 		XA_CORE_ASSERT(windowHandle, "Window handle is null!");
-
-#ifdef XA_DEBUG
-		m_EnableValidationLayers = true;
-#else
-		m_EnableValidationLayers = true;
-#endif
-		
+	
 		// TODO
 	}
 
@@ -46,8 +39,21 @@ namespace Xaloc {
 	{
 		XA_CORE_TRACE("Vulkan Context initializing...");
 
+		// Init shared resources
 		VulkanShared::Resources().Context = this;
-		
+
+		VulkanShared::Resources().ValidationLayers = {
+			"VK_LAYER_KHRONOS_validation"
+		};
+#ifdef XA_DEBUG
+		VulkanShared::Resources().EnableValidationLayers = true;
+#else
+		VulkanShared::Resources().EnableValidationLayers = false;
+#endif
+
+
+
+		// Create instance
 		CreateInstance();
 		XA_CORE_TRACE("    Instance created");
 		SetupDebugMessenger();
@@ -55,14 +61,30 @@ namespace Xaloc {
 		// Create surface
 		CreateSurface();
 		XA_CORE_TRACE("    Surface ready");
-		
-		PickPhysicalDevice();
-		XA_CORE_TRACE("    Physical device ready");
 
-		CreateLogicalDevice();
-		XA_CORE_TRACE("    Logical device ready");
-		
-		CreateSwapChain();
+		// Create Physical and Logical Device
+		m_PhysicalDevice = CreateRef<VulkanPhysicalDevice>();
+		m_PhysicalDevice->Create();
+		VulkanShared::Resources().PhysicalDevice = m_PhysicalDevice;
+
+		m_Device = CreateRef<VulkanDevice>();
+		m_Device->Create();
+		VulkanShared::Resources().Device = m_Device;
+
+
+		// Create the swap chain
+		int width, height;
+		glfwGetFramebufferSize(m_Window, &width, &height);
+
+		VulkanSwapChainSpecification spec;
+		spec.Device = m_Device->GetDevice();
+		spec.PhysicalDevice = m_PhysicalDevice->GetPhysicalDevice();
+		spec.Surface = m_Surface;
+		spec.Width = width;
+		spec.Height = height;
+
+		m_SwapChain = CreateRef<VulkanSwapChain>(spec);
+		VulkanShared::Resources().SwapChain = m_SwapChain;
 		XA_CORE_TRACE("    Swap chain ready");
 
 
@@ -76,8 +98,8 @@ namespace Xaloc {
 		CreateGraphicsPipeline();
 		XA_CORE_TRACE("    [TEMP] Pipeline ready");
 
-		CreateCommandPool();
-		XA_CORE_TRACE("[COMMAND POOL READY]");
+		// Create the command pool
+		m_Device->CreateCommandPool();
 
 		/* TODO
 		CreateDepthResources();
@@ -95,9 +117,10 @@ namespace Xaloc {
 
 	void VulkanContext::CleanUp()
 	{
-		vkDestroyDevice(m_Device, nullptr);
+		m_Device->CleanUp();
+		m_PhysicalDevice->CleanUp();
 
-		if (m_EnableValidationLayers)
+		if (VulkanShared::Resources().EnableValidationLayers)
 		{
 			VulkanUtils::DestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
 		}
@@ -127,13 +150,14 @@ namespace Xaloc {
 
 
 		// Validation layers
-		XA_CORE_ASSERT(!(m_EnableValidationLayers && !CheckValidationLayerSupport()),
+		XA_CORE_ASSERT(!(VulkanShared::Resources().EnableValidationLayers && !CheckValidationLayerSupport()),
 			"Validation layers requested, but not available!");
 
-		if (m_EnableValidationLayers)
+		if (VulkanShared::Resources().EnableValidationLayers)
 		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
-			createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
+			auto validationLayers = VulkanShared::Resources().ValidationLayers;
+			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			createInfo.ppEnabledLayerNames = validationLayers.data();
 		}
 		else
 		{
@@ -168,7 +192,7 @@ namespace Xaloc {
 		std::vector<VkLayerProperties> availableLayers(layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-		for (const char* layerName : m_ValidationLayers)
+		for (const char* layerName : VulkanShared::Resources().ValidationLayers)
 		{
 			bool layerFound = false;
 
@@ -195,7 +219,7 @@ namespace Xaloc {
 
 		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-		if (m_EnableValidationLayers) {
+		if (VulkanShared::Resources().EnableValidationLayers) {
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 
@@ -209,7 +233,7 @@ namespace Xaloc {
 
 	void VulkanContext::SetupDebugMessenger()
 	{
-		if (!m_EnableValidationLayers)
+		if (!VulkanShared::Resources().EnableValidationLayers)
 			return;
 
 		VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
@@ -232,110 +256,7 @@ namespace Xaloc {
 
 	
 
-	
-	
-	void VulkanContext::PickPhysicalDevice()
-	{
-		m_PhysicalDevice = VK_NULL_HANDLE;
 
-		uint32_t deviceCount = 0;
-		vkEnumeratePhysicalDevices(m_Instance, &deviceCount, nullptr);
-
-		XA_CORE_ASSERT(deviceCount > 0, "Failed to find GPUs with Vulkan support!");
-
-		std::vector<VkPhysicalDevice> devices(deviceCount);
-		vkEnumeratePhysicalDevices(m_Instance, &deviceCount, devices.data());
-
-
-		// Use an ordered map to automatically sort candidates by increasing score
-		std::multimap<int, VkPhysicalDevice> candidates;
-
-		for (const auto& device : devices)
-		{
-			int score = VulkanUtils::RateDeviceSuitability(device);
-			candidates.insert(std::make_pair(score, device));
-		}
-
-		// Check if the best candidate is suitable at all
-		if (candidates.rbegin()->first > 0)
-		{
-			m_PhysicalDevice = candidates.rbegin()->second;
-		}
-
-		XA_CORE_ASSERT(m_PhysicalDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
-	}
-
-
-
-
-
-	void VulkanContext::CreateLogicalDevice()
-	{
-		QueueFamilyIndices indices = VulkanUtils::FindQueueFamilies(m_PhysicalDevice, m_Surface);
-
-		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { indices.GraphicsFamily.value(), indices.PresentFamily.value() };
-
-		float queuePriority = 1.0f;
-		for (uint32_t queueFamily : uniqueQueueFamilies)
-		{
-			VkDeviceQueueCreateInfo queueCreateInfo = {};
-			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queueCreateInfo.queueFamilyIndex = queueFamily;
-			queueCreateInfo.queueCount = 1;
-			queueCreateInfo.pQueuePriorities = &queuePriority;
-			queueCreateInfos.push_back(queueCreateInfo);
-		}
-
-		VkPhysicalDeviceFeatures deviceFeatures = {};
-
-		VkDeviceCreateInfo createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-
-		createInfo.pEnabledFeatures = &deviceFeatures;
-
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(m_DeviceExtensions.size());
-		createInfo.ppEnabledExtensionNames = m_DeviceExtensions.data();
-
-		if (m_EnableValidationLayers)
-		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
-			createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
-		}
-		else
-		{
-			createInfo.enabledLayerCount = 0;
-		}
-
-		VK_CHECK_RESULT(vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device), "Failed to create logical device!");
-		vkGetDeviceQueue(m_Device, indices.GraphicsFamily.value(), 0, &m_GraphicsQueue);
-		vkGetDeviceQueue(m_Device, indices.PresentFamily.value(), 0, &m_PresentQueue);
-
-
-		VulkanShared::Resources().Device = m_Device;
-		VulkanShared::Resources().PhysicalDevice = m_PhysicalDevice;
-	}
-
-	
-
-	
-	void VulkanContext::CreateSwapChain()
-	{
-		int width, height;
-		glfwGetFramebufferSize(m_Window, &width, &height);
-
-		VulkanSwapChainSpecification spec;
-		spec.Device = m_Device;
-		spec.PhysicalDevice = m_PhysicalDevice;
-		spec.Surface = m_Surface;
-		spec.Width = width;
-		spec.Height = height;
-		
-		m_SwapChain = CreateRef<VulkanSwapChain>(spec);
-		VulkanShared::Resources().SwapChain = m_SwapChain;
-	}
 
 
 
@@ -416,7 +337,7 @@ namespace Xaloc {
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		VK_CHECK_RESULT(vkCreateRenderPass(m_Device, &renderPassInfo, nullptr, &m_RenderPass),
+		VK_CHECK_RESULT(vkCreateRenderPass(m_Device->GetDevice(), &renderPassInfo, nullptr, &m_RenderPass),
 			"Failed to create render pass!");
 
 	}
@@ -449,7 +370,7 @@ namespace Xaloc {
 		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
 		layoutInfo.pBindings = bindings.data();
 
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout),
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_Device->GetDevice(), &layoutInfo, nullptr, &m_DescriptorSetLayout),
 			"Failed to create descriptor set layout!");
 
 	}
@@ -644,7 +565,7 @@ namespace Xaloc {
 		pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 		pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-		VK_CHECK_RESULT(vkCreatePipelineLayout(m_Device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout),
+		VK_CHECK_RESULT(vkCreatePipelineLayout(m_Device->GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout),
 			"Failed to create pipeline layout!");
 
 
@@ -670,31 +591,14 @@ namespace Xaloc {
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineInfo.basePipelineIndex = -1; // Optional
 
-		VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline),
+		VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_Device->GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline),
 			"Failed to create graphics pipeline!");
 
 
 		// Clean up
-		vkDestroyShaderModule(m_Device, fragShaderModule, nullptr);
-		vkDestroyShaderModule(m_Device, vertShaderModule, nullptr);
+		vkDestroyShaderModule(m_Device->GetDevice(), fragShaderModule, nullptr);
+		vkDestroyShaderModule(m_Device->GetDevice(), vertShaderModule, nullptr);
 	}
-
-
-	
-
-
-	void VulkanContext::CreateCommandPool()
-	{
-		QueueFamilyIndices queueFamilyIndices = VulkanUtils::FindQueueFamilies(m_PhysicalDevice, m_Surface);
-
-		VkCommandPoolCreateInfo poolInfo = {};
-		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		poolInfo.queueFamilyIndex = queueFamilyIndices.GraphicsFamily.value();
-		poolInfo.flags = 0; // Optional
-
-		VK_CHECK_RESULT(vkCreateCommandPool(m_Device, &poolInfo, nullptr, &m_CommandPool), "Failed to create command pool!");
-	}
-
 
 
 	

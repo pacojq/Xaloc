@@ -12,12 +12,20 @@ namespace Xaloc {
 
 		VkSurfaceKHR Surface;
 
-		VkDevice Device;
-		VkPhysicalDevice PhysicalDevice;
+		Ref <VulkanDevice> Device;
+		Ref<VulkanPhysicalDevice> PhysicalDevice;
 
 		VulkanContext* Context;
 
 		Ref<VulkanSwapChain> SwapChain;
+
+
+		
+		// Validation and Debugging
+
+		std::vector<const char*> ValidationLayers;
+		bool EnableValidationLayers;
+		
 	};
 
 

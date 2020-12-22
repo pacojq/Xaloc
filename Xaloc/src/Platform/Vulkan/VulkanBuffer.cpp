@@ -8,7 +8,7 @@ namespace Xaloc {
 
 	void VulkanBuffer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 	{
-		auto device = VulkanShared::Resources().Device;
+		auto vkDevice = VulkanShared::Resources().Device->GetDevice();
 
 		// Create the vertex buffer
 		VkBufferCreateInfo bufferInfo = {};
@@ -17,21 +17,21 @@ namespace Xaloc {
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		VK_CHECK_RESULT(vkCreateBuffer(device, &bufferInfo, nullptr, &buffer), "Failed to create buffer!");
+		VK_CHECK_RESULT(vkCreateBuffer(vkDevice, &bufferInfo, nullptr, &buffer), "Failed to create buffer!");
 
 
 		// Allocate memory
 		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+		vkGetBufferMemoryRequirements(vkDevice, buffer, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = VulkanUtils::FindMemoryType(memRequirements.memoryTypeBits, properties);
 
-		VK_CHECK_RESULT(vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory), "Failed to allocate buffer memory!");
+		VK_CHECK_RESULT(vkAllocateMemory(vkDevice, &allocInfo, nullptr, &bufferMemory), "Failed to allocate buffer memory!");
 
-		vkBindBufferMemory(device, buffer, bufferMemory, 0);
+		vkBindBufferMemory(vkDevice, buffer, bufferMemory, 0);
 	}
 
 
@@ -53,17 +53,16 @@ namespace Xaloc {
 
 	VkCommandBuffer VulkanBuffer::BeginSingleTimeCommands()
 	{
-		auto context = VulkanShared::Resources().Context;
 		auto device = VulkanShared::Resources().Device;
 
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = context->GetCommandPool();
+		allocInfo.commandPool = device->GetCommandPool();
 		allocInfo.commandBufferCount = 1;
 
 		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+		vkAllocateCommandBuffers(device->GetDevice(), &allocInfo, &commandBuffer);
 
 		// Start recording the command buffer
 		VkCommandBufferBeginInfo beginInfo = {};
@@ -77,7 +76,6 @@ namespace Xaloc {
 
 	void VulkanBuffer::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
 	{
-		auto context = VulkanShared::Resources().Context;
 		auto device = VulkanShared::Resources().Device;
 
 		vkEndCommandBuffer(commandBuffer);
@@ -87,10 +85,10 @@ namespace Xaloc {
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
-		vkQueueSubmit(context->GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(context->GetGraphicsQueue());
+		vkQueueSubmit(device->GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(device->GetGraphicsQueue());
 
-		vkFreeCommandBuffers(device, context->GetCommandPool(), 1, &commandBuffer);
+		vkFreeCommandBuffers(device->GetDevice(), device->GetCommandPool(), 1, &commandBuffer);
 	}
 
 

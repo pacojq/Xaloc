@@ -85,7 +85,7 @@ namespace Xaloc {
 
 	VkShaderModule VulkanShader::CreateShaderModule(const std::string& code)
 	{
-		auto device = VulkanShared::Resources().Device;
+		auto device = VulkanShared::Resources().Device->GetDevice();
 		
 		VkShaderModuleCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

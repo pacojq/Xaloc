@@ -12,7 +12,7 @@ namespace Xaloc {
 
 	static void CreateImage(VulkanContext* context, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 	{
-		const auto device = context->GetDevice();
+		const auto device = context->GetDevice()->GetDevice();
 		
 		// Create the image
 
@@ -220,7 +220,7 @@ namespace Xaloc {
 		VkDeviceSize imageSize = width * height * channels;
 
 		auto context = VulkanShared::Resources().Context;
-		auto device = VulkanShared::Resources().Device;
+		auto device = VulkanShared::Resources().Device->GetDevice();
 
 		VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
 
@@ -276,7 +276,7 @@ namespace Xaloc {
 
 	VulkanTexture2D::~VulkanTexture2D()
 	{
-		auto device = VulkanShared::Resources().Device;
+		auto device = VulkanShared::Resources().Device->GetDevice();
 
 		vkDestroyImage(device, m_TextureImage, nullptr);
 		vkFreeMemory(device, m_TextureImageMemory, nullptr);

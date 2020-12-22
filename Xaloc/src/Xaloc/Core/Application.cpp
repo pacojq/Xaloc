@@ -11,6 +11,7 @@
 #include "Xaloc/Scripting/ScriptEngine.h"
 
 
+// TODO We use GLFW to get the timestep. We should make it platform-specific.
 #include <GLFW/glfw3.h>
 
 
@@ -46,12 +47,15 @@ namespace Xaloc {
 
 		Renderer::Init();
 
-		m_ImGuiLayer = new ImGuiLayer();
+
+		// Setup ImGui
+		m_ImGuiLayer = ImGuiLayer::Create();
 		PushOverlay(m_ImGuiLayer);
 		m_LayerStack.Flush();
-
 		ImGuiStyles::ApplyDefaultStyle();
 
+
+		// Setup C# scripting modules
 		if (spec.UseScripting)
 		{
 			// TODO error handling with ScriptingDllPath

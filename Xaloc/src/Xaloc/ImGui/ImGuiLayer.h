@@ -13,32 +13,36 @@ namespace Xaloc {
 
 	/*
 		Specific layer for ImGui rendering.
+		To be implemented by each rendering platform.
 	*/
 	class ImGuiLayer : public Layer
 	{
 	public:
-		ImGuiLayer();
-		~ImGuiLayer() = default;
+		static ImGuiLayer* Create();
 
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
+		virtual void Begin() = 0;
+		virtual void End() = 0;
+
 		virtual void OnEvent(Event& e) override;
-
-		virtual void OnImGuiRender() override;
-
-		void Begin();
-		void End();
-
+		
 		void SetBlockEvents(bool blockEvents) { m_BlockEvents = blockEvents; }
-
 
 		const Ref<ImGuiProfiler>& GetProfiler() const { return m_Profiler; }
 
 		inline void ShowConsole() { m_ShowConsole = true; }
 		inline void ShowProfiler() { m_ShowProfiler = true; }
+
+
+	protected:
+		ImGuiLayer::ImGuiLayer();
+
+		/// <summary>
+		/// To be called by children on attach layer.
+		/// </summary>
+		void SetupImGui();
 		
 
-	private:
+	protected:
 		bool m_BlockEvents = false;
 
 		Ref<ImGuiProfiler> m_Profiler;

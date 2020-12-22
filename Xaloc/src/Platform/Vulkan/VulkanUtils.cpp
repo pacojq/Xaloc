@@ -208,7 +208,7 @@ namespace Xaloc {
 	uint32_t VulkanUtils::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(VulkanShared::Resources().PhysicalDevice, &memProperties);
+		vkGetPhysicalDeviceMemoryProperties(VulkanShared::Resources().PhysicalDevice->GetPhysicalDevice(), &memProperties);
 
 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 		{
@@ -236,7 +236,7 @@ namespace Xaloc {
 		for (VkFormat format : candidates)
 		{
 			VkFormatProperties props;
-			vkGetPhysicalDeviceFormatProperties(VulkanShared::Resources().PhysicalDevice, format, &props);
+			vkGetPhysicalDeviceFormatProperties(VulkanShared::Resources().PhysicalDevice->GetPhysicalDevice(), format, &props);
 
 			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
 			{
