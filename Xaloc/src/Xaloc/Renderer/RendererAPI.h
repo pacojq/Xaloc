@@ -26,7 +26,8 @@ namespace Xaloc {
 		{
 			None = 0,
 			OpenGL = 1,
-			Vulkan = 2
+			Vulkan = 2,
+			DirectX = 3
 		};
 
 	public:

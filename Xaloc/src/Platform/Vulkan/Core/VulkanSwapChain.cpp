@@ -1,7 +1,7 @@
 #include "xapch.h"
 #include "VulkanSwapChain.h"
 
-#include "VulkanUtils.h"
+#include "../VulkanUtils.h"
 
 
 namespace Xaloc {

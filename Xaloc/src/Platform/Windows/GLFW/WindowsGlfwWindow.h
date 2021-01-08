@@ -9,11 +9,11 @@
 namespace Xaloc {
 
 
-	class WindowsWindow : public Window
+	class WindowsGlfwWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowProps& props);
-		virtual ~WindowsWindow();
+		WindowsGlfwWindow(const WindowProps& props);
+		virtual ~WindowsGlfwWindow();
 
 		void OnUpdate() override;
 

@@ -102,6 +102,8 @@ project "Xaloc"
 		"ImGui",
 		"opengl32.lib",
 		"%{LibraryDir.mono}",
+		"d3d11.lib", -- DirectX stuff
+		"dxguid.lib", -- DirectX stuff
 		"$(VULKAN_SDK)/Lib/vulkan-1.lib" -- VULKAN SDK must be installed
 	}
 	
