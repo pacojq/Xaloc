@@ -1,4 +1,5 @@
 #include "xapch.h"
+#ifdef XA_IMGUI_GLFW
 #include "OpenGLImGuiLayer.h"
 
 #include "Xaloc/Core/Application.h"
@@ -104,3 +105,4 @@ namespace Xaloc {
 
 	
 }
+#endif

@@ -7,8 +7,13 @@
 #include "Xaloc/Core/Application.h"
 #include "Xaloc/Core/Log.h"
 
+#ifdef XA_IMGUI_GLFW
 #include "Platform/OpenGL/OpenGLImGuiLayer.h"
+#endif
 
+#ifdef XA_IMGUI_DIRECTX
+#include "Platform/DirectX/DirectXImGuiLayer.h"
+#endif
 
 namespace Xaloc {
 
@@ -21,11 +26,17 @@ namespace Xaloc {
 			XA_CORE_ASSERT(false, "RendererAPI::None is not supported!");
 			return nullptr;
 
+#ifdef XA_IMGUI_GLFW
 		case RendererAPI::API::OpenGL:
 			return new OpenGLImGuiLayer();
 
 		// TODO case RendererAPI::API::Vulkan:
 		// TODO 	return new VulkanImGuiLayer();
+#endif
+#ifdef XA_IMGUI_DIRECTX
+		case RendererAPI::API::DirectX:
+			return new DirectXImGuiLayer();
+#endif
 		}
 		XA_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;

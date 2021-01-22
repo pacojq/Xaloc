@@ -1,4 +1,5 @@
 #pragma once
+#ifdef XA_IMGUI_GLFW
 
 #include "Xaloc/ImGui/ImGuiLayer.h"
 
@@ -21,3 +22,4 @@ namespace Xaloc {
 	};
 
 }
+#endif
