@@ -4,6 +4,7 @@
 
 #include "Platform/OpenGL/OpenGLRendererAPI.h"
 #include "Platform/Vulkan/VulkanRendererAPI.h"
+#include "Platform/DirectX/DirectXRendererAPI.h"
 
 namespace Xaloc {
 
@@ -29,6 +30,10 @@ namespace Xaloc {
 
 			case RendererAPI::API::Vulkan:
 				s_RendererAPI = CreateScope<VulkanRendererAPI>();
+				break;
+
+			case RendererAPI::API::DirectX:
+				s_RendererAPI = CreateScope<DirectXRendererAPI>();
 				break;
 
 			default:

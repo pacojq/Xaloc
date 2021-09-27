@@ -13,8 +13,8 @@
 	#include <Windows.h>
 	#include <WinBase.h>
 
-	#define XA_IMGUI_DIRECTX
-	//#define XA_IMGUI_GLFW
+	//#define XA_IMGUI_DIRECTX
+	#define XA_IMGUI_GLFW
 
 #endif
 

@@ -11,10 +11,16 @@ namespace Xaloc {
 		//XA_CORE_ASSERT(windowHandle, "Window handle is null!");
 	}
 
+	DirectXContext::~DirectXContext()
+	{
+	}
+
+
 	void DirectXContext::Init()
 	{
 		XA_CORE_TRACE("DirectX Context initializing...");
 
+		D3D_FEATURE_LEVEL dx11 = D3D_FEATURE_LEVEL_11_0;
 
 		// SwapChain Descriptor
 		DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
@@ -31,19 +37,28 @@ namespace Xaloc {
 		swapChainDesc.Windowed = TRUE;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
+		// Set up viewport
+		m_Viewport.Width = m_Width;
+		m_Viewport.Height = m_Height;
+		m_Viewport.TopLeftX = 0;
+		m_Viewport.TopLeftY = 0;
+		m_Viewport.MinDepth = 0; 
+		m_Viewport.MaxDepth = 1;
+
+
 		// Enable debug layer
 		UINT deviceCreateFlags = 0;
-		#ifdef HZ_DEBUG
+#ifdef XA_DEBUG
 		deviceCreateFlags |= D3D11_CREATE_DEVICE_DEBUG;
-		#endif
+#endif
 
 		// Create Device and SwapChain
 		DX_CALL_HR(D3D11CreateDeviceAndSwapChain(
 			nullptr,
 			D3D_DRIVER_TYPE_HARDWARE,
-			nullptr,
+			NULL,
 			deviceCreateFlags,
-			nullptr, 0,
+			&dx11, 1,
 			D3D11_SDK_VERSION,
 			&swapChainDesc, &m_SwapChain, &m_Device,
 			nullptr,
@@ -51,14 +66,48 @@ namespace Xaloc {
 		));
 
 		// Main RenderTargetView
-		//CreateMainRenderTargetView();
+		CreateMainRenderTargetView();
+
+
+		D3D11_RASTERIZER_DESC rDesc = {};
+		rDesc.CullMode = D3D11_CULL_NONE;
+		rDesc.FillMode = D3D11_FILL_SOLID;
+
+		ID3D11RasterizerState* state;
+		DX_CALL_HR(m_Device->CreateRasterizerState(&rDesc, &state));
+
+		m_DeviceContext->RSSetState(state);
+		m_DeviceContext->RSSetViewports(1, &m_Viewport);
+
+		state->Release();
+
+
 
 		XA_CORE_TRACE("DirectX Context ready!");
 	}
 
 
+
+	void DirectXContext::CreateMainRenderTargetView()
+	{
+		ID3D11Texture2D* backbuffer;
+
+		DX_CALL_HR(m_SwapChain->GetBuffer(0, __uuidof(backbuffer), (void**)&backbuffer));
+		DX_CALL_HR(m_Device->CreateRenderTargetView(backbuffer, NULL, &m_MainRenderTargetView));
+
+		backbuffer->Release();
+
+		ID3D11RenderTargetView* views = { m_MainRenderTargetView.Get() };
+
+		m_DeviceContext->OMSetRenderTargets(1, &views, nullptr);
+	}
+
+
+
 	void DirectXContext::SwapBuffers()
 	{
+		bool vSync = true; // TODO: vSync:  Application::Get().GetWindow().IsVSync();
+		m_SwapChain->Present(vSync, 0);
 	}
 
 }

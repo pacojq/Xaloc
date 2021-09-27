@@ -27,7 +27,7 @@ Xaloc::Application* Xaloc::CreateApplication()
 	ApplicationSpec spec;
 
 	spec.Name = "Sandbox App";
-	spec.TargetGraphics = Xaloc::RendererAPI::API::OpenGL;
+	spec.TargetGraphics = Xaloc::RendererAPI::API::DirectX;
 
 	spec.UseScripting = true;
 	spec.ScriptingDllPath = "assets/scripts/SandboxCs.dll";

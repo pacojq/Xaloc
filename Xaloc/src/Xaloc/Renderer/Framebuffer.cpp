@@ -4,6 +4,7 @@
 #include "Renderer.h"
 
 #include "Platform/OpenGL/OpenGLFramebuffer.h"
+#include "Platform/DirectX/DirectXFramebuffer.h"
 
 namespace Xaloc {
 
@@ -17,6 +18,9 @@ namespace Xaloc {
 
 		case RendererAPI::API::OpenGL:
 			return CreateRef<OpenGLFramebuffer>(spec);
+
+		case RendererAPI::API::DirectX:
+			return CreateRef<DirectXFramebuffer>(spec);
 		}
 
 		XA_CORE_ASSERT(false, "Unknown RendererAPI!");
