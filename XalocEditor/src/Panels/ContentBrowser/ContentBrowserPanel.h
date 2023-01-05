@@ -7,21 +7,34 @@
 
 #include "Xaloc/Renderer/Texture.h"
 
+#include "ContentBrowserHeader.h"
+
 #include <map>
 
-namespace Xaloc
-{
-	class AssetManagerPanel
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
+
+namespace Xaloc {
+
+	class EditorLayer;
+
+	class ContentBrowserPanel
 	{
 	public:
-		AssetManagerPanel();
+		ContentBrowserPanel(EditorLayer* editorLayer);
 		
 		void OnImGuiRender();
 
 	private:
 
 		void RenderHierarchy();
-		void RenderHierarchyDir(const DirectoryInfo& dir);
+
+		void RenderHierarchyRoot(const DirectoryInfo& dir);
+		ImRect RenderHierarchyDir(const DirectoryInfo& dir);
+		ImRect RenderHierarchyItem(const FileInfo& file);
+		void OnContextMenuOpen(const FileInfo& file);
+
+
 		
 		void RenderFileListView(const FileInfo& file);
 		void RenderFileGridView(const FileInfo& file);
@@ -29,18 +42,14 @@ namespace Xaloc
 		void RenderDirListView(const DirectoryInfo& dir);
 		void RenderDirGridView(const DirectoryInfo& dir);
 
-		void RenderBreadCrumbs();
-
-		void RenderSearch();
-
 		void RenderBottom();
 		
 	private:
-		std::map<AssetType, Ref<Texture2D>> m_AssetIconMap;
-		
-		Ref<Texture2D> m_TexFolder;
-		Ref<Texture2D> m_TexFile;
-		
+		EditorLayer* m_EditorLayer;
+
+		Scope<ContentBrowserHeader> m_Header;
+
+	private:		
 		Ref<Texture2D> m_TexGridView;
 		Ref<Texture2D> m_TexListView;
 		Ref<Texture2D> m_TexSearch;
@@ -56,13 +65,11 @@ namespace Xaloc
 		bool m_IsDragging;
 		bool m_IsInListView;
 		bool m_UpdateBreadCrumbs;
-		bool m_ShowSearchBar;
-
-		char* m_InputText;
-		char* m_InputHint;
-		char  m_InputBuffer[1024];
 
 		DirectoryInfo m_CurrentDir;
 		DirectoryInfo m_BaseProjectDir;
+
+	friend class ContentBrowserHeader;
+
 	};
 }

@@ -6,6 +6,8 @@
 
 #include "SceneSerializer.h"
 
+#include "Xaloc/Core/Assets/AssetManager.h"
+
 #include "Xaloc/Renderer/Renderer2D.h"
 #include "Xaloc/Renderer/Camera.h"
 
@@ -214,10 +216,18 @@ namespace Xaloc {
 			auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
 			{
-				auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-				auto trans = transformComponent;
-				auto spr = spriteRendererComponent;
-				Renderer2D::DrawQuad(transformComponent.GetTransform(), spriteRendererComponent.SubTexture);
+				auto [trans, sprRenderer] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				
+				Ref<SubTexture2D> subTex = AssetManager::GetAsset<SubTexture2D>(sprRenderer.Sprite);
+				if (subTex.get())
+				{
+					Renderer2D::DrawQuad(trans.GetTransform(), subTex);
+				}
+				else
+				{
+					glm::vec4 color = { 1.0f, 0.0f, 1.0f, 1.0f };
+					Renderer2D::DrawQuad(trans.Translation, trans.Scale, color);
+				}
 			}
 
 			Renderer2D::EndScene();
@@ -235,10 +245,18 @@ namespace Xaloc {
 		auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 		for (auto entity : group)
 		{
-			auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			auto trans = transformComponent;
-			auto spr = spriteRendererComponent;
-			Renderer2D::DrawQuad(trans.GetTransform(), spriteRendererComponent.SubTexture);
+			auto [trans, sprRenderer] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+			Ref<SubTexture2D> subTex = AssetManager::GetAsset<SubTexture2D>(sprRenderer.Sprite);
+			if (subTex.get())
+			{
+				Renderer2D::DrawQuad(trans.GetTransform(), subTex);
+			}
+			else 
+			{
+				glm::vec4 color = { 1.0f, 0.0f, 1.0f, 1.0f };
+				Renderer2D::DrawQuad(trans.Translation, trans.Scale, color);
+			}
 		}
 
 		Renderer2D::EndScene();

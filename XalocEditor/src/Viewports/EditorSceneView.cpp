@@ -84,7 +84,7 @@ namespace Xaloc {
 		//ImGuizmo::DrawGrid(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), glm::value_ptr(gizmoGridTransform), 5.0f);
 
 
-		if (selectedEntity)
+		if (selectedEntity && selectedEntity.HasComponent<TransformComponent>())
 		{
 			// Entity transform
 			TransformComponent& tc = selectedEntity.GetComponent<TransformComponent>();

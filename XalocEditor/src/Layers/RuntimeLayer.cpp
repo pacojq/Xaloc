@@ -13,11 +13,6 @@ namespace Xaloc {
 
 	RuntimeLayer::RuntimeLayer(const Ref<Scene>& scene) : Layer("Runtime Layer")
 	{
-		// Load Assets
-
-		AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
-
-
 		// Init Scene
 		// TODO save current scene state
 		m_Scene = scene;

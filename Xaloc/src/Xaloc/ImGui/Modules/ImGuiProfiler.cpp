@@ -110,11 +110,10 @@ namespace Xaloc {
 		}
 		avg /= m_Frames.size();
 
-
+		/*
 		int plotMax = max > m_TargetFrameTime * 2.0f ? max * 1.1f : m_TargetFrameTime * 2.0f;
 
-		ImPlot::SetNextPlotLimitsX(0, m_MaxFrameCount-1, ImGuiCond_Always);
-		ImPlot::SetNextPlotLimitsY(0, plotMax, ImGuiCond_Always);
+		ImPlot::SetNextAxesLimits(0, m_MaxFrameCount - 1, 0, plotMax, ImGuiCond_Always);
 
 		if (ImPlot::BeginPlot("Frame Time", "Frame", "ms"))
 		{
@@ -123,6 +122,7 @@ namespace Xaloc {
 			ImPlot::PopStyleVar();
 			ImPlot::EndPlot();
 		}
+		*/
 
 		ImGui::Separator();
 

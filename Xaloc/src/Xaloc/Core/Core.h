@@ -104,6 +104,12 @@ namespace Xaloc {
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 
+	template<typename T1, typename T2>
+	constexpr Ref<T2> CastRef(const Ref<T1>& ref)
+	{
+		return std::static_pointer_cast<T2>(ref);
+	}
+
 }
 
 

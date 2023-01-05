@@ -13,6 +13,9 @@ public:
 	{
 		//PushLayer(new ExampleLayer());
 		PushLayer(new SandboxLayer());
+
+		//SetImGuiEnabled(true);
+		SetImGuiEnabled(false);
 	}
 
 	~Sandbox()
@@ -30,7 +33,7 @@ Xaloc::Application* Xaloc::CreateApplication()
 	spec.TargetGraphics = Xaloc::RendererAPI::API::OpenGL;
 
 	spec.UseScripting = true;
-	spec.ScriptingDllPath = "assets/scripts/SandboxCs.dll";
+	spec.ScriptingDllPath = "assets/game/scripts/SandboxCs.dll";
 	
 	//spec.PauseOnFocusLost = true;
 

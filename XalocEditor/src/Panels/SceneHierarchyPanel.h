@@ -6,10 +6,12 @@
 
 namespace Xaloc {
 
+	class EditorLayer;
+
 	class SceneHierarchyPanel
 	{
 	public:
-		SceneHierarchyPanel(const Ref<Scene>& scene);
+		SceneHierarchyPanel(EditorLayer* editorLayer, const Ref<Scene>& scene);
 
 		void SetScene(const Ref<Scene>& scene);
 		void SetSelected(Entity entity);
@@ -23,6 +25,7 @@ namespace Xaloc {
 		void DrawComponents(Entity entity);
 		
 	private:
+		EditorLayer* m_EditorLayer;
 		Ref<Scene> m_Scene;
 
 		bool m_ShowProperties = false;

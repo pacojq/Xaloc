@@ -6,10 +6,13 @@
 
 namespace Xaloc {
 
-	class SubTexture2D
+	class SubTexture2D : public Asset
 	{
 	public:
 		SubTexture2D(const Ref<Texture2D>& texture, const glm::vec2& min, const glm::vec2& max);
+
+		static AssetType GetStaticAssetType() { return AssetType::Sprite; }
+		virtual AssetType GetAssetType() const override { return GetStaticAssetType(); }
 
 		const Ref<Texture2D> GetTexture() const { return m_Texture; }
 		const glm::vec2* GetTexCoords() const { return m_TexCoords; }

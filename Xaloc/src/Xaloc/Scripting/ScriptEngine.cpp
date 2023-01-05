@@ -256,7 +256,7 @@ namespace Xaloc {
 
 		}
 
-		s_CoreAssembly = LoadAssembly("assets/scripts/XalocSharp.dll");
+		s_CoreAssembly = LoadAssembly("assets/game/scripts/XalocSharp.dll");
 		s_CoreAssemblyImage = GetAssemblyImage(s_CoreAssembly);
 
 		s_AppAssembly = LoadAssembly(s_AssemblyPath);

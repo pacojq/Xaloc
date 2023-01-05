@@ -33,6 +33,8 @@ namespace Xaloc {
 		m_PauseOnFocusLost = spec.PauseOnFocusLost;
 
 		AssetManager::Init(spec.AssetsRootPath);
+		AssetManager::LoadProjectAssets(); // TODO: revise this if we are loading packed release assets
+
 		
 		RendererAPI::SetAPI(spec.TargetGraphics);
 
@@ -66,6 +68,8 @@ namespace Xaloc {
 	Application::~Application()
 	{
 		XA_PROFILE_FUNCTION();
+
+		AssetManager::Shutdown();
 
 		Renderer::Shutdown();
 	}

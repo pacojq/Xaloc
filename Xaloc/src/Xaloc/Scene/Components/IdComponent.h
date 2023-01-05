@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Xaloc/Scene/UUID.h"
+#include "Xaloc/Core/UUID.h"
 
 namespace Xaloc {
 

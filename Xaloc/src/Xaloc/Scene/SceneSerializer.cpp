@@ -5,6 +5,7 @@
 #include "Components.h"
 
 #include "Xaloc/Core/Assets/AssetManager.h"
+#include "Xaloc/Core/Assets/Utils/XmlHelper.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -147,6 +148,17 @@ namespace Xaloc {
             XA_CORE_TRACE("        BehaviourComponent: {}", name);
         }
 
+
+        SpriteRendererComponent serializedSpriteRenderer;
+        if (XmlHelper::TryDeserializeCompSpriteRenderer(entityNode, serializedSpriteRenderer))
+        {
+            SpriteRendererComponent& spr = entity.AddComponent<SpriteRendererComponent>();
+
+            spr.Sprite = serializedSpriteRenderer.Sprite;
+            spr.Color = serializedSpriteRenderer.Color;
+            spr.TilingFactor = serializedSpriteRenderer.TilingFactor;
+        }
+        /*
         pugi::xml_node rendererNode = entityNode.child("SpriteRendererComponent");
         if (rendererNode)
         {
@@ -167,6 +179,7 @@ namespace Xaloc {
             XA_CORE_TRACE("        SpriteRendererComponent: texcoords = {0}    width = {1}    height = {2}    assetID = {3}",
                 strTexcoords, width, height, assetID);
         }
+        */
     }
 
 
@@ -252,8 +265,8 @@ namespace Xaloc {
         {
             auto renderer = entity.GetComponent<SpriteRendererComponent>();
             auto rendererNode = node.append_child("SpriteRendererComponent");
-
-            auto subTex = renderer.SubTexture;
+            /*
+            auto subTex = renderer.Sprite;
             auto tex = subTex->GetTexture();
             
             char buff[64];
@@ -263,7 +276,9 @@ namespace Xaloc {
             rendererNode.append_attribute("texcoords").set_value(strTexcoords.c_str());
             rendererNode.append_attribute("width").set_value(subTex->GetWidth());
             rendererNode.append_attribute("height").set_value(subTex->GetHeight());
-            rendererNode.append_attribute("assetID").set_value(tex->AssetID().c_str());
+            */
+            auto attrId = rendererNode.append_attribute("sprite");
+            attrId.set_value(Uint64ToString(renderer.Sprite).c_str());
         }
     }
 

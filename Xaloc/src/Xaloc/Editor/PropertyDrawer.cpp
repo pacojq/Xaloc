@@ -1,10 +1,16 @@
+#include "xapch.h"
 #include "PropertyDrawer.h"
+
+#include "Xaloc/Core/Assets/AssetManager.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <limits>
 
 namespace Xaloc {
+
+	#define INT_MIN std::numeric_limits<int>::min()
+	#define INT_MAX std::numeric_limits<int>::max()
 
 	#define FLOAT_MIN std::numeric_limits<float>::min()
 	#define FLOAT_MAX std::numeric_limits<float>::max()
@@ -39,8 +45,99 @@ namespace Xaloc {
 		PopID();
 	}
 
+	void PropertyDrawer::BeginDisabled(bool disabled)
+	{
+		if (disabled)
+			ImGui::BeginDisabled(true);
+	}
+
+	void PropertyDrawer::EndDisabled()
+	{
+		// NOTE(Peter): Cheeky hack to prevent ImGui from asserting (required due to the nature of UI::BeginDisabled)
+		if (GImGui->DisabledStackSize > 0)
+			ImGui::EndDisabled();
+	}
 
 
+
+
+	void PropertyDrawer::Uuid(const char* label, UUID value, bool error)
+	{
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		if (error) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.2f, 0.2f, 1.0f));
+
+		ImGui::Text("%llx", value);
+
+		if (error) ImGui::PopStyleColor();
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+	}
+
+
+	bool PropertyDrawer::Asset(const char* label, const AssetType type, AssetHandle& value, void* icon)
+	{
+		bool modified = false;
+
+		float y = ImGui::GetCursorPosY();
+		y += (ImGui::GetTextLineHeightWithSpacing() - ImGui::GetTextLineHeight()) / 2.0f;
+		ImGui::SetCursorPosY(y);
+
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+
+		if (icon != nullptr)
+		{
+			float height = ImGui::GetTextLineHeightWithSpacing();
+			ImGui::Image(icon, ImVec2(height, height), ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			ImGui::SameLine();
+		}
+
+		char buffer[256];
+
+		if (value == 0) strcpy(buffer, "None");
+		else
+		{
+			std::string name = AssetManager::GetMetadata(value).FilePath.filename().string();
+			strcpy(buffer, (char*)name.c_str());
+		}
+		ImGui::BeginDisabled();
+		ImGui::InputText("##asset", buffer, 256, ImGuiInputTextFlags_ReadOnly);
+		ImGui::EndDisabled();
+
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+		{
+			XA_CORE_WARN("Clicked!!");
+			// TODO: open editor, maybe editor
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("selectable");
+			if (payload)
+			{
+				const std::string absPath = (char*)payload->Data;
+				XA_CORE_WARN("{}", absPath);
+
+				if (type == AssetManager::GetAssetTypeFromPath(absPath))
+				{
+					value = AssetManager::GetAssetHandleFromFilePath(absPath);
+					modified = true;
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+
+		return modified;
+	}
 
 
 	
@@ -108,7 +205,7 @@ namespace Xaloc {
 
 	
 
-	bool PropertyDrawer::Int(const char* label, int& value)
+	bool PropertyDrawer::Int(const char* label, int& value, int delta)
 	{
 		bool modified = false;
 
@@ -116,11 +213,32 @@ namespace Xaloc {
 		ImGui::NextColumn();
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		_itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragInt(s_IDBuffer, &value))
+		std::string id = fmt::format("##{0}", label);
+		if (ImGui::DragInt(id.c_str(), &value, delta))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+
+		return modified;
+	}
+
+	bool PropertyDrawer::Int(const char* label, int& value, int delta, int min)
+	{
+		return Int(label, value, delta, min, INT_MAX);
+	}
+
+
+	bool PropertyDrawer::Int(const char* label, int& value, int delta, int min, int max)
+	{
+		bool modified = false;
+
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		std::string id = fmt::format("##{0}", label);
+		if (ImGui::DragInt(id.c_str(), &value, delta, min, max))
 			modified = true;
 
 		ImGui::PopItemWidth();
@@ -140,11 +258,8 @@ namespace Xaloc {
 		ImGui::NextColumn();
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		_itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat(s_IDBuffer, &value, delta))
+		std::string id = fmt::format("##{0}", label);
+		if (ImGui::DragFloat(id.c_str(), &value, delta))
 			modified = true;
 
 		ImGui::PopItemWidth();
@@ -167,11 +282,8 @@ namespace Xaloc {
 		ImGui::NextColumn();
 		ImGui::PushItemWidth(-1);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		_itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat(s_IDBuffer, &value, delta, min, max))
+		std::string id = fmt::format("##{0}", label);
+		if (ImGui::DragFloat(id.c_str(), &value, delta, min, max))
 			modified = true;
 
 		ImGui::PopItemWidth();
@@ -295,7 +407,7 @@ namespace Xaloc {
 				
 				if (ImGui::Selectable(str.c_str(), isSelected))
 				{
-					outIndex = &index;
+					*outIndex = index;
 					modified = true;
 				}
 				if (isSelected) ImGui::SetItemDefaultFocus();

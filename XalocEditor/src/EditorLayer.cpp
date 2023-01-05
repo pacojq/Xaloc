@@ -20,12 +20,9 @@ namespace Xaloc {
 	EditorLayer::EditorLayer() : Layer("Editor Layer")
 	{
 		m_MenuBar = CreateRef<EditorMenuBar>(this);
-
-		// Load Assets - TODO: remove
-		AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
 		
 		// TODO: start with empty room
-		auto& scene = Scene::Load("assets/scenes/serializedScene.xaloc");
+		auto& scene = Scene::Load("assets/game/scenes/serializedScene.xaloc");
 		OpenScene(scene);
 
 		// Init Editor
@@ -33,8 +30,11 @@ namespace Xaloc {
 		m_EditorCameraOrthographic = CreateRef<EditorCameraOrthographic>();
 		m_EditorCamera = m_EditorCameraOrthographic;
 
-		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
-		m_AssetManagerPanel = CreateScope<AssetManagerPanel>();
+
+		m_Icons = CreateRef<EditorIcons>();
+
+		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(this, scene);
+		m_ContentBrowserPanel = CreateScope<ContentBrowserPanel>(this);
 
 		m_GamePreview = CreateRef<EditorGamePreview>(EditorNames::Windows::GAME_PREVIEW);
 		m_SceneViewport = CreateRef<EditorSceneView>(EditorNames::Windows::SCENE);
@@ -195,8 +195,8 @@ namespace Xaloc {
 		if (opt_fullscreen)
 		{
 			ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->GetWorkPos());
-			ImGui::SetNextWindowSize(viewport->GetWorkSize());
+			ImGui::SetNextWindowPos(viewport->WorkPos);
+			ImGui::SetNextWindowSize(viewport->WorkSize);
 			ImGui::SetNextWindowViewport(viewport->ID);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -290,9 +290,8 @@ namespace Xaloc {
 		// ============================================= HIERARCHY ============================================= //
 
 		m_SceneHierarchyPanel->OnImGuiRender();
-		
 
-		m_AssetManagerPanel->OnImGuiRender();
+		m_ContentBrowserPanel->OnImGuiRender();
 		
 		
 		// ============================================= VIEWPORTS ============================================= //

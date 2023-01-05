@@ -2,6 +2,7 @@
 
 #include "Xaloc.h"
 
+#include "EditorIcons.h"
 #include "EditorMenuBar.h"
 #include "Viewports/EditorGamePreview.h"
 #include "Viewports/EditorSceneView.h"
@@ -10,8 +11,8 @@
 #include "Xaloc/Renderer/Cameras/EditorCameraPerspective.h"
 #include "Xaloc/Renderer/Cameras/EditorCameraOrthographic.h"
 
-#include "Panels/AssetManagerPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/ContentBrowser/ContentBrowserPanel.h"
 
 #include "Layers/RuntimeLayer.h"
 
@@ -38,12 +39,16 @@ namespace Xaloc {
 	public:
 		void OpenScene(const Ref<Scene>& scene);
 
+		const Ref<EditorIcons>& GetIcons() const { return m_Icons; }
+
 
 	private:
 		void ResetDockSpace();
 
 		
 	private:
+		Ref<EditorIcons> m_Icons;
+
 		Ref<EditorMenuBar> m_MenuBar;
 		friend class EditorMenuBar;
 
@@ -75,7 +80,7 @@ namespace Xaloc {
 
 		bool m_PanelsInitialized = false;
 		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
-		Scope<AssetManagerPanel> m_AssetManagerPanel;
+		Scope<ContentBrowserPanel> m_ContentBrowserPanel;
 
 		ImGuiID m_DockspaceId;
 		bool m_DockspaceReady = false;

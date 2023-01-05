@@ -10,8 +10,8 @@
 #include "Xaloc/ImGui/ImGuizmo.h"
 
 #define IMGUI_IMPL_API
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 #include <GLFW/glfw3.h>
 

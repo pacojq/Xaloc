@@ -1,8 +1,12 @@
 #include "SceneHierarchyPanel.h"
 
-#include "./../EditorNames.h"
+#include "../EditorLayer.h"
+#include "../EditorNames.h"
 
-#include "PropertyDrawer.h"
+#include "Xaloc/Editor/PropertyDrawer.h"
+
+#include "Xaloc/Renderer/Texture.h"
+#include "Xaloc/Renderer/SubTexture2D.h"
 
 #include "Xaloc/Scripting/ScriptEngine.h"
 
@@ -15,8 +19,8 @@
 
 namespace Xaloc {
 	
-	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
-		: m_Scene(scene)
+	SceneHierarchyPanel::SceneHierarchyPanel(EditorLayer* editorLayer, const Ref<Scene>& scene)
+		: m_EditorLayer(editorLayer), m_Scene(scene)
 	{
 	}
 
@@ -44,7 +48,7 @@ namespace Xaloc {
 				DrawEntityNode(Entity(entity, m_Scene.get()));
 			});
 
-		if (ImGui::BeginPopupContextWindow(0, 1, false))
+		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight))
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
 			{
@@ -286,16 +290,19 @@ namespace Xaloc {
 		});
 		
 
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& src)
+		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [&](auto& src)
 		{
+			auto iconRef = m_EditorLayer->GetIcons()->GetAssetIcon(AssetType::Sprite)->GetRendererID();
+
 			PropertyDrawer::BeginPropertyGrid();
-			PropertyDrawer::String("Asset ID", src.SubTexture->GetTexture()->AssetID().c_str());
+
+			AssetHandle texAsset = src.Sprite;
+			if (PropertyDrawer::Asset("Sprite", AssetType::Sprite, texAsset, (void*)iconRef))
+			{
+				src.Sprite = texAsset;
+			}
 
 			PropertyDrawer::EndPropertyGrid();
-			if (ImGui::Button("Apply"))
-			{
-				// TODO
-			}
 		});
 
 
@@ -400,13 +407,7 @@ namespace Xaloc {
 			{
 				if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
 				{
-					// TODO move this white texture to an editor layer property, so we can reuse it
-					Ref<Texture2D> whiteTexture = Texture2D::Create(1, 1);
-					uint32_t whiteTextureData = 0xffffffff;
-					whiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-
-					Ref<SubTexture2D> subTexture = CreateRef<SubTexture2D>(whiteTexture, glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f));
-					m_SelectionContext.AddComponent<SpriteRendererComponent>(subTexture);
+					m_SelectionContext.AddComponent<SpriteRendererComponent>();
 				}
 				else XA_CORE_WARN("This entity already has the Sprite Renderer Component!");
 				ImGui::CloseCurrentPopup();

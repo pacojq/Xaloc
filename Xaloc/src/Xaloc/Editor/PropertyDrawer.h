@@ -1,6 +1,11 @@
 #pragma once
 
 #include "Xaloc/Core/Core.h"
+#include "Xaloc/Core/UUID.h"
+
+#include "Xaloc/Core/Assets/Asset.h"
+#include "Xaloc/Core/Assets/AssetType.h"
+
 #include "Xaloc/Scene/Scene.h"
 #include "Xaloc/Scene/Entity.h"
 
@@ -27,11 +32,21 @@ namespace Xaloc {
 	public:
 		static void BeginPropertyGrid();
 		static void EndPropertyGrid();
+
+		static void Uuid(const char* label, UUID uuid, bool error = false);
+
+		static bool Asset(const char* label, const AssetType type, AssetHandle& value, void* icon = nullptr);
 		
 		static bool String(const char* label, const char* value, bool error = false);
 		static bool String(const char* label, std::string& value, bool error = false);
 
-		static bool Int(const char* label, int& value);
+		static void BeginDisabled(bool disabled = true);
+		static void EndDisabled();
+
+
+		static bool Int(const char* label, int& value, int delta = 1);
+		static bool Int(const char* label, int& value, int delta, int min);
+		static bool Int(const char* label, int& value, int delta, int min, int max);
 
 		static bool Float(const char* label, float& value, float delta = 0.1f);
 		static bool Float(const char* label, float& value, float delta, float min);

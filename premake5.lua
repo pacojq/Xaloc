@@ -67,6 +67,8 @@ project "Xaloc"
 		
 		"%{prj.name}/vendor/implot/implot.h",
 		"%{prj.name}/vendor/implot/implot.cpp",
+		"%{prj.name}/vendor/implot/implot_internal.h",
+		"%{prj.name}/vendor/implot/implot_items.cpp",
 		
 		"%{prj.name}/vendor/pugixml/**.hpp",
 		"%{prj.name}/vendor/pugixml/**.cpp"

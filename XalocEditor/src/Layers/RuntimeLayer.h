@@ -3,7 +3,6 @@
 #include "Xaloc.h"
 #include "../Viewports/EditorGamePreview.h"
 
-#include "../Panels/AssetManagerPanel.h"
 #include "../Panels/SceneHierarchyPanel.h"
 
 namespace Xaloc {

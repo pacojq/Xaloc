@@ -40,25 +40,18 @@ SandboxLayer::SandboxLayer()
 		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 {
-	// Load Assets
-	AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
-
 	// Init Scene
 	//m_Scene = CreateRef<Scene>("Sandbox Scene");	
-	m_Scene = Scene::Load("assets/scenes/testScene.xaloc");
+	m_Scene = Scene::Load("assets/game/scenes/testScene.xaloc");
 }
 
 
 void SandboxLayer::OnAttach()
-{
-	Application::Get().SetImGuiEnabled(false);
-
-	
+{	
 	m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
 
 
-
-	Ref<Texture2D> tilemap = AssetManager::GetTexture("TILEMAP"); //Texture2D::Create("assets/game/textures/tilemap.png");
+	Ref<Texture2D> tilemap = AssetManager::GetAsset<Texture2D>("assets/game/textures/tilemap.png");
 
 	glm::vec2 size = { 16.0f, 16.0f };
 	glm::vec2 pad = { 0.0f, 0.0f };
@@ -97,11 +90,14 @@ void SandboxLayer::OnAttach()
 
 	// PLAYER
 
-	Ref<SubTexture2D> tilePlayer = SubTexture2D::CreateFromGrid(tilemap,
-		{ 24.0f, 17.0f }, size, pad, off);
+	//Ref<SubTexture2D> tilePlayer = SubTexture2D::CreateFromGrid(tilemap,
+	//	{ 24.0f, 17.0f }, size, pad, off);
 
 	m_Player = m_Scene->CreateEntity("Player");
-	m_Player.AddComponent<SpriteRendererComponent>(tilePlayer);
+
+	SpriteRendererComponent& playerSpr = m_Player.AddComponent<SpriteRendererComponent>();
+	playerSpr.Sprite = AssetManager::GetMetadata("assets/game/textures/player.xaspr").Handle;
+
 	m_Player.AddComponent<BehaviourComponent>("SandboxCs.PlayerEntity");
 
 	// FOREST
