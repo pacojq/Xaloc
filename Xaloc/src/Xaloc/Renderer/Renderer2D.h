@@ -1,10 +1,12 @@
 #pragma once
 
-#include "OrthographicCamera.h"
-#include "EditorCamera.h"
+#include "Cameras/OrthographicCamera.h"
+#include "Cameras/EditorCamera.h"
 
 #include "Texture.h"
 #include "SubTexture2D.h"
+
+#include "Shader.h"
 
 namespace Xaloc {
 	class Camera;
@@ -14,6 +16,10 @@ namespace Xaloc {
 	/// </summary>
 	class Renderer2D
 	{
+	public:
+		// TODO project-dependent pixels per unit
+		inline static const float PX_PER_UNIT = 16.0f;
+
 	public:
 		static void Init();
 		static void Shutdown();
@@ -36,6 +42,8 @@ namespace Xaloc {
 		static void Flush();
 
 
+
+		static void Blit(const Ref<Shader>& shader);
 
 		
 

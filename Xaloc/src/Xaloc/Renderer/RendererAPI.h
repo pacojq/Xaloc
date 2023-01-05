@@ -39,6 +39,8 @@ namespace Xaloc {
 
 		virtual void DrawIndexed(uint32_t indexCount) = 0;
 
+		virtual void DrawBlit() = 0;
+
 		inline static API GetAPI() { return s_API; }
 		inline static void SetAPI(const API api) { s_API = api; }
 

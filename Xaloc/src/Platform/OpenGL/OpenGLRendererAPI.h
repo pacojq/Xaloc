@@ -14,6 +14,8 @@ namespace Xaloc {
 		virtual void Clear() override;
 
 		virtual void DrawIndexed(uint32_t indexCount) override;
+
+		virtual void DrawBlit() override;
 	};
 
 }

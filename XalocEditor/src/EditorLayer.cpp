@@ -2,17 +2,16 @@
 
 #include "EditorNames.h"
 
+#include "Xaloc/Math/Math.h"
+#include "Xaloc/Files/FileSystem.h"
+
 #include "Xaloc/Scripting/ScriptEngine.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "Xaloc/ImGui/ImGuizmo.h"
 
-#include "Xaloc/Math/Math.h"
-
 #include <glm/gtc/type_ptr.hpp>
-
-#include "Xaloc/Files/FileSystem.h"
 
 
 namespace Xaloc {
@@ -22,73 +21,104 @@ namespace Xaloc {
 	{
 		m_MenuBar = CreateRef<EditorMenuBar>(this);
 
-		// Load Assets
-
+		// Load Assets - TODO: remove
 		AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
 		
+		// TODO: start with empty room
+		auto& scene = Scene::Load("assets/scenes/serializedScene.xaloc");
+		OpenScene(scene);
 
-		// Init Scene
-
-		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
-
-		m_MainCamera = m_Scene->CreateEntity("Orthographic Camera");
-		
-		auto& orthoData = m_MainCamera.AddComponent<CameraComponent>();
-		orthoData.Camera.SetViewportSize(1280.0, 720.0);
-		orthoData.Camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
-		orthoData.Camera.SetOrthographicNearClip(-100);
-		orthoData.Camera.SetOrthographicFarClip(100);
-
-		// vv ======================================== TODO temporary: start runtime
-		ScriptEngine::SetSceneContext(m_Scene);
-		m_Scene->StartRuntime();
-		// ^^ ============================================= temporary: start runtime
-
-		
-
-		
 		// Init Editor
+		m_EditorCameraPerspective = CreateRef<EditorCameraPerspective>(glm::perspective(45.0f, 1.778f, 0.01f, 1000.0f));
+		m_EditorCameraOrthographic = CreateRef<EditorCameraOrthographic>();
+		m_EditorCamera = m_EditorCameraOrthographic;
 
-		m_EditorCamera = EditorCamera(glm::perspective(45.0f, 1.778f, 0.01f, 1000.0f));
-		
-		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
 		m_AssetManagerPanel = CreateScope<AssetManagerPanel>();
 
-		m_GameViewport = CreateRef<EditorViewport>(EditorNames::Windows::GAME_PREVIEW);
-		m_SceneViewport = CreateRef<EditorViewport>(EditorNames::Windows::SCENE);
+		m_GamePreview = CreateRef<EditorGamePreview>(EditorNames::Windows::GAME_PREVIEW);
+		m_SceneViewport = CreateRef<EditorSceneView>(EditorNames::Windows::SCENE);
+		m_SceneViewport->SetScene(scene);
 		
-		//m_CameraController.SetZoomLevel(5.0f);
+
+		m_PanelsInitialized = true;
 	}
 
 
 	void EditorLayer::OnAttach()
 	{
-		FramebufferSpec framebufferSpec;
-		framebufferSpec.Width = 1280;
-		framebufferSpec.Height = 720;
+		FramebufferSpec framebufferSpec; // TODO: available width and height
+		framebufferSpec.Width = 480 * 2;
+		framebufferSpec.Height = 270 * 2;
 		framebufferSpec.ClearColor = { 0.1f, 0.1f, 0.1f, 1 };
-		Ref<Framebuffer> framebuffer = Framebuffer::Create(framebufferSpec);
-
-		RenderPassSpecification renderPassSpec;
-		renderPassSpec.TargetFramebuffer = framebuffer;
-		m_RenderPass = RenderPass::Create(renderPassSpec);
-
-		
+		Ref<Framebuffer> previewframebuffer = Framebuffer::Create(framebufferSpec);
 		Ref<Framebuffer> editorFramebuffer = Framebuffer::Create(framebufferSpec);
+
+		RenderPassSpecification previewRenderPassSpec;
+		previewRenderPassSpec.TargetFramebuffer = previewframebuffer;
+
 		RenderPassSpecification editorRenderPassSpec;
 		editorRenderPassSpec.TargetFramebuffer = editorFramebuffer;
-		
+
+		m_PreviewRenderPass = RenderPass::Create(previewRenderPassSpec);
 		m_EditorRenderPass = RenderPass::Create(editorRenderPassSpec);
 
 
-		m_GuizmoRenderPass = RenderPass::Create(renderPassSpec);
+		const glm::vec3 m_BgColA = { 78.0f / 255.0f, 78.0f / 255.0f, 78.0f / 255.0f };
+		const glm::vec3 m_BgColB = { 83.0f / 255.0f, 83.0f / 255.0f, 83.0f / 255.0f };
 
+		m_CheckerboardShader = Shader::Create("assets/shaders/CheckerboardBlit.glsl");
+		m_CheckerboardShader->Bind();
+		m_CheckerboardShader->SetFloat("u_PxPerUnit", Renderer2D::PX_PER_UNIT);
+		m_CheckerboardShader->SetFloat3("u_ColorLight", m_BgColA);
+		m_CheckerboardShader->SetFloat3("u_ColorDark", m_BgColB);
+		m_CheckerboardShader->SetFloat4("u_ScreenSize", { framebufferSpec.Width, framebufferSpec.Height, 0.0f, 0.0f });
 	}
 
 	void EditorLayer::OnDetach()
 	{
 	}
+
+
+
+
+
+	void EditorLayer::OpenScene(const Ref<Scene>& scene)
+	{
+		m_Scene.reset();
+		m_Scene = scene;
+
+		if (m_PanelsInitialized)
+		{
+			m_SceneHierarchyPanel->SetScene(scene);
+			m_SceneViewport->SetScene(scene);
+		}
+
+#ifdef TODO // TODO: temporary
+		{
+			Entity player = m_Scene->FindEntityByName("Player");
+			if (player)
+			{
+				XA_CORE_ERROR("ADDING PLAYER COMPONENT!");
+				player.AddComponent<NativeBehaviourComponent>().Bind<PlayerComponent>();
+			}
+		}
+#endif
+		// TODO: temporary
+		{
+			SceneCamera& cam = m_Scene->GetCameraStack()->MainCamera();
+			cam.Camera.SetViewportSize(480, 270);
+			cam.Camera.SetClipDistance(-100, 100);
+		}
+
+		// vv ======================================== TODO temporary: start runtime
+		ScriptEngine::SetSceneContext(m_Scene);
+		m_Scene->StartRuntime();
+		// ^^ ============================================= temporary: start runtime
+	}
+
+
+
 
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -99,7 +129,7 @@ namespace Xaloc {
 
 		bool blockEvents = true;
 
-		if (m_GameViewport->IsFocused() && m_GameViewport->IsHovered())
+		if (m_GamePreview->IsFocused() && m_GamePreview->IsHovered())
 		{
 			blockEvents = false;
 		}
@@ -109,7 +139,7 @@ namespace Xaloc {
 		}
 		
 		Application::Get().GetImGuiLayer()->SetBlockEvents(blockEvents);
-		if (m_GameViewport->IsFocused())
+		if (m_GamePreview->IsFocused())
 		{
 			// TODO update editor camera
 			//m_CameraController.OnUpdate(ts);
@@ -122,25 +152,32 @@ namespace Xaloc {
 
 
 		// UPDATE AND RENDER SCENE
-		
-		Renderer::BeginRenderPass(m_RenderPass);
-		m_Scene->OnUpdateEditor(ts, m_EditorCamera);
-		Renderer::EndRenderPass();
+
+		SceneCamera& mainCamera = m_Scene->GetCameraStack()->MainCamera();
+		if (mainCamera.IsActive())
+		{
+			Renderer::BeginRenderPass(m_PreviewRenderPass);
+			{
+				m_Scene->OnUpdateEditor(ts, mainCamera.ViewProjectionMatrix());
+			}
+			Renderer::EndRenderPass();
+		}
 
 
 		
 		// RENDER SCENE FROM EDITOR CAMERA
 
-		Renderer::BeginRenderPass(m_EditorRenderPass);
-		m_Scene->OnUpdateEditor(ts, m_EditorCamera);
-		//m_Scene->RenderScene(editorCamera, m_EditorCamera->GetTransform().GetTransform());
+		Renderer::BeginRenderPass(m_EditorRenderPass, true);
+		{
+			Renderer2D::Blit(m_CheckerboardShader); // Editor background
+		}
 		Renderer::EndRenderPass();
 
-		if (m_SceneViewport->IsFocused())
+		Renderer::BeginRenderPass(m_EditorRenderPass, false);
 		{
-			m_EditorCamera.OnUpdate(ts);
+			m_Scene->OnUpdateEditor(ts, m_EditorCamera->GetViewProjection());
 		}
-
+		Renderer::EndRenderPass();
 	}
 
 
@@ -260,96 +297,22 @@ namespace Xaloc {
 		
 		// ============================================= VIEWPORTS ============================================= //
 
-		m_GameViewport->Begin();
-		if (m_GameViewport->Render(m_RenderPass))
-		{
-			// TODO OnWindow resize, call m_CameraController.OnResize again 
-			//m_CameraController.OnResize(viewportSize.x, viewportSize.y);
-			
-			auto& data = m_MainCamera.GetComponent<CameraComponent>();
-			uint32_t width = (uint32_t)m_GameViewport->GetSize().x;
-			uint32_t height = (uint32_t)m_GameViewport->GetSize().y;
-			data.Camera.SetViewportSize(width, height);
-		}
-		m_GameViewport->End();
+		m_GamePreview->OnImGuiDraw(m_PreviewRenderPass->GetSpecification().TargetFramebuffer);
 
 
-		m_SceneViewport->Begin();
-		if (m_SceneViewport->Render(m_EditorRenderPass))
+		Ref<Framebuffer>& roomViewFramebuffer = m_EditorRenderPass->GetSpecification().TargetFramebuffer;
+		Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
+
+		if (m_SceneViewport->OnImGuiDraw(roomViewFramebuffer, m_EditorCamera, selectedEntity))
 		{
 			uint32_t width = (uint32_t)m_SceneViewport->GetSize().x;
 			uint32_t height = (uint32_t)m_SceneViewport->GetSize().y;
-			m_EditorCamera.SetViewportSize(width, height);
+			m_EditorCamera->SetViewportSize(width, height);
+
+			m_CheckerboardShader->Bind();
+			m_CheckerboardShader->SetFloat4("u_ScreenSize", { width, height, 0.0f, 0.0f });
 		}
 
-
-		
-
-		// ============================================= GUIZMO ============================================= //
-
-		/*
-		ImGui::Begin("Editor Camera");
-		ImGui::Text("Distance: %f", m_EditorCamera.GetDistance());
-		ImGui::Text("Pitch: %f", m_EditorCamera.GetPitch());
-		ImGui::Text("Yaw: %f", m_EditorCamera.GetYaw());
-		ImGui::End();
-		*/
-		
-		// Editor Camera
-		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
-		
-		float rw = (float)ImGui::GetWindowWidth();
-		float rh = (float)ImGui::GetWindowHeight();
-		ImGuizmo::SetOrthographic(false);
-		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
-		
-		// Guizmo grid
-		float gizmoGridScale = 1.0f;// + glm::log(m_EditorCamera.GetDistance());
-		glm::mat4 gizmoGridTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f))
-			* glm::rotate(glm::mat4(1.0f), 0.0f, { 0.0f, 0.0f, 1.0f })
-			* glm::scale(glm::mat4(1.0f), { gizmoGridScale, gizmoGridScale, gizmoGridScale });
-
-		ImGuizmo::DrawGrid(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), glm::value_ptr(gizmoGridTransform), 5.0f);
-
-		Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
-		if (selectedEntity)
-		{			
-			// Entity transform
-			auto& tc = selectedEntity.GetComponent<TransformComponent>();
-			glm::mat4 transform = tc.GetTransform();
-
-			
-			bool snap = false; // TODO Input::IsKeyPressed(XA_KEY_LEFT_CONTROL);
-			// TODOfloat snapValue[3] = { m_SnapValue, m_SnapValue, m_SnapValue };
-			float snapValues[3] = { 0.1f, 0.1f, 0.1f };
-			
-			//if (m_SelectionMode == SelectionMode::Entity)
-			{
-				ImGuizmo::Manipulate(
-					glm::value_ptr(cameraView),
-					glm::value_ptr(cameraProjection),
-					(ImGuizmo::OPERATION)ImGuizmo::OPERATION::TRANSLATE,
-					ImGuizmo::LOCAL,
-					glm::value_ptr(transform),
-					nullptr,
-					snap ? snapValues : nullptr);
-
-				if (ImGuizmo::IsUsing())
-				{
-					glm::vec3 translation, rotation, scale;
-					Math::DecomposeTransform(transform, translation, rotation, scale);
-
-					glm::vec3 deltaRotation = rotation - tc.Rotation;
-					tc.Translation = translation;
-					tc.Rotation += deltaRotation;
-					tc.Scale = scale;
-				}
-			}
-		}
-		
-		m_SceneViewport->End();
 		
 		ImGui::End();
 
@@ -361,7 +324,7 @@ namespace Xaloc {
 
 		if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
 		{
-			m_EditorCamera.OnEvent(e);
+			m_EditorCamera->OnEvent(e);
 		}
 		
 		EventDispatcher dispatcher(e);
@@ -382,7 +345,7 @@ namespace Xaloc {
 
 		uint32_t width = e.GetWidth();
 		uint32_t height = e.GetHeight();
-		m_EditorCamera.SetViewportSize(width, height);
+		m_EditorCamera->SetViewportSize(width, height);
 		
 		return false;
 	}
@@ -394,16 +357,16 @@ namespace Xaloc {
 		if (e.GetMouseButton() == XA_MOUSE_BUTTON_LEFT) // TODO && !Input::IsKeyPressed(KeyCode::LeftAlt) && !ImGuizmo::IsOver())
 		{
 			auto [mouseX, mouseY] = m_SceneViewport->GetMouseViewportSpace();
-			if (m_GameViewport->IsFocused() && m_GameViewport->IsHovered())
+			if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
 			{
-				auto [mx, my] = m_GameViewport->GetMouseViewportSpace();
+				auto [mx, my] = m_SceneViewport->GetMouseViewportSpace();
 				mouseX = mx;
 				mouseY = my;
 			}
 
 			// Editor Camera
-			const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-			glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
+			const glm::mat4& cameraProjection = m_EditorCamera->GetProjection();
+			glm::mat4 cameraView = m_EditorCamera->GetViewMatrix();
 			
 			// TODO select entity
 			/*

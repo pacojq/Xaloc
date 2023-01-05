@@ -26,14 +26,14 @@ namespace Xaloc {
 		T& AddComponent(Args&&... args) { return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...); }
 
 		template<typename T>
-		T& GetComponent()
+		T& GetComponent() const
 		{
 			XA_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
 		}
 
 		template<typename T>
-		bool HasComponent() { return m_Scene->m_Registry.has<T>(m_EntityHandle); }
+		bool HasComponent() const { return m_Scene->m_Registry.has<T>(m_EntityHandle); }
 
 
 		template<typename T>

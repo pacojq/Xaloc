@@ -46,8 +46,6 @@
 
 // --- Renderer ---------------------------------
 
-#include "Xaloc/Renderer/OrthographicCameraController.h"
-
 #include "Xaloc/Renderer/Renderer.h"
 #include "Xaloc/Renderer/Renderer2D.h"
 #include "Xaloc/Renderer/RenderCommand.h"
@@ -62,6 +60,6 @@
 #include "Xaloc/Renderer/RenderPass.h"
 #include "Xaloc/Renderer/Framebuffer.h"
 
-#include "Xaloc/Renderer/OrthographicCamera.h"
+#include "Xaloc/Renderer/Cameras/OrthographicCamera.h"
 
 // ----------------------------------------------

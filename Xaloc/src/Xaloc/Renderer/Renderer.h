@@ -4,7 +4,7 @@
 
 #include "RenderPass.h"
 
-#include "OrthographicCamera.h"
+#include "Cameras/OrthographicCamera.h"
 #include "Shader.h"
 
 #include "Xaloc/Math/AABB.h"
@@ -23,7 +23,7 @@ namespace Xaloc {
 		
 		static void OnWindowResize(uint32_t width, uint32_t height);
 
-		static void BeginScene(OrthographicCamera& camera);
+		static void BeginScene(OrthographicCamera& camera, const glm::mat4& transform);
 		static void EndScene();
 
 		static void BeginRenderPass(Ref<RenderPass> renderPass, bool clear = true);

@@ -117,6 +117,8 @@ namespace Xaloc {
 
 	void Scene::Init()
 	{
+		m_CameraStack = CreateRef<CameraStack>();
+
 		m_Registry.on_construct<TransformComponent>().connect<&OnTransformConstruct>();
 		m_Registry.on_construct<TagComponent>().connect<&OnTagConstruct>();
 		m_Registry.on_construct<BehaviourComponent>().connect<&OnBehaviourComponentConstruct>();
@@ -168,8 +170,7 @@ namespace Xaloc {
 			}
 		}
 
-		
-		
+
 		// For more info on entt groups:
 		// https://skypjack.github.io/2019-04-12-entt-tips-and-tricks-part-1/
 		// https://github.com/skypjack/entt/wiki/Crash-Course:-entity-component-system#groups
@@ -203,28 +204,12 @@ namespace Xaloc {
 		}
 
 
-		Camera* mainCamera = nullptr;
-		glm::mat4 cameraTransform;
+		
+
+		SceneCamera& mainCamera = m_CameraStack->MainCamera();
+		if (mainCamera.IsActive())
 		{
-			int priority = std::numeric_limits<int>::max();
-
-			auto group = m_Registry.view<TransformComponent, CameraComponent>();
-			for (auto entity : group)
-			{
-				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
-
-				if (camera.Priority < priority)
-				{
-					mainCamera = &camera.Camera;
-					cameraTransform = transform.GetTransform();
-					priority = camera.Priority;
-				}
-			}
-		}
-
-		if (mainCamera)
-		{
-			Renderer2D::BeginScene(*mainCamera, cameraTransform);
+			Renderer2D::BeginScene(mainCamera.ViewProjectionMatrix());
 
 			auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
@@ -243,9 +228,9 @@ namespace Xaloc {
 
 
 
-	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
+	void Scene::OnUpdateEditor(Timestep ts, glm::mat4 cameraViewProj)
 	{
-		Renderer2D::BeginScene(camera);
+		Renderer2D::BeginScene(cameraViewProj);
 
 		auto group = m_Registry.group<SpriteRendererComponent>(entt::get<TransformComponent>);
 		for (auto entity : group)

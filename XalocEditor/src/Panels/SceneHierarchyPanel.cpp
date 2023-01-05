@@ -198,6 +198,7 @@ namespace Xaloc {
 			PropertyDrawer::Vec3("Rotation", rotation);
 			tc.Rotation = glm::radians(rotation);
 
+			/*
 			if (entity.HasComponent<CameraComponent>())
 			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -206,7 +207,8 @@ namespace Xaloc {
 				ImGui::PopItemFlag();
 				ImGui::PopStyleVar();
 			}
-			else PropertyDrawer::Vec3("Scale", tc.Scale, 1.0f);
+			else */
+			PropertyDrawer::Vec3("Scale", tc.Scale, 1.0f);
 
 			PropertyDrawer::EndPropertyGrid();
 		});
@@ -270,59 +272,6 @@ namespace Xaloc {
 			if (PropertyDrawer::String("Name", sc.Name))
 			{
 				m_Scene->m_Name = sc.Name;
-			}
-
-			PropertyDrawer::EndPropertyGrid();
-		});
-
-		DrawComponent<CameraComponent>("Camera", entity, [](auto& cc)
-		{
-			auto& camera = cc.Camera;
-
-			PropertyDrawer::BeginPropertyGrid();
-			PropertyDrawer::Int("Priority", cc.Priority);
-
-
-			const std::vector<std::string> projectionTypeStrings = { "Perspective", "Orthographic" };
-			const char* currentProjectionType = projectionTypeStrings[(int)camera.GetProjectionType()].c_str();
-			int projIndex;
-
-			if (PropertyDrawer::ComboBox("Projection", projectionTypeStrings, currentProjectionType, &projIndex))
-			{
-				currentProjectionType = projectionTypeStrings[(int)camera.GetProjectionType()].c_str();
-				camera.SetProjectionType((SceneCamera::ProjectionType)projIndex);
-			}
-
-			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
-			{
-				float perspectiveVerticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-				if (PropertyDrawer::Float("Priority", perspectiveVerticalFov))
-					camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveVerticalFov));
-
-				float perspectiveNear = camera.GetPerspectiveNearClip();
-				if (PropertyDrawer::Float("Near", perspectiveNear))
-					camera.SetPerspectiveNearClip(perspectiveNear);
-
-				float perspectiveFar = camera.GetPerspectiveFarClip();
-				if (PropertyDrawer::Float("Far", perspectiveFar))
-					camera.SetPerspectiveFarClip(perspectiveFar);
-			}
-
-			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
-			{
-				float orthoSize = camera.GetOrthographicSize();
-				if (PropertyDrawer::Float("Size", orthoSize, 0.1f, 0.1f))
-					camera.SetOrthographicSize(orthoSize);
-
-				float orthoNear = camera.GetOrthographicNearClip();
-				float orthoFar = camera.GetOrthographicFarClip();
-
-				if (PropertyDrawer::Float("Near", orthoNear, 0.1f, -10000.0f, orthoFar - 0.1f))
-					camera.SetOrthographicNearClip(orthoNear);
-				if (PropertyDrawer::Float("Far", orthoFar, 0.1f, orthoNear + 0.1f, 10000.0f))
-					camera.SetOrthographicFarClip(orthoFar);
-
-				ImGui::Checkbox("Fixed Aspect Ratio", &cc.FixedAspectRatio);
 			}
 
 			PropertyDrawer::EndPropertyGrid();
@@ -438,13 +387,6 @@ namespace Xaloc {
 				if (!m_SelectionContext.HasComponent<BehaviourComponent>())
 					m_SelectionContext.AddComponent<BehaviourComponent>();
 				else XA_CORE_WARN("This entity already has the Behaviour Component!");
-				ImGui::CloseCurrentPopup();
-			}
-			if (ImGui::MenuItem("Camera"))
-			{
-				if (!m_SelectionContext.HasComponent<CameraComponent>())
-					m_SelectionContext.AddComponent<CameraComponent>();
-				else XA_CORE_WARN("This entity already has the Camera Component!");
 				ImGui::CloseCurrentPopup();
 			}
 			if (ImGui::MenuItem("Collider"))

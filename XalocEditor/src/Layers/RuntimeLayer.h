@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Xaloc.h"
-#include "../EditorViewport.h"
+#include "../Viewports/EditorGamePreview.h"
 
 #include "../Panels/AssetManagerPanel.h"
 #include "../Panels/SceneHierarchyPanel.h"
@@ -30,7 +30,7 @@ namespace Xaloc {
 
 		Ref<RenderPass> m_RenderPass;
 		
-		Ref<EditorViewport> m_GameViewport;
+		Ref<EditorGamePreview> m_GamePreview;
 
 
 	// Editor Windows

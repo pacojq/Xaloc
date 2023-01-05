@@ -9,6 +9,7 @@
 // TODO temporary
 #include "Xaloc/Scripting/ScriptEngine.h"
 
+using namespace Xaloc;
 
 static const uint32_t s_mapWidth = 24;
 static const uint32_t s_mapHeight = 14;
@@ -34,89 +35,81 @@ static const char* s_MapTiles =
 
 SandboxLayer::SandboxLayer()
 		: Layer("Sandbox 2D"),
-		m_CameraController(1280.0f / 720.0f, true),
 		m_TilingFactor(1.0f),
 		m_Rotation(0.0f),
 		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
 		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
 {
 	// Load Assets
-	Xaloc::AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
+	AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
 
 	// Init Scene
-	//m_Scene = Xaloc::CreateRef<Xaloc::Scene>("Sandbox Scene");	
-	m_Scene = Xaloc::Scene::Load("assets/scenes/testScene.xaloc");
-
-	// Init Camera
-	m_CameraController.SetZoomLevel(5.0f); // TODO remove this
+	//m_Scene = CreateRef<Scene>("Sandbox Scene");	
+	m_Scene = Scene::Load("assets/scenes/testScene.xaloc");
 }
 
 
 void SandboxLayer::OnAttach()
 {
-	Xaloc::Application::Get().SetImGuiEnabled(false);
+	Application::Get().SetImGuiEnabled(false);
 
 	
-	m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
+	m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
 
 
 
-	Xaloc::Ref<Xaloc::Texture2D> tilemap = Xaloc::AssetManager::GetTexture("TILEMAP"); //Xaloc::Texture2D::Create("assets/game/textures/tilemap.png");
+	Ref<Texture2D> tilemap = AssetManager::GetTexture("TILEMAP"); //Texture2D::Create("assets/game/textures/tilemap.png");
 
 	glm::vec2 size = { 16.0f, 16.0f };
 	glm::vec2 pad = { 0.0f, 0.0f };
 	glm::vec2 off = { 1.0f, 1.0f };
 
-	s_TextureMap['G'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 16.0f }, size, pad, off);
+	s_TextureMap['G'] = SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 16.0f }, size, pad, off);
 
-	s_TextureMap['T'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 17.0f }, size, pad, off);
-	s_TextureMap['B'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 15.0f }, size, pad, off);
-	s_TextureMap['L'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 16.0f }, size, pad, off);
-	s_TextureMap['R'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 16.0f }, size, pad, off);
+	s_TextureMap['T'] = SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 17.0f }, size, pad, off);
+	s_TextureMap['B'] = SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 15.0f }, size, pad, off);
+	s_TextureMap['L'] = SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 16.0f }, size, pad, off);
+	s_TextureMap['R'] = SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 16.0f }, size, pad, off);
 
-	s_TextureMap['0'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 15.0f }, size, pad, off);
-	s_TextureMap['1'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 15.0f }, size, pad, off);
-	s_TextureMap['2'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 17.0f }, size, pad, off);
-	s_TextureMap['3'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 17.0f }, size, pad, off);
+	s_TextureMap['0'] = SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 15.0f }, size, pad, off);
+	s_TextureMap['1'] = SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 15.0f }, size, pad, off);
+	s_TextureMap['2'] = SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 17.0f }, size, pad, off);
+	s_TextureMap['3'] = SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 17.0f }, size, pad, off);
 
-	s_TextureMap['4'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 5.0f, 16.0f }, size, pad, off);
-	s_TextureMap['5'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 6.0f, 16.0f }, size, pad, off);
-	s_TextureMap['6'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 6.0f, 17.0f }, size, pad, off);
-	s_TextureMap['7'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 5.0f, 17.0f }, size, pad, off);
+	s_TextureMap['4'] = SubTexture2D::CreateFromGrid(tilemap, { 5.0f, 16.0f }, size, pad, off);
+	s_TextureMap['5'] = SubTexture2D::CreateFromGrid(tilemap, { 6.0f, 16.0f }, size, pad, off);
+	s_TextureMap['6'] = SubTexture2D::CreateFromGrid(tilemap, { 6.0f, 17.0f }, size, pad, off);
+	s_TextureMap['7'] = SubTexture2D::CreateFromGrid(tilemap, { 5.0f, 17.0f }, size, pad, off);
 
-	m_TileWater = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 9.0f, 10.0f }, size, pad, off);
+	m_TileWater = SubTexture2D::CreateFromGrid(tilemap, { 9.0f, 10.0f }, size, pad, off);
 
 
 
 	
 	// CAMERA
 	
-	auto m_MainCamera = m_Scene->CreateEntity("Orthographic Camera");
-
-	auto& orthoData = m_MainCamera.AddComponent<Xaloc::CameraComponent>();
-	orthoData.Camera.SetViewportSize(1280.0, 720.0);
-	orthoData.Camera.SetProjectionType(Xaloc::SceneCamera::ProjectionType::Orthographic);
-	orthoData.Camera.SetOrthographicNearClip(-100);
-	orthoData.Camera.SetOrthographicFarClip(100);
+	SceneCamera& mainCamera = m_Scene->GetCameraStack()->MainCamera();
+	mainCamera.Camera.SetViewportSize(480, 270);
+	mainCamera.Camera.SetClipDistance(-100, 100);
 
 
 	
 
 	// PLAYER
 
-	Xaloc::Ref<Xaloc::SubTexture2D> tilePlayer = Xaloc::SubTexture2D::CreateFromGrid(tilemap,
+	Ref<SubTexture2D> tilePlayer = SubTexture2D::CreateFromGrid(tilemap,
 		{ 24.0f, 17.0f }, size, pad, off);
 
 	m_Player = m_Scene->CreateEntity("Player");
-	m_Player.AddComponent<Xaloc::SpriteRendererComponent>(tilePlayer);
-	m_Player.AddComponent<Xaloc::BehaviourComponent>("SandboxCs.PlayerEntity");
+	m_Player.AddComponent<SpriteRendererComponent>(tilePlayer);
+	m_Player.AddComponent<BehaviourComponent>("SandboxCs.PlayerEntity");
 
 	// FOREST
 	/*
-	Xaloc::Entity* forest = m_Scene->CreateEntity("Forest");
+	Entity* forest = m_Scene->CreateEntity("Forest");
 
-	Xaloc::Ref<Xaloc::SubTexture2D> tree_0 = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 7.0f }, size, pad, off);
-	Xaloc::Ref<Xaloc::SubTexture2D> tree_1 = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 8.0f }, size, pad, off);
+	Ref<SubTexture2D> tree_0 = SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 7.0f }, size, pad, off);
+	Ref<SubTexture2D> tree_1 = SubTexture2D::CreateFromGrid(tilemap, { 22.0f, 8.0f }, size, pad, off);
 
 	for (uint32_t y = 0; y < s_mapHeight; y++)
 	{
@@ -131,8 +124,8 @@ void SandboxLayer::OnAttach()
 			if (Random::Float() < 0.3f)
 				continue;
 
-			Xaloc::Ref<Xaloc::SubTexture2D> tex = Random::Float() < 0.5f ? tree_0 : tree_1;
-			Xaloc::SpriteRenderer* sprite = new Xaloc::SpriteRenderer(tex);
+			Ref<SubTexture2D> tex = Random::Float() < 0.5f ? tree_0 : tree_1;
+			SpriteRenderer* sprite = new SpriteRenderer(tex);
 			sprite->SetDepth(0.1f);
 			sprite->SetLocalPosition(pos);
 			forest->AddComponent(sprite);
@@ -141,7 +134,7 @@ void SandboxLayer::OnAttach()
 	*/
 
 
-	Xaloc::ScriptEngine::SetSceneContext(m_Scene); // TODO find a cleaner way to do this
+	ScriptEngine::SetSceneContext(m_Scene); // TODO find a cleaner way to do this
 	m_Scene->StartRuntime();
 }
 
@@ -150,44 +143,36 @@ void SandboxLayer::OnDetach()
 }
 
 
-void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
+void SandboxLayer::OnUpdate(Timestep ts)
 {
-	// UPDATE
-	
-	m_CameraController.OnUpdate(ts);
+	Renderer2D::ResetStats();
 
-
-
-	// RENDER
-
-	Xaloc::Renderer2D::ResetStats();
-
-	Xaloc::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-	Xaloc::RenderCommand::Clear();
+	RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+	RenderCommand::Clear();
 
 	#if false   	
-	Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	Renderer2D::BeginScene(m_CameraController.GetCamera());
 
-	//Xaloc::Renderer2D::DrawRotatedQuad({ -0.5f, 0.5f }, { 0.8f, 0.8f }, m_Rotation, m_SecondColor);
-	Xaloc::Renderer2D::DrawQuad({ -0.5f, 0.5f, 1.0f }, { 0.8f, 0.8f }, m_SecondColor);
-	Xaloc::Renderer2D::DrawQuad({ 0.25f, -0.25f }, { 1.2f, 1.2f }, m_FirstColor);
-	Xaloc::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, m_Texture, m_TilingFactor, { 1.0f, 1.0f, 1.0f, 1.0f });
-	Xaloc::Renderer2D::DrawRotatedQuad({ -2.0f, 0.0f, 0.0f }, { 2.0f, 2.0f }, glm::radians(m_Rotation), m_Texture, 0.5f);
+	//Renderer2D::DrawRotatedQuad({ -0.5f, 0.5f }, { 0.8f, 0.8f }, m_Rotation, m_SecondColor);
+	Renderer2D::DrawQuad({ -0.5f, 0.5f, 1.0f }, { 0.8f, 0.8f }, m_SecondColor);
+	Renderer2D::DrawQuad({ 0.25f, -0.25f }, { 1.2f, 1.2f }, m_FirstColor);
+	Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, m_Texture, m_TilingFactor, { 1.0f, 1.0f, 1.0f, 1.0f });
+	Renderer2D::DrawRotatedQuad({ -2.0f, 0.0f, 0.0f }, { 2.0f, 2.0f }, glm::radians(m_Rotation), m_Texture, 0.5f);
 
 	for (float y = -5.0f; y < 5.0f; y += 0.5f)
 	{
 		for (float x = -5.0f; x < 5.0f; x += 0.5f)
 		{
 			glm::vec4 color = { (x + 5.0f) / 10.0f, (y + 5.0f) / 10.0f, 1.0f, 0.5f };
-			Xaloc::Renderer2D::DrawQuad({ x, y }, { 0.45f, 0.45f }, color);
+			Renderer2D::DrawQuad({ x, y }, { 0.45f, 0.45f }, color);
 		}
 	}
 
-	Xaloc::Renderer2D::EndScene();
+	Renderer2D::EndScene();
 	#endif
 
 
-	Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera().GetViewProjectionMatrix());
+	Renderer2D::BeginScene(m_Scene->GetCameraStack()->MainCamera().ViewProjectionMatrix());
 	
 	for (uint32_t y = 0; y < s_mapHeight; y++)
 	{
@@ -197,29 +182,29 @@ void SandboxLayer::OnUpdate(Xaloc::Timestep ts)
 
 			glm::vec3 pos = { x - (s_mapWidth / 2.0f), y - (s_mapHeight / 2.0f), m_TilesDepth };
 			glm::vec3 waterPos = { pos.x, pos.y, m_TilesDepth - 0.0001f };
-			Xaloc::Renderer2D::DrawQuad(waterPos, { 1.0f, 1.0f }, m_TileWater);
+			Renderer2D::DrawQuad(waterPos, { 1.0f, 1.0f }, m_TileWater);
 
 			if (tileType == 'W')
 				continue;
 			
 			if (s_TextureMap.find(tileType) != s_TextureMap.end())
 			{
-				Xaloc::Ref<Xaloc::SubTexture2D> tex = s_TextureMap[tileType];
-				Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, tex);
+				Ref<SubTexture2D> tex = s_TextureMap[tileType];
+				Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, tex);
 			}
 			else
 			{
-				Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f });
+				Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f });
 			}
 		}
 	}
 	
-	Xaloc::Renderer2D::EndScene();
+	Renderer2D::EndScene();
 
 
-	//Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera().GetViewProjectionMatrix());
+	Renderer2D::BeginScene(m_Scene->GetCameraStack()->MainCamera().ViewProjectionMatrix());
 	m_Scene->OnUpdateRuntime(ts);
-	//Xaloc::Renderer2D::EndScene();
+	Renderer2D::EndScene();
 }
 
 
@@ -246,7 +231,7 @@ void SandboxLayer::OnImGuiRender()
 	ImGui::Separator();
 	ImGui::Text("Player data");
 
-	glm::mat4 matrix = m_Player.GetComponent<Xaloc::TransformComponent>().GetTransform();
+	glm::mat4 matrix = m_Player.GetComponent<TransformComponent>().GetTransform();
 	glm::vec3 translation = {matrix[3][0], matrix[3][1], matrix[3][2] };
 
 	//glm::vec3 playerPos = m_Player->GetPosition();
@@ -271,7 +256,7 @@ void SandboxLayer::OnImGuiRender()
 	ImGui::End();
 
 
-	auto stats = Xaloc::Renderer2D::GetStats();
+	auto stats = Renderer2D::GetStats();
 
 	ImGui::Begin("Render Stats");
 	ImGui::Text("Draw Calls: %d", stats.DrawCalls);
@@ -283,7 +268,7 @@ void SandboxLayer::OnImGuiRender()
 	//ImGui::ShowDemoWindow();
 }
 
-void SandboxLayer::OnEvent(Xaloc::Event& e)
+void SandboxLayer::OnEvent(Event& e)
 {
-	m_CameraController.OnEvent(e);
+	// Do nothing (?)
 }

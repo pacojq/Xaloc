@@ -1,12 +1,14 @@
 #pragma once
 
 #include "UUID.h"
+
+#include "CameraStack.h"
 #include "PhysicSpace.h"
 
 #include "Xaloc/Core/Timestep.h"
 #include "Xaloc/Events/Event.h"
 
-#include "Xaloc/Renderer/EditorCamera.h"
+#include "Xaloc/Renderer/Cameras/EditorCamera.h"
 
 #include <entt/entt.hpp>
 
@@ -34,10 +36,11 @@ namespace Xaloc {
 		void StartRuntime();
 
 		void OnUpdateRuntime(Timestep ts);
-		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
+		void OnUpdateEditor(Timestep ts, glm::mat4 cameraViewProj);
 		
 		void OnEvent(Event& e);
 
+		const Ref<CameraStack>& GetCameraStack() const { return m_CameraStack; }
 
 		Entity Scene::CreateEntity(const std::string& name);
 		Entity Scene::CreateEntity(const std::string& name, UUID id);
@@ -54,12 +57,13 @@ namespace Xaloc {
 
 	private:
 		UUID m_SceneID;
-		entt::entity m_SceneEntity;
-		entt::registry m_Registry;
-
-		EntityMap m_EntityMap;
-
 		std::string m_Name;
+		entt::entity m_SceneEntity;
+
+		Ref<CameraStack> m_CameraStack;
+
+		entt::registry m_Registry;
+		EntityMap m_EntityMap;
 
 		Ref<PhysicSpace> m_PhysicSpace;
 

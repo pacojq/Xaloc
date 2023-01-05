@@ -40,9 +40,11 @@ namespace Xaloc {
 	}
 
 
-	void Renderer::BeginScene(OrthographicCamera& camera)
+	void Renderer::BeginScene(OrthographicCamera& camera, const glm::mat4& transform)
 	{
-		m_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+		//                   Projection matrix      * View matrix
+		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
+		m_SceneData->ViewProjectionMatrix = viewProj;
 	}
 
 	void Renderer::EndScene()

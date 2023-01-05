@@ -3,9 +3,12 @@
 #include "Xaloc.h"
 
 #include "EditorMenuBar.h"
-#include "EditorViewport.h"
+#include "Viewports/EditorGamePreview.h"
+#include "Viewports/EditorSceneView.h"
 
-#include "Xaloc/Renderer/EditorCamera.h"
+#include "Xaloc/Renderer/Cameras/EditorCamera.h"
+#include "Xaloc/Renderer/Cameras/EditorCameraPerspective.h"
+#include "Xaloc/Renderer/Cameras/EditorCameraOrthographic.h"
 
 #include "Panels/AssetManagerPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
@@ -32,6 +35,10 @@ namespace Xaloc {
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);
 
+	public:
+		void OpenScene(const Ref<Scene>& scene);
+
+
 	private:
 		void ResetDockSpace();
 
@@ -44,23 +51,32 @@ namespace Xaloc {
 		bool m_OnRuntime = false;
 
 		Ref<Scene> m_Scene;
-		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
-		Scope<AssetManagerPanel> m_AssetManagerPanel;
 
 		Entity m_MainCamera;
 		
-		EditorCamera m_EditorCamera;
+		// TODO: main camera
+		//InstanceId m_MainCamera; // TODO: change to "camera index" in a camera stack
+
+		Ref<EditorCamera> m_EditorCamera; // The currently active editor camera
+		Ref<EditorCameraPerspective> m_EditorCameraPerspective;
+		Ref<EditorCameraOrthographic> m_EditorCameraOrthographic;
+
+
 		Ref<RenderPass> m_EditorRenderPass;
-		
-		Ref<RenderPass> m_RenderPass;
-		Ref<RenderPass> m_GuizmoRenderPass;
-		
-		Ref<EditorViewport> m_GameViewport;
-		Ref<EditorViewport> m_SceneViewport;
+		Ref<RenderPass> m_PreviewRenderPass;
+
+		Ref<EditorGamePreview> m_GamePreview;
+		Ref<EditorSceneView> m_SceneViewport;
+
+		Ref<Shader> m_CheckerboardShader;
 		
 
-	// Editor Windows
-	private:
+	private: // =============== Editor Windows ===============
+
+		bool m_PanelsInitialized = false;
+		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		Scope<AssetManagerPanel> m_AssetManagerPanel;
+
 		ImGuiID m_DockspaceId;
 		bool m_DockspaceReady = false;
 

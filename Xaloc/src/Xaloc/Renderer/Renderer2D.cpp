@@ -23,6 +23,12 @@ namespace Xaloc {
 		float TilingFactor;
 	};
 
+	struct BlitVertex
+	{
+		glm::vec3 Position;
+		glm::vec2 TexCoord;
+	};
+
 	struct Renderer2DData
 	{
 		static const uint32_t MaxQuads = 10000; // Max per draw call
@@ -46,6 +52,13 @@ namespace Xaloc {
 
 		glm::vec4 QuadVertexPositions[4];
 
+
+		Ref<Pipeline> BlitPipeline;
+		Ref<IndexBuffer> BlitIndexBuffer;
+		Ref<VertexBuffer> BlitVertexBuffer;
+
+		BlitVertex* BlitVertexBufferBase;
+
 		Renderer2D::Statistics Stats;
 	};
 
@@ -60,74 +73,101 @@ namespace Xaloc {
 		XA_CORE_ASSERT(!s_Init, "Renderer2D is already initialized!");
 		s_Init = true;
 		
-		// Create pipeline
-		PipelineSpecification pipelineSpecification;
-		pipelineSpecification.Layout = {
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" },
-			{ ShaderDataType::Float2, "a_TexCoord" },
-			{ ShaderDataType::Float,  "a_TexIndex" },
-			{ ShaderDataType::Float,  "a_TilingFactor" }
-		};
-		s_Data.QuadPipeline = Pipeline::Create(pipelineSpecification);
-
-
-
-		// Create vertex buffer
-		s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
-		
-		// Allocate vertex buffer
-		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
-
-		
-		
-
-		// Create index buffer
-		uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
-
-		uint32_t offset = 0;
-		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+		// CREATE QUADS PIPELINE
 		{
-			quadIndices[i + 0] = offset + 0;
-			quadIndices[i + 1] = offset + 1;
-			quadIndices[i + 2] = offset + 2;
+			PipelineSpecification pipelineSpecification;
+			pipelineSpecification.Layout = {
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float4, "a_Color" },
+				{ ShaderDataType::Float2, "a_TexCoord" },
+				{ ShaderDataType::Float,  "a_TexIndex" },
+				{ ShaderDataType::Float,  "a_TilingFactor" }
+			};
+			s_Data.QuadPipeline = Pipeline::Create(pipelineSpecification);
 
-			quadIndices[i + 3] = offset + 2;
-			quadIndices[i + 4] = offset + 3;
-			quadIndices[i + 5] = offset + 0;
+			s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
+			s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 
-			offset += 4;
+
+			// Create index buffer
+			uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
+
+			uint32_t offset = 0;
+			for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+			{
+				quadIndices[i + 0] = offset + 0;
+				quadIndices[i + 1] = offset + 1;
+				quadIndices[i + 2] = offset + 2;
+
+				quadIndices[i + 3] = offset + 2;
+				quadIndices[i + 4] = offset + 3;
+				quadIndices[i + 5] = offset + 0;
+
+				offset += 4;
+			}
+
+			s_Data.QuadIndexBuffer = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
+
+			delete[] quadIndices;
+
+
+			s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+			s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
+			s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
+			s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 		}
 
-		s_Data.QuadIndexBuffer = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
+		// CREATE BLIT PIPELINE
+		{
+			PipelineSpecification pipelineSpecification;
+			pipelineSpecification.Layout = {
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float2, "a_TexCoord" }
+			};
+			s_Data.BlitPipeline = Pipeline::Create(pipelineSpecification);
 
-		delete[] quadIndices;
-
-
-
-
-		
-		s_Data.WhiteTexture = Texture2D::Create(1, 1);
-		uint32_t whiteTextureData = 0xffffffff;
-		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-
-		int32_t samplers[s_Data.MaxTextureSlots];
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
-			samplers[i] = i;
-
-		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+			s_Data.BlitVertexBuffer = VertexBuffer::Create(4 * sizeof(QuadVertex));
+			s_Data.BlitVertexBufferBase = new BlitVertex[4];
 
 
-		// Slot 0 is for white texture
-		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+			s_Data.BlitVertexBufferBase[0].Position = { -1.0f, -1.0f, 0.0f };
+			s_Data.BlitVertexBufferBase[0].TexCoord = { 0.0f, 1.0f };
+
+			s_Data.BlitVertexBufferBase[1].Position = { 1.0f, -1.0f, 0.0f };
+			s_Data.BlitVertexBufferBase[1].TexCoord = { 1.0f, 1.0f };
+
+			s_Data.BlitVertexBufferBase[2].Position = { 1.0f, 1.0f, 0.0f };
+			s_Data.BlitVertexBufferBase[2].TexCoord = { 1.0f, 0.0f };
+
+			s_Data.BlitVertexBufferBase[3].Position = { -1.0f, 1.0f, 0.0f };
+			s_Data.BlitVertexBufferBase[3].TexCoord = { 0.0f, 0.0f };
 
 
-		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+			// Create index buffer
+			uint32_t* quadIndices = new uint32_t[6]{ 0, 1, 2, 2, 3, 0 };
+			s_Data.BlitIndexBuffer = IndexBuffer::Create(quadIndices, 6);
+			delete[] quadIndices;
+		}
+
+
+		// INITIALIZE TEXTURE DATA
+		{
+			s_Data.WhiteTexture = Texture2D::Create(1, 1);
+			uint32_t whiteTextureData = 0xffffffff;
+			s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+
+			int32_t samplers[s_Data.MaxTextureSlots];
+			for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
+				samplers[i] = i;
+
+			s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+			s_Data.TextureShader->Bind();
+			s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+
+			// Slot 0 is for white texture
+			s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+
+		}
 	}
 
 
@@ -167,7 +207,20 @@ namespace Xaloc {
 		BeginScene(camera.GetViewProjection());
 	}
 
-	
+
+
+	void Renderer2D::Blit(const Ref<Shader>& shader)
+	{
+		shader->Bind();
+
+		s_Data.BlitVertexBuffer->SetData(s_Data.BlitVertexBufferBase, sizeof(BlitVertex) * 4);
+
+		s_Data.BlitPipeline->Bind();
+		// TODO bind vertex buffer?
+		s_Data.BlitIndexBuffer->Bind();
+
+		RenderCommand::DrawBlit();
+	}
 
 
 

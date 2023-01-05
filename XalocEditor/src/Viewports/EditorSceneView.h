@@ -2,14 +2,16 @@
 
 #include "Xaloc.h"
 
+#include "Xaloc/Renderer/Cameras/EditorCamera.h"
+
 
 namespace Xaloc {
 
-	class EditorViewport
+	class EditorSceneView
 	{
 	public:
-		EditorViewport(const std::string& name);
-		~EditorViewport() = default;
+		EditorSceneView(const std::string& name);
+		~EditorSceneView() = default;
 
 		inline bool IsFocused() const { return m_Focused; }
 		inline bool IsHovered() const { return m_Hovered; }
@@ -17,21 +19,17 @@ namespace Xaloc {
 		inline const glm::vec2& GetSize() const { return m_Size; }
 		inline const glm::vec2& GetBounds(int index) const { return m_Bounds[index]; }
 
-
-		void Begin();
-		void End();
-		
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="renderPass"></param>
 		/// <returns>Whether the viewport has changed size.</returns>
-		bool Render(Ref<RenderPass>& renderPass);
+		bool OnImGuiDraw(const Ref<Framebuffer>& framebuffer, const Ref<EditorCamera>& camera, const Entity& selectedEntity);
 
 		std::pair<float, float> GetMouseViewportSpace();
+
+		void SetScene(const Ref<Scene>& scene) { m_Scene = scene; }
+
 		
 	private:
 		std::string m_Name;
+		Ref<Scene> m_Scene;
 		
 		bool m_Focused = false;
 		bool m_Hovered = false;

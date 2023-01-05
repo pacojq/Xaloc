@@ -53,6 +53,11 @@ namespace Xaloc {
 			s_RendererAPI->DrawIndexed(indexCount);
 		}
 
+		inline static void DrawBlit()
+		{
+			s_RendererAPI->DrawBlit();
+		}
+
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};
