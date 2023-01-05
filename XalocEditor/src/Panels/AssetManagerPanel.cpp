@@ -1,11 +1,13 @@
 #include "AssetManagerPanel.h"
 
+#include "./../EditorNames.h"
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
 #include "Xaloc/Core/Application.h"
 
-#include "Xaloc/Files/FileUtils.h"
+#include "Xaloc/Files/FileSystem.h"
 
 namespace Xaloc
 {
@@ -53,7 +55,7 @@ namespace Xaloc
 
 	void AssetManagerPanel::OnImGuiRender()
 	{
-		ImGui::Begin("Project");
+		ImGui::Begin(EditorNames::Windows::PROJECT);
 		{
 			ImGui::Columns(2, "AB", true);
 			ImGui::SetColumnOffset(1, 240);
@@ -142,7 +144,7 @@ namespace Xaloc
 				{
 					if (ImGui::MenuItem("Import New Asset", "Ctrl + O"))
 					{
-						std::string filename = FileUtils::OpenFileDialog();
+						std::string filename = FileSystem::OpenFileDialog();
 						std::vector<std::string> outData;
 
 						//AssetManager::ProcessAseets(filename);

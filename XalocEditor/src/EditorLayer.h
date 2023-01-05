@@ -1,8 +1,9 @@
 #pragma once
 
-#include "EditorViewport.h"
-
 #include "Xaloc.h"
+
+#include "EditorMenuBar.h"
+#include "EditorViewport.h"
 
 #include "Xaloc/Renderer/EditorCamera.h"
 
@@ -10,6 +11,8 @@
 #include "Panels/SceneHierarchyPanel.h"
 
 #include "Layers/RuntimeLayer.h"
+
+#include "imgui/imgui.h"
 
 namespace Xaloc {
 
@@ -29,8 +32,13 @@ namespace Xaloc {
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);
 
+	private:
+		void ResetDockSpace();
+
 		
 	private:
+		Ref<EditorMenuBar> m_MenuBar;
+		friend class EditorMenuBar;
 
 		RuntimeLayer* m_RuntimeLayer = nullptr;
 		bool m_OnRuntime = false;
@@ -49,15 +57,15 @@ namespace Xaloc {
 		
 		Ref<EditorViewport> m_GameViewport;
 		Ref<EditorViewport> m_SceneViewport;
-
-
-		static inline std::string s_FilenameFilter = "Xaloc Scene\0*.xaloc\0 All files\0*.*\0";
 		
 
 	// Editor Windows
 	private:
+		ImGuiID m_DockspaceId;
+		bool m_DockspaceReady = false;
+
 		bool m_ShowWindowConsole = true; // TODO
-		bool m_ShowWindowRenderStats = true;
+		bool m_ShowWindowRenderStats = false;
 	};
 
 }

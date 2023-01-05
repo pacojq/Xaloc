@@ -1,5 +1,5 @@
 #pragma once
-#include "AssetType.h"
+#include "xaloc/Core/Assets/AssetType.h"
 
 #include <string>
 #include <vector>

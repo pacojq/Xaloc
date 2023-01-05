@@ -1,5 +1,5 @@
 #include "xapch.h"
-#include "Xaloc/Files/FileUtils.h"
+#include "Xaloc/Files/FileSystem.h"
 
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -12,7 +12,7 @@
 namespace Xaloc {
 
 	// TODO Move this somewhere else
-	std::string FileUtils::OpenFileDialog(const std::string& filter)
+	std::string FileSystem::OpenFileDialog(const std::string& filter)
 	{
 		OPENFILENAMEA ofn;       // common dialog box structure
 		CHAR szFile[260] = { 0 };       // if using TCHAR macros
@@ -38,7 +38,7 @@ namespace Xaloc {
 	}
 
 	
-	std::string FileUtils::SaveFileDialog(const std::string& filter) 
+	std::string FileSystem::SaveFileDialog(const std::string& filter)
 	{
 		OPENFILENAMEA ofn;       // common dialog box structure
 		CHAR szFile[260] = { 0 };       // if using TCHAR macros

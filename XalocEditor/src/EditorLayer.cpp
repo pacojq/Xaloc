@@ -1,15 +1,18 @@
 #include "EditorLayer.h"
 
+#include "EditorNames.h"
+
 #include "Xaloc/Scripting/ScriptEngine.h"
 
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "Xaloc/ImGui/ImGuizmo.h"
 
 #include "Xaloc/Math/Math.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Xaloc/Files/FileUtils.h"
+#include "Xaloc/Files/FileSystem.h"
 
 
 namespace Xaloc {
@@ -17,6 +20,8 @@ namespace Xaloc {
 
 	EditorLayer::EditorLayer() : Layer("Editor Layer")
 	{
+		m_MenuBar = CreateRef<EditorMenuBar>(this);
+
 		// Load Assets
 
 		AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
@@ -50,8 +55,8 @@ namespace Xaloc {
 		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
 		m_AssetManagerPanel = CreateScope<AssetManagerPanel>();
 
-		m_GameViewport = CreateRef<EditorViewport>("Game Preview");
-		m_SceneViewport = CreateRef<EditorViewport>("Scene");
+		m_GameViewport = CreateRef<EditorViewport>(EditorNames::Windows::GAME_PREVIEW);
+		m_SceneViewport = CreateRef<EditorViewport>(EditorNames::Windows::SCENE);
 		
 		//m_CameraController.SetZoomLevel(5.0f);
 	}
@@ -180,65 +185,20 @@ namespace Xaloc {
 			ImGui::PopStyleVar(2);
 
 		// DockSpace
+		m_DockspaceId = ImGui::GetID("MyDockSpace");
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
-			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+			ImGui::DockSpace(m_DockspaceId, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+			if (!m_DockspaceReady)
+				ResetDockSpace();
 		}
 
 
-		
-		// ============================================= MENU BAR ============================================= //
+		m_MenuBar->OnImGuiRender();
 
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("Xaloc"))
-			{
-				if (ImGui::MenuItem("Exit")) Xaloc::Application::Get().Close();
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Scene"))
-			{
-				//if (ImGui::MenuItem("Save"))
-				//{
-					// TODO
-				//}
-				if (ImGui::MenuItem("Save as..."))
-				{
-					std::string filename = FileUtils::SaveFileDialog(s_FilenameFilter);
-					if (filename != "")
-						Scene::Save(m_Scene, filename);
-				}
-				if (ImGui::MenuItem("Load..."))
-				{
-					std::string filename = FileUtils::OpenFileDialog(s_FilenameFilter);
-					if (filename != "")
-					{
-						m_Scene.reset();
-						m_Scene = Scene::Load(filename);
-						m_SceneHierarchyPanel->SetScene(m_Scene);
-					}
-				}
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Window"))
-			{
-				if (ImGui::MenuItem("Console")) Application::Get().GetImGuiLayer()->ShowConsole();
-				if (ImGui::MenuItem("Profiler")) Application::Get().GetImGuiLayer()->ShowProfiler();
-				if (ImGui::MenuItem("Render Stats")) m_ShowWindowRenderStats = true;
-				ImGui::EndMenu();
-			}
 			
-			ImGui::EndMenuBar();
-		}
-
-
-
-		
-
 
 		// ============================================= MISC WINDOWS ============================================= //
 
@@ -247,17 +207,20 @@ namespace Xaloc {
 			auto stats = Xaloc::Renderer2D::GetStats();
 			
 			ImGui::Begin("Render Stats", &m_ShowWindowRenderStats);
-			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-			ImGui::Text("Quads: %d", stats.QuadCount);
-			ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-			ImGui::End();
+			{
+				ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+				ImGui::Text("Quads: %d", stats.QuadCount);
+				ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+				ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+				ImGui::End();
+			}
 		}
 
 		// TODO Play / Pause
 
+#if TODO_RUNTIME
 		ImGui::Begin("Runtime");
-
+		
 		if (m_OnRuntime)
 		{
 			if (ImGui::Button("Stop"))
@@ -276,7 +239,7 @@ namespace Xaloc {
 					delete m_RuntimeLayer;
 					m_RuntimeLayer = nullptr;
 				}
-				
+
 				m_RuntimeLayer = new RuntimeLayer(m_Scene);
 				Xaloc::Application::Get().PushLayer(m_RuntimeLayer);
 				m_OnRuntime = true;
@@ -284,7 +247,7 @@ namespace Xaloc {
 		}
 
 		ImGui::End();
-		
+#endif
 
 
 		// ============================================= HIERARCHY ============================================= //
@@ -488,6 +451,44 @@ namespace Xaloc {
 		return false;
 	}
 
+
+
+
+	void EditorLayer::ResetDockSpace()
+	{
+		m_DockspaceReady = true;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		ImGui::DockBuilderRemoveNode(m_DockspaceId); // Clear out existing layout
+		ImGui::DockBuilderAddNode(m_DockspaceId, ImGuiDockNodeFlags_DockSpace); // Add empty node
+		ImGui::DockBuilderSetNodeSize(m_DockspaceId, viewport->Size);
+
+		ImGuiID dock_main_id = m_DockspaceId;
+
+		ImGuiID dock_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, NULL, &dock_main_id);
+		ImGuiID dock_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, NULL, &dock_main_id);
+		ImGuiID dock_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.20f, NULL, &dock_main_id);
+		//ImGuiID dock_top = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up, 0.20f, NULL, &dock_main_id);
+
+		ImGuiID dock_left_top;
+		ImGuiID dock_left_bot = ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Down, 0.50f, NULL, &dock_left_top);
+
+
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::GAME_PREVIEW, dock_main_id);
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::SCENE, dock_main_id);
+
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::PROJECT, dock_right);
+
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::SCENE_HIERARCHY, dock_left_top);
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::PROPERTIES, dock_left_bot);
+
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::CONSOLE, dock_bottom);
+		ImGui::DockBuilderDockWindow("Profiler", dock_bottom);
+		ImGui::DockBuilderDockWindow("Graphics", dock_bottom);
+
+
+		ImGui::DockBuilderFinish(m_DockspaceId);
+	}
 
 
 }

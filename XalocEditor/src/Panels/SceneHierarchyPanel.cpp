@@ -1,5 +1,7 @@
 #include "SceneHierarchyPanel.h"
 
+#include "./../EditorNames.h"
+
 #include "PropertyDrawer.h"
 
 #include "Xaloc/Scripting/ScriptEngine.h"
@@ -35,7 +37,7 @@ namespace Xaloc {
 	{
 		// ======================================== SCENE HIERARCHY ======================================== //
 		
-		ImGui::Begin("Scene Hierarchy");
+		ImGui::Begin(EditorNames::Windows::SCENE_HIERARCHY);
 		uint32_t entityCount = 0, meshCount = 0;
 		m_Scene->m_Registry.each([&](auto entity)
 			{
