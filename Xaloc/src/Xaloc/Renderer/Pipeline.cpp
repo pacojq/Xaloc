@@ -4,7 +4,6 @@
 #include "Renderer.h"
 
 #include "Platform/OpenGL/OpenGLPipeline.h"
-// TODO #include "Platform/Vulkan/VulkanPipeline.h"
 
 namespace Xaloc {
 
@@ -19,9 +18,6 @@ namespace Xaloc {
 
 		case RendererAPI::API::OpenGL:
 		 	return CreateRef<OpenGLPipeline>(spec);
-
-		// TODO case RendererAPI::API::Vulkan:
-		// TODO 	return CreateRef<VulkanPipeline>(spec);
 		}
 
 		XA_CORE_ASSERT(false, "Unknown RendererAPI!");

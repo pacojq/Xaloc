@@ -91,8 +91,7 @@ project "Xaloc"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.mono}",
-		"%{IncludeDir.pugixml}",
-		"$(VULKAN_SDK)/Include" -- VULKAN SDK must be installed
+		"%{IncludeDir.pugixml}"
 	}
 	
 	links
@@ -101,13 +100,7 @@ project "Xaloc"
 		"Glad",
 		"ImGui",
 		"opengl32.lib",
-		"%{LibraryDir.mono}",
-		"$(VULKAN_SDK)/Lib/vulkan-1.lib" -- VULKAN SDK must be installed
-	}
-	
-	libdirs 
-	{
-		"$(VULKAN_SDK)/Lib" -- VULKAN SDK must be installed	
+		"%{LibraryDir.mono}"
 	}
 
 	filter "system:windows"

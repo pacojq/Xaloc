@@ -24,8 +24,6 @@ namespace Xaloc {
 		case RendererAPI::API::OpenGL:
 			return new OpenGLImGuiLayer();
 
-		// TODO case RendererAPI::API::Vulkan:
-		// TODO 	return new VulkanImGuiLayer();
 		}
 		XA_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;

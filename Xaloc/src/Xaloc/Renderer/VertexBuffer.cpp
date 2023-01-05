@@ -4,7 +4,6 @@
 #include "Renderer.h"
 
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
-#include "Platform/Vulkan/VulkanVertexBuffer.h"
 
 namespace Xaloc {
 
@@ -19,9 +18,6 @@ namespace Xaloc {
 
 		case RendererAPI::API::OpenGL:
 			return CreateRef<OpenGLVertexBuffer>(size);
-
-		case RendererAPI::API::Vulkan:
-			return CreateRef<VulkanVertexBuffer>(size);
 		}
 
 		XA_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -38,9 +34,6 @@ namespace Xaloc {
 
 		case RendererAPI::API::OpenGL:
 			return CreateRef<OpenGLVertexBuffer>(vertices, size);
-
-		case RendererAPI::API::Vulkan:
-			return CreateRef<VulkanVertexBuffer>(vertices, size);
 		}
 
 		XA_CORE_ASSERT(false, "Unknown RendererAPI!");

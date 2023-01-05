@@ -3,7 +3,6 @@
 
 #include "Renderer.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
-#include "Platform/Vulkan/VulkanTexture.h"
 
 namespace Xaloc {
 
@@ -17,9 +16,6 @@ namespace Xaloc {
 
 			case RendererAPI::API::OpenGL:
 				return CreateRef<OpenGLTexture2D>(width, height);
-
-			case RendererAPI::API::Vulkan:
-				return CreateRef<VulkanTexture2D>(width, height);
 		}
 
 		XA_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -36,9 +32,6 @@ namespace Xaloc {
 
 			case RendererAPI::API::OpenGL:
 				return CreateRef<OpenGLTexture2D>(path);
-
-			case RendererAPI::API::Vulkan:
-				return CreateRef<VulkanTexture2D>(path);
 		}
 
 		XA_CORE_ASSERT(false, "Unknown RendererAPI!");
