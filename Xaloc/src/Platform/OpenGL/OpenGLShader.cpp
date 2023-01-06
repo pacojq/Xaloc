@@ -18,7 +18,7 @@ namespace Xaloc {
 		if (type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
 
-		XA_CORE_ASSERT(false, "Unknown shader type: '{0}'", type);
+		XA_CORE_ASSERT(false, "Unknown shader type!");
 		return 0;
 	}
 
@@ -71,7 +71,7 @@ namespace Xaloc {
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
 		std::string result;
-		std::ifstream in(filepath, std::ios::in | std::ios::binary);
+		std::ifstream in(filepath, std::ios::in | std::ios::binary); 
 		if (in)
 		{
 			in.seekg(0, std::ios::end);

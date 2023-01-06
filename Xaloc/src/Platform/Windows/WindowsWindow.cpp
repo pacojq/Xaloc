@@ -7,13 +7,14 @@
 
 #include "Xaloc/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLContext.h"
-#include "Platform/Vulkan/VulkanContext.h"
 
 
 namespace Xaloc {
 
 	static bool s_GLFWInitialized = false;
 
+	float Window::s_HighDPIScaleFactor = 1.0f;
+	
 	static void GLFWErrorCallback(int error, const char* description)
 	{
 		XA_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
@@ -61,28 +62,31 @@ namespace Xaloc {
 		//}
 		//
 
-		GLFWmonitor* primary = glfwGetPrimaryMonitor();
+		GLFWmonitor* primary = glfwGetPrimaryMonitor();		
 		const GLFWvidmode* mode = glfwGetVideoMode(primary);
 		XA_CORE_INFO("Current video mode: {0} x {1} | {2} Hz", mode->width, mode->height, mode->refreshRate);
 		
 		XA_CORE_INFO("Creating window '{0}' ({1}, {2})", props.Title, props.Width, props.Height);
 
+		float xscale, yscale;
+		glfwGetMonitorContentScale(primary, &xscale, &yscale);
+		if (xscale > 1.0f || yscale > 1.0f)
+		{
+			Window::s_HighDPIScaleFactor = xscale;
+			glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+		}
 		
 		glfwWindowHint(GLFW_RESIZABLE, props.IsResizable ? GLFW_TRUE : GLFW_FALSE);
 		glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
 		glfwWindowHint(GLFW_DECORATED, props.IsDecorated ? GLFW_TRUE : GLFW_FALSE);
 		glfwWindowHint(GLFW_REFRESH_RATE, 0); // Run at max refresh rate
 
-		if (Renderer::GetAPI() == RendererAPI::API::Vulkan)
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 
 
 		if (Renderer::GetAPI() == RendererAPI::API::OpenGL)
 			m_Context = CreateScope<OpenGLContext>(m_Window);
-		else if (Renderer::GetAPI() == RendererAPI::API::Vulkan)
-			m_Context = CreateScope<VulkanContext>(m_Window);
+		else XA_CORE_ASSERT(false, "Unknown render API!");
 		
 		//m_Context = CreateScope<OpenGLContext>(m_Window);
 		m_Context->Init();

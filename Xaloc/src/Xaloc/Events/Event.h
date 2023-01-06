@@ -63,7 +63,7 @@ namespace Xaloc {
 
 // Easy and fast way to implement needed functions for an event to be of a type or category
 
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::##type; }\
+#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
 								virtual EventType GetEventType() const override { return GetStaticType(); }\
 								virtual const char* GetName() const override { return #type; }
 
@@ -72,7 +72,7 @@ namespace Xaloc {
 	
 
 
-	class XALOC_API Event
+	class Event
 	{
 		friend class EventDispatcher;
 
@@ -112,7 +112,7 @@ namespace Xaloc {
 		{
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
-				m_Event.m_Handled = func(*(T*)&m_Event);
+				m_Event.m_Handled |= func(static_cast<T&>(m_Event));
 				return true;
 			}
 			return false;

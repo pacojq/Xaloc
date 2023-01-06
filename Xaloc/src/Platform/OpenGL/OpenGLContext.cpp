@@ -6,6 +6,29 @@
 
 namespace Xaloc {
 
+
+	static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	{
+		switch (severity)
+		{
+		case GL_DEBUG_SEVERITY_HIGH:
+			XA_CORE_ERROR("[OpenGL Debug HIGH] {0}", message);
+			XA_CORE_ASSERT(false, "GL_DEBUG_SEVERITY_HIGH");
+			break;
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			XA_CORE_WARN("[OpenGL Debug MEDIUM] {0}", message);
+			break;
+		case GL_DEBUG_SEVERITY_LOW:
+			XA_CORE_INFO("[OpenGL Debug LOW] {0}", message);
+			break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
+			// HZ_CORE_TRACE("[OpenGL Debug NOTIFICATION] {0}", message);
+			break;
+		}
+	}
+
+
+	
 	
 	OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
 		: m_WindowHandle(windowHandle)
@@ -26,6 +49,10 @@ namespace Xaloc {
 		XA_CORE_INFO("  Renderer:  {0}", glGetString(GL_RENDERER));
 		XA_CORE_INFO("  Version:   {0}", glGetString(GL_VERSION));
 
+		glDebugMessageCallback(OpenGLLogMessage, nullptr);
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		
 #ifdef XA_ENABLE_ASSERTS
 		int versionMajor;
 		int versionMinor;

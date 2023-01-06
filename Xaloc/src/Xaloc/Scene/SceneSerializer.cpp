@@ -5,9 +5,9 @@
 #include "Components.h"
 
 #include "Xaloc/Core/Assets/AssetManager.h"
+#include "Xaloc/Core/Assets/Utils/XmlHelper.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-
 
 namespace Xaloc {
 
@@ -36,6 +36,34 @@ namespace Xaloc {
         return output;
     }
 
+    static uint64_t ParseUint64(const std::string& str)
+    {
+        errno = 0;
+        unsigned long long result = strtoull(str.c_str(), NULL, 16);
+
+        if (errno == EINVAL)
+        {
+            XA_CORE_ASSERT(false, "Not a valid number!");
+            return 0;
+        }
+        else if (errno == ERANGE)
+        {
+            XA_CORE_ASSERT(false, "Does not fit in an unsigned long long!");
+            return 0;
+        }
+
+        return result;
+    }
+
+    static std::string Uint64ToString(uint64_t n)
+    {
+        char buff[16 + 1];
+        snprintf(buff, sizeof(buff), "%llx", n);
+        std::string result = buff;
+        return result;
+    }
+
+    
 
 
 
@@ -44,13 +72,13 @@ namespace Xaloc {
 	{
         pugi::xml_node root = doc.child("scene");
 
-        uint32_t id = root.attribute("id").as_uint();
+        std::string strId = root.attribute("uuid").value();
+        uint64_t id = ParseUint64(strId);
         std::string name = root.child("name").child_value();
 
-        XA_CORE_TRACE("Loading scene. Id = {0}. Name = '{1}'", id, name);
+        XA_CORE_TRACE("Loading scene. Id = {0} ({1}). Name = '{2}'", id, strId, name);
         
-		Ref<Scene> scene = CreateRef<Scene>(name);
-        scene->m_SceneID = id;
+		Ref<Scene> scene = CreateRef<Scene>(name, id);
 
 
         pugi::xml_node entitiesRoot = root.child("entities");
@@ -71,11 +99,11 @@ namespace Xaloc {
 
     void SceneSerializer::DeserializeEntity(pugi::xml_node& entityNode, const Ref<Scene>& scene)
     {
-        uint32_t id = entityNode.attribute("id").as_uint();
-        XA_CORE_TRACE("    Loading entity. Id = {}", id);
+        std::string strId = entityNode.attribute("uuid").value();
+        uint64_t id = ParseUint64(strId);
+        XA_CORE_TRACE("    Loading entity. Id = {}  ({})", id, strId);
 
-        auto entity = scene->CreateEntity("New Entity");
-        entity.GetComponent<IdComponent>().ID = id;
+        auto entity = scene->CreateEntity("New Entity", id);
 
         
         pugi::xml_node tagNode = entityNode.child("TagComponent");
@@ -96,24 +124,16 @@ namespace Xaloc {
 
             std::string strRotation = transformNode.attribute("rotation").value();
             auto vecRotation = ParseVector(strRotation);
-            glm::quat rotation = { vecRotation[0], vecRotation[1], vecRotation[2], vecRotation[3] };
+            glm::vec3 rotation = { vecRotation[0], vecRotation[1], vecRotation[2] };
 
             std::string strScale = transformNode.attribute("scale").value();
             auto vecScale = ParseVector(strScale);
             glm::vec3 scale = { vecScale[0], vecScale[1], vecScale[2] };
 
-            
-            glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-                * glm::mat4_cast( rotation )
-                * glm::scale(glm::mat4(1.0f), scale);
-
-            auto [oPosition, oRotation, oScale] = GetTransformDecomposition(transform);
-
-            XA_ASSERT(oPosition == position, "Failed to deserialize position");
-            XA_ASSERT(oRotation == rotation, "Failed to deserialize rotation");
-            XA_ASSERT(oScale == scale, "Failed to deserialize scale");
-
-            entity.GetComponent<TransformComponent>().Transform = transform;
+        	
+            entity.GetComponent<TransformComponent>().Translation = position;
+            entity.GetComponent<TransformComponent>().Rotation = rotation;
+            entity.GetComponent<TransformComponent>().Scale = scale;
 
             XA_CORE_TRACE("        TransformComponent: position = {0}    rotation = {1}    scale = {2}",
                 strPosition, strRotation, strScale);
@@ -128,6 +148,17 @@ namespace Xaloc {
             XA_CORE_TRACE("        BehaviourComponent: {}", name);
         }
 
+
+        SpriteRendererComponent serializedSpriteRenderer;
+        if (XmlHelper::TryDeserializeCompSpriteRenderer(entityNode, serializedSpriteRenderer))
+        {
+            SpriteRendererComponent& spr = entity.AddComponent<SpriteRendererComponent>();
+
+            spr.Sprite = serializedSpriteRenderer.Sprite;
+            spr.Color = serializedSpriteRenderer.Color;
+            spr.TilingFactor = serializedSpriteRenderer.TilingFactor;
+        }
+        /*
         pugi::xml_node rendererNode = entityNode.child("SpriteRendererComponent");
         if (rendererNode)
         {
@@ -148,6 +179,7 @@ namespace Xaloc {
             XA_CORE_TRACE("        SpriteRendererComponent: texcoords = {0}    width = {1}    height = {2}    assetID = {3}",
                 strTexcoords, width, height, assetID);
         }
+        */
     }
 
 
@@ -157,14 +189,19 @@ namespace Xaloc {
 	pugi::xml_document SceneSerializer::Serialize(const Ref<Scene>& scene)
 	{
         pugi::xml_document doc;
-        if (!doc.load_string("<!-- Xaloc Engine. Serialized Scene -->", pugi::parse_default | pugi::parse_comments))
+        pugi::xml_parse_result res = doc.load_string("<!-- Xaloc Engine. Serialized Scene -->", pugi::parse_default | pugi::parse_comments);
+
+    	if (!res && res.status != pugi::status_no_document_element)
         {
+            XA_CORE_ERROR("Parsing status: {}", res.status);
+            XA_CORE_ERROR("Parsing error: {}", res.description());
             XA_CORE_ASSERT(false, "Something went wrong!");
         }
 
         pugi::xml_node root = doc.append_child("scene");
-        auto rootId = root.append_attribute("id");
-        rootId.set_value(scene->m_SceneID);
+    	
+        auto rootId = root.append_attribute("uuid");
+        rootId.set_value(Uint64ToString(scene->m_SceneID).c_str());
         
         pugi::xml_node sceneName = root.append_child("name");
         sceneName.append_child(pugi::node_pcdata).set_value(scene->m_Name.c_str());
@@ -172,12 +209,11 @@ namespace Xaloc {
 
         pugi::xml_node entities = root.append_child("entities");
         
-
+        // Only serialize entities with ID
         auto view = scene->m_Registry.view<IdComponent>();
         for (auto entity : view)
         {
             auto& idComp = view.get<IdComponent>(entity);
-            //auto ent = Entity(entity, scene.get());
             SerializeEntity(doc, entities, Entity(entity, scene.get()), idComp.ID, scene);
         }
 
@@ -185,12 +221,12 @@ namespace Xaloc {
 	}
 
     void SceneSerializer::SerializeEntity(pugi::xml_document& doc, pugi::xml_node& entitiesRoot,
-            Entity entity, uint32_t id, const Ref<Scene>& scene)
+            Entity entity, UUID id, const Ref<Scene>& scene)
     {
         pugi::xml_node node = entitiesRoot.append_child("entity");
 
-        auto attrId = node.append_attribute("id");
-        attrId.set_value(id);
+        auto attrId = node.append_attribute("uuid");
+        attrId.set_value(Uint64ToString(id).c_str());
 
         if (entity.HasComponent<TagComponent>())
         {
@@ -204,14 +240,13 @@ namespace Xaloc {
             auto transform = entity.GetComponent<TransformComponent>();
             auto transformNode = node.append_child("TransformComponent");
 
-            auto [translation, rotation, scale] = GetTransformDecomposition(transform);
-            char buff[64];
+        	char buff[64];
             
-            snprintf(buff, sizeof(buff), "[%f, %f, %f]", translation.r, translation.g, translation.b);
+            snprintf(buff, sizeof(buff), "[%f, %f, %f]", transform.Translation.x, transform.Translation.y, transform.Translation.z);
             std::string strPosition = buff;
-            snprintf(buff, sizeof(buff), "[%f, %f, %f, %f]", rotation.w, rotation.x, rotation.y, rotation.z);
+            snprintf(buff, sizeof(buff), "[%f, %f, %f]", transform.Rotation.x, transform.Rotation.y, transform.Rotation.z);
             std::string strRotation = buff;
-            snprintf(buff, sizeof(buff), "[%f, %f, %f]", scale.r, scale.g, scale.b);
+            snprintf(buff, sizeof(buff), "[%f, %f, %f]", transform.Scale.x, transform.Scale.y, transform.Scale.z);
             std::string strScale = buff;
 
             transformNode.append_attribute("position").set_value(strPosition.c_str());
@@ -230,8 +265,8 @@ namespace Xaloc {
         {
             auto renderer = entity.GetComponent<SpriteRendererComponent>();
             auto rendererNode = node.append_child("SpriteRendererComponent");
-
-            auto subTex = renderer.SubTexture;
+            /*
+            auto subTex = renderer.Sprite;
             auto tex = subTex->GetTexture();
             
             char buff[64];
@@ -241,7 +276,9 @@ namespace Xaloc {
             rendererNode.append_attribute("texcoords").set_value(strTexcoords.c_str());
             rendererNode.append_attribute("width").set_value(subTex->GetWidth());
             rendererNode.append_attribute("height").set_value(subTex->GetHeight());
-            rendererNode.append_attribute("assetID").set_value(tex->AssetID().c_str());
+            */
+            auto attrId = rendererNode.append_attribute("sprite");
+            attrId.set_value(Uint64ToString(renderer.Sprite).c_str());
         }
     }
 

@@ -5,6 +5,7 @@
 #include "Xaloc/Core/Core.h"
 #include "Xaloc/Events/Event.h"
 #include "Xaloc/Core/Log.h"
+#include "Xaloc/Renderer/GraphicsContext.h"
 
 namespace Xaloc {
 
@@ -33,7 +34,7 @@ namespace Xaloc {
 	/*
 		Interface representing a desktop system based window
 	*/
-	class XALOC_API Window
+	class Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
@@ -51,8 +52,14 @@ namespace Xaloc {
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetNativeWindow() const = 0;
+		
+		virtual GraphicsContext* GetContext() const = 0;
 
 		static Window* Create(const WindowProps& props = WindowProps());
+
+	public:
+		static float s_HighDPIScaleFactor;
+
 	};
 
 

@@ -2,17 +2,34 @@
 
 #include "RendererAPI.h"
 
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
+
 namespace Xaloc {
 
-	/*
-		RendererCommand is just a layer that abstracts the actual RendererAPI.
-		Different Render Commands will be called by Xaloc's Renderers.
-	*/
+	/// <summary>
+	/// RendererCommand is just a layer that abstracts the actual RendererAPI.
+	/// Different Render Commands will be called by Xaloc's Renderers.
+	/// </summary>
 	class RenderCommand
 	{
 	public:
-		inline static void Init()
+
+		static void Init(RendererAPI::API api)
 		{
+			switch (api)
+			{
+			case RendererAPI::API::None:
+				XA_CORE_ASSERT(false, "RendererAPI::None is curently not supported!");
+				break;
+
+			case RendererAPI::API::OpenGL:
+				s_RendererAPI = CreateScope<OpenGLRendererAPI>();
+				break;
+
+			default:
+				XA_CORE_ASSERT(false, "Unknown RendererAPI!");
+			}
+			
 			s_RendererAPI->Init();
 		}
 
@@ -31,9 +48,14 @@ namespace Xaloc {
 			s_RendererAPI->Clear();
 		}
 
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0)
+		inline static void DrawIndexed(uint32_t indexCount = 0)
 		{
-			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
+			s_RendererAPI->DrawIndexed(indexCount);
+		}
+
+		inline static void DrawBlit()
+		{
+			s_RendererAPI->DrawBlit();
 		}
 
 	private:

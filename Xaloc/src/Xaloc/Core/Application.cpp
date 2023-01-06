@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Xaloc/Core/Log.h"
+#include "Xaloc/Core/Assets/AssetManager.h"
 
 #include "Xaloc/ImGui/ImGuiStyles.h"
 
@@ -9,13 +10,9 @@
 
 #include "Xaloc/Scripting/ScriptEngine.h"
 
+
+// TODO We use GLFW to get the timestep. We should make it platform-specific.
 #include <GLFW/glfw3.h>
-
-// TODO this is temporary. Move this and OpenFile somewhere else
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-#include <Windows.h>
-
 
 
 namespace Xaloc {
@@ -35,6 +32,9 @@ namespace Xaloc {
 
 		m_PauseOnFocusLost = spec.PauseOnFocusLost;
 
+		AssetManager::Init(spec.AssetsRootPath);
+		AssetManager::LoadProjectAssets(); // TODO: revise this if we are loading packed release assets
+
 		
 		RendererAPI::SetAPI(spec.TargetGraphics);
 
@@ -49,10 +49,15 @@ namespace Xaloc {
 
 		Renderer::Init();
 
-		m_ImGuiLayer = new ImGuiLayer();
+
+		// Setup ImGui
+		m_ImGuiLayer = ImGuiLayer::Create();
 		PushOverlay(m_ImGuiLayer);
+		m_LayerStack.Flush();
 		ImGuiStyles::ApplyDefaultStyle();
 
+
+		// Setup C# scripting modules
 		if (spec.UseScripting)
 		{
 			// TODO error handling with ScriptingDllPath
@@ -64,6 +69,8 @@ namespace Xaloc {
 	{
 		XA_PROFILE_FUNCTION();
 
+		AssetManager::Shutdown();
+
 		Renderer::Shutdown();
 	}
 
@@ -73,6 +80,13 @@ namespace Xaloc {
 		XA_PROFILE_FUNCTION();
 		
 		m_LayerStack.PushLayer(layer);
+	}
+
+	void Application::PopLayer(Layer* layer)
+	{
+		XA_PROFILE_FUNCTION();
+
+		m_LayerStack.PopLayer(layer);
 	}
 
 	void Application::PushOverlay(Layer* overlay)
@@ -106,6 +120,8 @@ namespace Xaloc {
 	void Application::Run()
 	{
 		XA_PROFILE_FUNCTION();
+
+		m_LayerStack.Flush();
 		
 		while (m_Running)
 		{
@@ -116,25 +132,35 @@ namespace Xaloc {
 			m_LastFrameTime = time;
 
 			m_FPS = 1.0f / timestep;
+			m_Timestep = timestep * 1000.0f; // seconds to milliseconds
 
 			if (!m_Minimized)
 			{
 				if (!m_Paused)
 				{
+					m_ImGuiLayer->GetProfiler()->BeginFrame();
+					
 					XA_PROFILE_SCOPE("LayerStack OnUpdate");
 					
 					for (Layer* layer : m_LayerStack)
 						layer->OnUpdate(timestep);
+
+					m_ImGuiLayer->GetProfiler()->EndFrame();
 				}
 
-				m_ImGuiLayer->Begin();
+				if (m_ImGuiEnabled)
 				{
-					XA_PROFILE_SCOPE("LayerStack OnImGuiRender");
-					
-					for (Layer* layer : m_LayerStack)
-						layer->OnImGuiRender();
+					m_ImGuiLayer->Begin();
+					{
+						XA_PROFILE_SCOPE("LayerStack OnImGuiRender");
+
+						for (Layer* layer : m_LayerStack)
+							layer->OnImGuiRender();
+					}
+					m_ImGuiLayer->End();
 				}
-				m_ImGuiLayer->End();
+
+				m_LayerStack.Flush();
 			}
 
 			m_Window->OnUpdate();
@@ -190,59 +216,6 @@ namespace Xaloc {
 		m_Focused = e.IsFocused();
 		
 		return false;
-	}
-
-
-	// TODO Move this somewhere else
-	std::string Application::OpenFile(const std::string& filter) const
-	{
-		OPENFILENAMEA ofn;       // common dialog box structure
-		CHAR szFile[260] = { 0 };       // if using TCHAR macros
-
-		// Initialize OPENFILENAME
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
-		ofn.lpstrFile = szFile;
-		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = "All\0*.*\0";
-		ofn.nFilterIndex = 1;
-		ofn.lpstrFileTitle = NULL;
-		ofn.nMaxFileTitle = 0;
-		ofn.lpstrInitialDir = NULL;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-		if (GetOpenFileNameA(&ofn) == TRUE)
-		{
-			return ofn.lpstrFile;
-		}
-		return std::string();
-	}
-
-	// TODO Move this somewhere else
-	std::string Application::SaveFile(const std::string& filter) const
-	{
-		OPENFILENAMEA ofn;       // common dialog box structure
-		CHAR szFile[260] = { 0 };       // if using TCHAR macros
-
-		// Initialize OPENFILENAME
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
-		ofn.lpstrFile = szFile;
-		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = "All\0*.*\0";
-		ofn.nFilterIndex = 1;
-		ofn.lpstrFileTitle = NULL;
-		ofn.nMaxFileTitle = 0;
-		ofn.lpstrInitialDir = NULL;
-		ofn.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
-
-		if (GetSaveFileNameA(&ofn) == TRUE)
-		{
-			return ofn.lpstrFile;
-		}
-		return std::string();
 	}
 
 

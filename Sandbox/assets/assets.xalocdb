@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!-- Xaloc Engine. Assets database -->
+<assetdb>
+	<assets>
+		<asset handle="3a164c0fb8ec994" type="Text" path="game\textures\License.txt" />
+		<asset handle="83fd8573bacc2c16" type="Texture2D" path="textures\Checkerboard.png" />
+		<asset handle="d9c98d1fc2896a0f" type="Shader" path="shaders\Texture.glsl" />
+		<asset handle="e2a3b714b97b17e" type="Font" path="fonts\Oxygen\OxygenMono-Regular.ttf" />
+		<asset handle="2b519418aab457a4" type="Shader" path="shaders\FlatColor.glsl" />
+		<asset handle="a19920893c6754a7" type="Font" path="fonts\Roboto\RobotoMono-Regular.ttf" />
+		<asset handle="2a821764bb7eab52" type="Text" path="fonts\Oxygen\OFL.txt" />
+		<asset handle="904d8c784d518c4e" type="Scene" path="game\scenes\testScene.xaloc" />
+		<asset handle="8b84b2960096e0c6" type="Text" path="fonts\Roboto\LICENSE.txt" />
+		<asset handle="1" type="Texture2D" path="game\textures\tilemap.png" />
+		<asset handle="4245cdf1e40a5790" type="Dll" path="game\scripts\XalocSharp.dll" />
+		<asset handle="dbe37bccec8e5ccf" type="Dll" path="game\scripts\SandboxCs.dll" />
+		<asset handle="ff8447f2fc96a00b" type="Sprite" path="game\textures\player.xaspr" />
+		<asset handle="c80ae7597bafc125" type="Sprite" path="game\textures\trees.xaspr" />
+	</assets>
+</assetdb>

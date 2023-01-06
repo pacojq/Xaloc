@@ -43,9 +43,10 @@ Xaloc Engine is built in a Windows environment, using Visual Studio 2019.
 Execute the script `scripts/Win-GenProjects.bat` 
 to generate the solution and project files.
 
-### Vulkan 
+### .NET Framework 
 
-To work with the Vulkan API, you should first install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home).
+In order to build Xaloc, you will need to have the .NET Framework SDK installed. The engine's C# scripting module
+targets .NET Framework 4.7.2.
 
 
 ## Compiling and Executing
@@ -71,6 +72,7 @@ Right now, Xaloc is very bare-bones. Its most remarkable features are:
 | **C# scripting** | Basic scripting in C# using mono. | Done✔️ |
 | **2D Renderer** | 2D batch renderer supporting OpenGL. | Done✔️ |
 | **ImGui support** | Basic game editor and in-game debug UI using ImGui. | Done✔️ |
+| **Asset manager** | Basic asset handling API. | Done✔️ |
 
 
  > For in-development features, check the [dev branch](https://github.com/pacojq/Xaloc/tree/dev).
@@ -80,10 +82,9 @@ Right now, Xaloc is very bare-bones. Its most remarkable features are:
 
 | Feature | Description | Status |
 | ------- | ----------- | ------ |
-| **Vulkan support** | Extend the Renderer to supports Vulkan. | WIP 💻 |
-| **Asset manager** | Basic asset handling API. | WIP 💻 |
-| **Physics system** | Own 2D physics API. | TODO 📋 |
+| **Better asset manager** | Packaging assets, streaming, etc. | WIP 💻 |
 | **Audio system** | Sound API. | TODO 📋 |
+| **Physics system** | Own 2D physics API. | TODO 📋 |
 | **Font support** | Extend the Renderer capabilities so it can draw text. | TODO 📋 |
 
 
@@ -98,7 +99,8 @@ The game editor is in continuous development.
 
 Xaloc has the following dependencies:
 
-  - [ImGui](https://github.com/ocornut/imgui) for GUI rendering.
+  - [ImGui](https://github.com/ocornut/imgui) and [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo) for GUI rendering.
+  - [ImPlot](https://github.com/epezent/implot) as plotting library for the profiler.
   - [mono](https://www.mono-project.com/docs/about-mono/) for C# [scripting](https://www.mono-project.com/docs/advanced/embedding/scripting/).
   - [GLFW](https://github.com/glfw/glfw) for OpenGL, OpenGL ES, window creation 
   and input handling. More info at its [website](https://www.glfw.org/).
@@ -116,5 +118,4 @@ Projects are generated with [Premake 5](https://github.com/premake/premake-core/
 Huge shout out to:
 
   - Yan Chernikov's [video series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT). Original code at [TheCherno/Hazel](https://github.com/TheCherno/Hazel).
-  - Alexander Overvoorde's [Vulkan tutorial](https://vulkan-tutorial.com/Introduction).
   - Jason Gregory's [Game Engine Architecture](https://www.gameenginebook.com) book.

@@ -1,23 +1,40 @@
 #pragma once
 
-#include "OrthographicCamera.h"
+#include "Cameras/OrthographicCamera.h"
+#include "Cameras/EditorCamera.h"
 
 #include "Texture.h"
 #include "SubTexture2D.h"
 
-namespace Xaloc {
+#include "Shader.h"
 
-	/*
-		Xaloc's 2D renderer.
-	*/
+namespace Xaloc {
+	class Camera;
+
+	/// <summary>
+	/// Xaloc's 2D renderer.
+	/// </summary>
 	class Renderer2D
 	{
+	public:
+		// TODO project-dependent pixels per unit
+		inline static const float PX_PER_UNIT = 16.0f;
+
 	public:
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const OrthographicCamera& camera);
+		/// <summary>
+		/// Begins a scene with a given view projection matrix.
+		/// </summary>
+		/// <param name="viewProj"></param>
+		static void BeginScene(glm::mat4 viewProj);
 		static void EndScene();
+
+		/// Utility BeginScene
+		static void BeginScene(const Camera& camera, const glm::mat4& transform);
+		/// Utility BeginScene
+		static void BeginScene(const EditorCamera& camera);
 
 		/// <summary>
 		/// Draws the current batch and resets its state.
@@ -25,6 +42,8 @@ namespace Xaloc {
 		static void Flush();
 
 
+
+		static void Blit(const Ref<Shader>& shader);
 
 		
 
@@ -196,7 +215,9 @@ namespace Xaloc {
 
 	private:
 		static float FindTextureIndex(const Ref<Texture2D> texture);
-		static void FlushAndReset();
+
+		static void StartBatch();
+		static void NextBatch();
 	};
 
 }

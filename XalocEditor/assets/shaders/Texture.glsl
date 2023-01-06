@@ -45,7 +45,8 @@ void main()
 	//
 
 	vec4 texColor = v_Color;
-	switch(int(v_TexIndex))
+	int index = int(round(v_TexIndex));
+	switch(index)
 	{
 		case 0: texColor *= texture(u_Textures[0], v_TexCoord * v_TilingFactor); break;
 		case 1: texColor *= texture(u_Textures[1], v_TexCoord * v_TilingFactor); break;
@@ -80,5 +81,7 @@ void main()
 		case 30: texColor *= texture(u_Textures[30], v_TexCoord * v_TilingFactor); break;
 		case 31: texColor *= texture(u_Textures[31], v_TexCoord * v_TilingFactor); break;
 	}
+
+	//color = vec4(texColor.a);
 	color = texColor;
 }

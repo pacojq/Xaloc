@@ -1,6 +1,10 @@
 #include "xapch.h"
 #include "Renderer.h"
 
+#include "Pipeline.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+
 #include "Renderer2D.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -20,8 +24,8 @@ namespace Xaloc {
 	
 
 	void Renderer::Init()
-	{
-		RenderCommand::Init();
+	{		
+		RenderCommand::Init(GetAPI());
 		Renderer2D::Init();
 	}
 
@@ -36,9 +40,11 @@ namespace Xaloc {
 	}
 
 
-	void Renderer::BeginScene(OrthographicCamera& camera)
+	void Renderer::BeginScene(OrthographicCamera& camera, const glm::mat4& transform)
 	{
-		m_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+		//                   Projection matrix      * View matrix
+		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
+		m_SceneData->ViewProjectionMatrix = viewProj;
 	}
 
 	void Renderer::EndScene()
@@ -68,14 +74,15 @@ namespace Xaloc {
 		s_Data.m_ActiveRenderPass = nullptr;
 	}
 
-	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
+	/* TODO 
+	void Renderer::Submit(const Ref<Pipeline> pipeline, const Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> vertexBuffer, const glm::mat4& transform)
 	{
 		shader->Bind();
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", m_SceneData->ViewProjectionMatrix);
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
 	
-		vertexArray->Bind();
+		vertexBuffer->Bind();
 		RenderCommand::DrawIndexed(vertexArray);
 	}
-
+	*/
 }

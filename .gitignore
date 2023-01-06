@@ -8,6 +8,11 @@
 !vendor/bin/premake/
 bin-int/
 
+# ImGui
+Sandbox/imgui.ini
+XalocEditor/imgui.ini
+
+
 # User-specific files
 *.rsuser
 *.suo
@@ -343,7 +348,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-Sandbox/imgui.ini
 
 # Visual Studio files and folder
 .vs/

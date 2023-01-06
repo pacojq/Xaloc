@@ -1,103 +1,78 @@
 #include "EditorLayer.h"
 
-#include "imgui/imgui.h"
+#include "EditorNames.h"
 
+#include "Xaloc/Math/Math.h"
+#include "Xaloc/Files/FileSystem.h"
+
+#include "Xaloc/Scripting/ScriptEngine.h"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
+#include "Xaloc/ImGui/ImGuizmo.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 
 namespace Xaloc {
 
-	static const uint32_t s_mapWidth = 24;
-	static const uint32_t s_mapHeight = 14;
 
-	static const char* s_MapTiles =
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWW3TTTT2WWWWWWWWWWW"
-		"WWWWW3T5GGGG4TTT2WWWWWWW"
-		"WWWWW06GGGGG7BB642WWWWWW"
-		"WWWWWWLGGGGGRWWLG42WWWWW"
-		"WWWWWW06GGGGRWWLGGRWWWWW"
-		"WWWWWWW0BB6G4TT5G71WWWWW"
-		"WWWWWWWWWW0BB6GGGRWWWWWW"
-		"WWWWWWWWWWWWW0BBB1WWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		"WWWWWWWWWWWWWWWWWWWWWWWW"
-		;
-
-
-	EditorLayer::EditorLayer()
-		: Layer("Editor Layer"),
-		m_CameraController(1280.0f / 720.0f, true),
-		m_TilingFactor(1.0f),
-		m_Rotation(0.0f),
-		m_FirstColor(0.2f, 0.3f, 0.8f, 1.0f),
-		m_SecondColor(0.8f, 0.2f, 0.3f, 1.0f)
+	EditorLayer::EditorLayer() : Layer("Editor Layer")
 	{
-		// Load Assets
-
-		AssetManager::LoadTexture("TILEMAP", "assets/game/textures/tilemap.png");
-
+		m_MenuBar = CreateRef<EditorMenuBar>(this);
+		
+		// TODO: start with empty room
+		auto& scene = Scene::Load("assets/game/scenes/serializedScene.xaloc");
+		OpenScene(scene);
 
 		// Init Editor
+		m_EditorCameraPerspective = CreateRef<EditorCameraPerspective>(glm::perspective(45.0f, 1.778f, 0.01f, 1000.0f));
+		m_EditorCameraOrthographic = CreateRef<EditorCameraOrthographic>();
+		m_EditorCamera = m_EditorCameraOrthographic;
 
-		m_Scene = Scene::Load("assets/scenes/serializedScene.xaloc");
 
-		//m_Scene = Xaloc::CreateRef<Scene>("Sandbox Scene");
-		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
+		m_Icons = CreateRef<EditorIcons>();
+
+		m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(this, scene);
+		m_ContentBrowserPanel = CreateScope<ContentBrowserPanel>(this);
+
+		m_GamePreview = CreateRef<EditorGamePreview>(EditorNames::Windows::GAME_PREVIEW);
+		m_SceneViewport = CreateRef<EditorSceneView>(EditorNames::Windows::SCENE);
+		m_SceneViewport->SetScene(scene);
 		
-		m_CameraController.SetZoomLevel(5.0f);
+
+		m_PanelsInitialized = true;
 	}
 
 
 	void EditorLayer::OnAttach()
-	{		
-		m_Texture = Xaloc::Texture2D::Create("assets/textures/Checkerboard.png");
-
-
-		Xaloc::FramebufferSpec framebufferSpec;
-		framebufferSpec.Width = 1280;
-		framebufferSpec.Height = 720;
+	{
+		FramebufferSpec framebufferSpec; // TODO: available width and height
+		framebufferSpec.Width = 480 * 2;
+		framebufferSpec.Height = 270 * 2;
 		framebufferSpec.ClearColor = { 0.1f, 0.1f, 0.1f, 1 };
-		Ref<Xaloc::Framebuffer> framebuffer = Xaloc::Framebuffer::Create(framebufferSpec);
+		Ref<Framebuffer> previewframebuffer = Framebuffer::Create(framebufferSpec);
+		Ref<Framebuffer> editorFramebuffer = Framebuffer::Create(framebufferSpec);
 
-		Xaloc::RenderPassSpecification renderPassSpec;
-		renderPassSpec.TargetFramebuffer = framebuffer;
-		m_RenderPass = Xaloc::RenderPass::Create(renderPassSpec);
-		
-		m_GuizmoRenderPass = Xaloc::RenderPass::Create(renderPassSpec);
+		RenderPassSpecification previewRenderPassSpec;
+		previewRenderPassSpec.TargetFramebuffer = previewframebuffer;
 
+		RenderPassSpecification editorRenderPassSpec;
+		editorRenderPassSpec.TargetFramebuffer = editorFramebuffer;
 
-
-		Xaloc::Ref<Xaloc::Texture2D> tilemap = AssetManager::GetTexture("TILEMAP");
-
-		glm::vec2 size = { 16.0f, 16.0f };
-		glm::vec2 pad = { 0.0f, 0.0f };
-		glm::vec2 off = { 1.0f, 1.0f };
-
-		s_TextureMap['G'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 16.0f }, size, pad, off);
-
-		s_TextureMap['T'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 17.0f }, size, pad, off);
-		s_TextureMap['B'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 1.0f, 15.0f }, size, pad, off);
-		s_TextureMap['L'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 16.0f }, size, pad, off);
-		s_TextureMap['R'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 16.0f }, size, pad, off);
-
-		s_TextureMap['0'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 15.0f }, size, pad, off);
-		s_TextureMap['1'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 15.0f }, size, pad, off);
-		s_TextureMap['2'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 2.0f, 17.0f }, size, pad, off);
-		s_TextureMap['3'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 0.0f, 17.0f }, size, pad, off);
-
-		s_TextureMap['4'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 5.0f, 16.0f }, size, pad, off);
-		s_TextureMap['5'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 6.0f, 16.0f }, size, pad, off);
-		s_TextureMap['6'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 6.0f, 17.0f }, size, pad, off);
-		s_TextureMap['7'] = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 5.0f, 17.0f }, size, pad, off);
-
-		m_TileWater = Xaloc::SubTexture2D::CreateFromGrid(tilemap, { 9.0f, 10.0f }, size, pad, off);
+		m_PreviewRenderPass = RenderPass::Create(previewRenderPassSpec);
+		m_EditorRenderPass = RenderPass::Create(editorRenderPassSpec);
 
 
+		const glm::vec3 m_BgColA = { 78.0f / 255.0f, 78.0f / 255.0f, 78.0f / 255.0f };
+		const glm::vec3 m_BgColB = { 83.0f / 255.0f, 83.0f / 255.0f, 83.0f / 255.0f };
+
+		m_CheckerboardShader = Shader::Create("assets/shaders/CheckerboardBlit.glsl");
+		m_CheckerboardShader->Bind();
+		m_CheckerboardShader->SetFloat("u_PxPerUnit", Renderer2D::PX_PER_UNIT);
+		m_CheckerboardShader->SetFloat3("u_ColorLight", m_BgColA);
+		m_CheckerboardShader->SetFloat3("u_ColorDark", m_BgColB);
+		m_CheckerboardShader->SetFloat4("u_ScreenSize", { framebufferSpec.Width, framebufferSpec.Height, 0.0f, 0.0f });
 	}
 
 	void EditorLayer::OnDetach()
@@ -105,122 +80,104 @@ namespace Xaloc {
 	}
 
 
-	void EditorLayer::OnUpdate(Xaloc::Timestep ts)
+
+
+
+	void EditorLayer::OpenScene(const Ref<Scene>& scene)
+	{
+		m_Scene.reset();
+		m_Scene = scene;
+
+		if (m_PanelsInitialized)
+		{
+			m_SceneHierarchyPanel->SetScene(scene);
+			m_SceneViewport->SetScene(scene);
+		}
+
+#ifdef TODO // TODO: temporary
+		{
+			Entity player = m_Scene->FindEntityByName("Player");
+			if (player)
+			{
+				XA_CORE_ERROR("ADDING PLAYER COMPONENT!");
+				player.AddComponent<NativeBehaviourComponent>().Bind<PlayerComponent>();
+			}
+		}
+#endif
+		// TODO: temporary
+		{
+			SceneCamera& cam = m_Scene->GetCameraStack()->MainCamera();
+			cam.Camera.SetViewportSize(480, 270);
+			cam.Camera.SetClipDistance(-100, 100);
+		}
+
+		// vv ======================================== TODO temporary: start runtime
+		ScriptEngine::SetSceneContext(m_Scene);
+		m_Scene->StartRuntime();
+		// ^^ ============================================= temporary: start runtime
+	}
+
+
+
+
+
+	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		// UPDATE
 
-		Application::Get().GetImGuiLayer()->SetBlockEvents(!(m_ViewportFocused && m_ViewportHovered));
-		if (m_ViewportFocused)
-		{
-			m_CameraController.OnUpdate(ts);
-		}
+		// TODO block events just to the viewport that doesn't need them
 
+		bool blockEvents = true;
+
+		if (m_GamePreview->IsFocused() && m_GamePreview->IsHovered())
+		{
+			blockEvents = false;
+		}
+		if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
+		{
+			blockEvents = false;
+		}
+		
+		Application::Get().GetImGuiLayer()->SetBlockEvents(blockEvents);
+		if (m_GamePreview->IsFocused())
+		{
+			// TODO update editor camera
+			//m_CameraController.OnUpdate(ts);
+		}
+		
 
 		// RENDER
 
 		Xaloc::Renderer2D::ResetStats();
 
-		// TODO begin render pass
-		//m_Framebuffer->Bind();
-		//m_RenderPass->GetSpecification().TargetFramebuffer->Bind();
-		Renderer::BeginRenderPass(m_RenderPass);
 
-		//Xaloc::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-		//Xaloc::RenderCommand::Clear();
-
-		#if false   	
-		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
-		//Xaloc::Renderer2D::DrawRotatedQuad({ -0.5f, 0.5f }, { 0.8f, 0.8f }, m_Rotation, m_SecondColor);
-		Xaloc::Renderer2D::DrawQuad({ -0.5f, 0.5f, 1.0f }, { 0.8f, 0.8f }, m_SecondColor);
-		Xaloc::Renderer2D::DrawQuad({ 0.25f, -0.25f }, { 1.2f, 1.2f }, m_FirstColor);
-		Xaloc::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, m_Texture, m_TilingFactor, { 1.0f, 1.0f, 1.0f, 1.0f });
-		Xaloc::Renderer2D::DrawRotatedQuad({ -2.0f, 0.0f, 0.0f }, { 2.0f, 2.0f }, glm::radians(m_Rotation), m_Texture, 0.5f);
-
-		for (float y = -5.0f; y < 5.0f; y += 0.5f)
-		{
-			for (float x = -5.0f; x < 5.0f; x += 0.5f)
-			{
-				glm::vec4 color = { (x + 5.0f) / 10.0f, (y + 5.0f) / 10.0f, 1.0f, 0.5f };
-				Xaloc::Renderer2D::DrawQuad({ x, y }, { 0.45f, 0.45f }, color);
-			}
-		}
-
-		Xaloc::Renderer2D::EndScene();
-		#endif
-
-
-		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
-		for (uint32_t y = 0; y < s_mapHeight; y++)
-		{
-			for (uint32_t x = 0; x < s_mapWidth; x++)
-			{
-				char tileType = s_MapTiles[((s_mapHeight - 1) - y) * s_mapWidth + x];
-
-				glm::vec3 pos = { x - (s_mapWidth / 2.0f), y - (s_mapHeight / 2.0f), m_TilesDepth };
-				glm::vec3 waterPos = { pos.x, pos.y, m_TilesDepth - 0.0001f };
-				Xaloc::Renderer2D::DrawQuad(waterPos, { 1.0f, 1.0f }, m_TileWater);
-
-				if (tileType == 'W')
-					continue;
-
-				if (s_TextureMap.find(tileType) != s_TextureMap.end())
-				{
-					Xaloc::Ref<Xaloc::SubTexture2D> tex = s_TextureMap[tileType];
-					Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, tex);
-				}
-				else
-				{
-					Xaloc::Renderer2D::DrawQuad(pos, { 1.0f, 1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f });
-				}
-			}
-		}
-
-		Xaloc::Renderer2D::EndScene();
-
-
-		
 		// UPDATE AND RENDER SCENE
+
+		SceneCamera& mainCamera = m_Scene->GetCameraStack()->MainCamera();
+		if (mainCamera.IsActive())
+		{
+			Renderer::BeginRenderPass(m_PreviewRenderPass);
+			{
+				m_Scene->OnUpdateEditor(ts, mainCamera.ViewProjectionMatrix());
+			}
+			Renderer::EndRenderPass();
+		}
+
+
 		
-		Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-		m_Scene->OnUpdate(ts);
-		Xaloc::Renderer2D::EndScene();
+		// RENDER SCENE FROM EDITOR CAMERA
 
-
-
-		// TODO end render pass
-		//m_Framebuffer->Unbind();
+		Renderer::BeginRenderPass(m_EditorRenderPass, true);
+		{
+			Renderer2D::Blit(m_CheckerboardShader); // Editor background
+		}
 		Renderer::EndRenderPass();
 
-		
-		// DRAW SELECTED ENTITIES GUI
-		
-		if (m_SelectionContext.size())
+		Renderer::BeginRenderPass(m_EditorRenderPass, false);
 		{
-			Entity selection = m_SelectionContext[0].Entity;
-
-			Xaloc::Renderer::BeginRenderPass(m_GuizmoRenderPass, false);
-			Xaloc::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
-			// TODO get app pixels per unit
-			float pxPerUnit = 16.0f;
-			
-			glm::vec4 sprMin = selection.Transform() * glm::vec4{ -0.5f - 1.0f / pxPerUnit, -0.5f - 1.0f / pxPerUnit, 0.0f, 1.0f };        // Get sprite quad min vertex
-			glm::vec4 sprMax = selection.Transform() * glm::vec4{ 0.5f + 1.0f / pxPerUnit, 0.5f + 1.0f / pxPerUnit, 0.0f, 1.0f };          // Get sprite quad max vertex
-			
-			//glm::vec4 color = { 0.549f, 0.976f, 1.0f, 1.0f };
-			glm::vec4 color = glm::vec4(1.0f);
-			
-			Renderer2D::DrawLine({ sprMin.x, sprMin.y }, { sprMax.x, sprMin.y }, color, 0.5f);
-			Renderer2D::DrawLine({ sprMax.x, sprMin.y }, { sprMax.x, sprMax.y }, color, 0.5f);
-			Renderer2D::DrawLine({ sprMax.x, sprMax.y }, { sprMin.x, sprMax.y }, color, 0.5f);
-			Renderer2D::DrawLine({ sprMin.x, sprMax.y }, { sprMin.x, sprMin.y }, color, 0.5f);
-
-			Xaloc::Renderer2D::EndScene();
-			Xaloc::Renderer::EndRenderPass();
+			m_Scene->OnUpdateEditor(ts, m_EditorCamera->GetViewProjection());
 		}
-
+		Renderer::EndRenderPass();
 	}
 
 
@@ -238,8 +195,8 @@ namespace Xaloc {
 		if (opt_fullscreen)
 		{
 			ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->GetWorkPos());
-			ImGui::SetNextWindowSize(viewport->GetWorkSize());
+			ImGui::SetNextWindowPos(viewport->WorkPos);
+			ImGui::SetNextWindowSize(viewport->WorkSize);
 			ImGui::SetNextWindowViewport(viewport->ID);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -265,204 +222,132 @@ namespace Xaloc {
 			ImGui::PopStyleVar(2);
 
 		// DockSpace
+		m_DockspaceId = ImGui::GetID("MyDockSpace");
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
-			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+			ImGui::DockSpace(m_DockspaceId, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+			if (!m_DockspaceReady)
+				ResetDockSpace();
 		}
 
 
-		
-		// ============================================= MENU BAR ============================================= //
+		m_MenuBar->OnImGuiRender();
 
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("Xaloc"))
-			{
-				if (ImGui::MenuItem("Exit")) Xaloc::Application::Get().Close();
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Scene"))
-			{
-				//if (ImGui::MenuItem("Save"))
-				//{
-					// TODO
-				//}
-				if (ImGui::MenuItem("Save as..."))
-				{
-					std::string filename = Application::Get().SaveFile("*.xaloc");
-					if (filename != "")
-						Scene::Save(m_Scene, filename);
-				}
-				if (ImGui::MenuItem("Load..."))
-				{
-					std::string filename = Application::Get().OpenFile("*.xaloc");
-					if (filename != "")
-					{
-						m_Scene.reset();
-						m_Scene = Scene::Load(filename);
-
-						m_SceneHierarchyPanel->SetScene(m_Scene);
-					}
-				}
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Window"))
-			{
-				if (ImGui::MenuItem("Render Stats")) m_ShowWindowRenderStats = true;
-				ImGui::EndMenu();
-			}
 			
-			ImGui::EndMenuBar();
-		}
-
-
-
-		
-
 
 		// ============================================= MISC WINDOWS ============================================= //
-
-		ImGui::Begin("Settings");
-		ImGui::DragFloat("Tiling factor", &m_TilingFactor, 0.1f, 0.1f, 10.0f);
-		ImGui::DragFloat("Rotation", &m_Rotation, 0.1f);
-		ImGui::ColorEdit4("First Color", glm::value_ptr(m_FirstColor));
-		ImGui::ColorEdit4("Second Color", glm::value_ptr(m_SecondColor));
-
-		ImGui::Separator();
-
-		ImGui::DragFloat("Tiles depth", &m_TilesDepth, 0.1f, -10.0f, 10.0f);
-
-		ImGui::End();
-
 
 		if (m_ShowWindowRenderStats)
 		{
 			auto stats = Xaloc::Renderer2D::GetStats();
 			
 			ImGui::Begin("Render Stats", &m_ShowWindowRenderStats);
-			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-			ImGui::Text("Quads: %d", stats.QuadCount);
-			ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-			ImGui::End();
+			{
+				ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+				ImGui::Text("Quads: %d", stats.QuadCount);
+				ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+				ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+				ImGui::End();
+			}
 		}
 
+		// TODO Play / Pause
 
+#if TODO_RUNTIME
+		ImGui::Begin("Runtime");
+		
+		if (m_OnRuntime)
+		{
+			if (ImGui::Button("Stop"))
+			{
+				Xaloc::Application::Get().PopLayer(m_RuntimeLayer);
+				//delete m_RuntimeLayer;
+				m_OnRuntime = false;
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Play"))
+			{
+				if (m_RuntimeLayer != nullptr)
+				{
+					delete m_RuntimeLayer;
+					m_RuntimeLayer = nullptr;
+				}
+
+				m_RuntimeLayer = new RuntimeLayer(m_Scene);
+				Xaloc::Application::Get().PushLayer(m_RuntimeLayer);
+				m_OnRuntime = true;
+			}
+		}
+
+		ImGui::End();
+#endif
 
 
 		// ============================================= HIERARCHY ============================================= //
 
 		m_SceneHierarchyPanel->OnImGuiRender();
-		
 
+		m_ContentBrowserPanel->OnImGuiRender();
 		
-		// ============================================= VIEWPORT ============================================= //
+		
+		// ============================================= VIEWPORTS ============================================= //
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Scene");
+		m_GamePreview->OnImGuiDraw(m_PreviewRenderPass->GetSpecification().TargetFramebuffer);
 
-		m_ViewportFocused = ImGui::IsWindowFocused();
-		m_ViewportHovered = ImGui::IsWindowHovered();
-		
-		auto viewportOffset = ImGui::GetCursorPos();
-		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-		
-		if (m_ViewportSize != *((glm::vec2*) & viewportSize))
+
+		Ref<Framebuffer>& roomViewFramebuffer = m_EditorRenderPass->GetSpecification().TargetFramebuffer;
+		Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
+
+		if (m_SceneViewport->OnImGuiDraw(roomViewFramebuffer, m_EditorCamera, selectedEntity))
 		{
-			m_RenderPass->GetSpecification().TargetFramebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-			//m_Framebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-			m_ViewportSize = { viewportSize.x, viewportSize.y };
+			uint32_t width = (uint32_t)m_SceneViewport->GetSize().x;
+			uint32_t height = (uint32_t)m_SceneViewport->GetSize().y;
+			m_EditorCamera->SetViewportSize(width, height);
 
-			// TODO OnWindow resize, call m_CameraController.OnResize again 
-			m_CameraController.OnResize(viewportSize.x, viewportSize.y);
+			m_CheckerboardShader->Bind();
+			m_CheckerboardShader->SetFloat4("u_ScreenSize", { width, height, 0.0f, 0.0f });
 		}
 
-		auto windowSize = ImGui::GetWindowSize();
-		ImVec2 minBound = ImGui::GetWindowPos();
-		minBound.x += viewportOffset.x;
-		minBound.y += viewportOffset.y;
-
-		ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
-
-		m_ViewportBounds[0] = { minBound.x, minBound.y };
-		m_ViewportBounds[1] = { maxBound.x, maxBound.y };
-
-		// TODO m_AllowViewportCameraEvents = ImGui::IsMouseHoveringRect(minBound, maxBound);
-
 		
-		uint32_t texID = m_RenderPass->GetSpecification().TargetFramebuffer->GetColorAttachmentRendererID();
-		//uint32_t texID = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)texID, viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-		ImGui::End();
-		ImGui::PopStyleVar();
-
-
-		ImGui::Begin("Viewport Info");
-		ImGui::Text("Min bound: [%f, %f]", m_ViewportBounds[0].x, m_ViewportBounds[0].y);
-		ImGui::Text("Max bound: [%f, %f]", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
-		ImGui::Separator();
-		ImGui::Text("Window size: [%f, %f]", viewportSize.x, viewportSize.y);
-		ImGui::End();
-		
-
-		// ============================================= GUIZMO ============================================= //
-
-		if (m_SelectionContext.size())
-		{
-			// TODO
-
-			/*
-			auto& selection = m_SelectionContext[0];
-
-			float rw = (float)ImGui::GetWindowWidth();
-			float rh = (float)ImGui::GetWindowHeight();
-			ImGuizmo::SetOrthographic(true);
-			ImGuizmo::SetDrawlist();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
-
-			// TODO use camera controller
-			auto& camera = m_CameraController.GetCamera();
-			bool snap = false; // TODO Input::IsKeyPressed(HZ_KEY_LEFT_CONTROL);
-
-			auto& entityTransform = selection.Transform();
-			
-			// TODOfloat snapValue[3] = { m_SnapValue, m_SnapValue, m_SnapValue };
-			float snapValue[3] = { 0.1, 0.1, 0.1 };
-			
-			//if (m_SelectionMode == SelectionMode::Entity)
-			{
-				ImGuizmo::Manipulate(glm::value_ptr(camera.GetViewMatrix()),
-					glm::value_ptr(camera.GetProjectionMatrix()),
-					(ImGuizmo::OPERATION)m_GizmoType,
-					ImGuizmo::LOCAL,
-					glm::value_ptr(entityTransform),
-					nullptr,
-					snap ? snapValue : nullptr);
-			}
-			*/
-		}
-
-	
-
 		ImGui::End();
 
 	}
 
-	void EditorLayer::OnEvent(Xaloc::Event& e)
+	void EditorLayer::OnEvent(Event& e)
 	{
-		// TODO remove this
-		m_CameraController.OnEvent(e);
-
 		m_Scene->OnEvent(e);
+
+		if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
+		{
+			m_EditorCamera->OnEvent(e);
+		}
 		
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<MouseButtonPressedEvent>(XA_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
+		dispatcher.Dispatch<WindowResizeEvent>(XA_BIND_EVENT_FN(EditorLayer::OnWindowResized));
 	}
 
+
+
+	
+
+	bool EditorLayer::OnWindowResized(WindowResizeEvent& e)
+	{
+		if (e.GetWidth() <= 0.0f || e.GetHeight() <= 0.0f) // Minimized
+			return false;
+
+		// TODO when dragging the scene viewport to dock it somewhere else, the camera rotates in a weird way
+
+		uint32_t width = e.GetWidth();
+		uint32_t height = e.GetHeight();
+		m_EditorCamera->SetViewportSize(width, height);
+		
+		return false;
+	}
 
 
 	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
@@ -470,10 +355,22 @@ namespace Xaloc {
 		auto [mx, my] = Input::GetMousePosition();
 		if (e.GetMouseButton() == XA_MOUSE_BUTTON_LEFT) // TODO && !Input::IsKeyPressed(KeyCode::LeftAlt) && !ImGuizmo::IsOver())
 		{
-			auto [mouseX, mouseY] = GetMouseViewportSpace();
+			auto [mouseX, mouseY] = m_SceneViewport->GetMouseViewportSpace();
+			if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
+			{
+				auto [mx, my] = m_SceneViewport->GetMouseViewportSpace();
+				mouseX = mx;
+				mouseY = my;
+			}
+
+			// Editor Camera
+			const glm::mat4& cameraProjection = m_EditorCamera->GetProjection();
+			glm::mat4 cameraView = m_EditorCamera->GetViewMatrix();
+			
+			// TODO select entity
+			/*
 			if (mouseX > -1.0f && mouseX < 1.0f && mouseY > -1.0f && mouseY < 1.0f) // If mouse is on viewport range
-			{				
-				m_SelectionContext.clear();
+			{
 				auto spriteEntities = m_Scene->FindEntitiesWith<SpriteRendererComponent>();
 				for (auto e : spriteEntities)
 				{
@@ -481,18 +378,22 @@ namespace Xaloc {
 					auto tex = entity.GetComponent<SpriteRendererComponent>().SubTexture;
 					if (!tex)
 						continue;
-
-
+					
 					// TODO use pixels per unit and SubTexture width and size
-					
+					TransformComponent trans = entity.GetComponent<TransformComponent>();
 					AABB boundingBox;
-					glm::vec4 sprMin = entity.Transform() * glm::vec4{ -0.5f, -0.5f, 0.0f, 1.0f };        // Get sprite quad min vertex
-					glm::vec4 sprMax = entity.Transform() * glm::vec4{ 0.5f, 0.5f, 0.0f, 1.0f };          // Get sprite quad max vertex
-					boundingBox.Min = sprMin * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
-					boundingBox.Max = sprMax * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
+					glm::vec4 sprMin = trans.GetTransform() * glm::vec4{ -0.5f * tex->GetWidth(), -0.5f * tex->GetHeight(), 0.0f, 1.0f };        // Get sprite quad min vertex
+					glm::vec4 sprMax = trans.GetTransform() * glm::vec4{ 0.5f * tex->GetWidth(), 0.5f * tex->GetHeight(), 0.0f, 1.0f };          // Get sprite quad max vertex
 
-					XA_CORE_TRACE("AABB min ({0} , {1});  max ({2}, {3})", boundingBox.Min.x, boundingBox.Min.y, boundingBox.Max.x, boundingBox.Max.y);
-					
+					//                   Projection matrix               * View matrix
+					glm::mat4 viewProj = m_EditorCamera.GetViewProjection();//m_EditorCamera->GetCamera()->GetProjection() * glm::inverse(m_EditorCamera->GetTransform().GetTransform());
+
+					boundingBox.Min = sprMin * viewProj;  // Translate it to screen space
+					boundingBox.Max = sprMax * viewProj;  // Translate it to screen space
+
+					//boundingBox.Min = sprMin * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
+					//boundingBox.Max = sprMax * m_CameraController.GetCamera().GetViewProjectionMatrix();  // Translate it to screen space
+										
 					bool intersects = mouseX > boundingBox.Min.x && mouseX < boundingBox.Max.x
 									&& mouseY > boundingBox.Min.y && mouseY < boundingBox.Max.y;
 
@@ -500,38 +401,55 @@ namespace Xaloc {
 					
 					if (intersects)
 					{
-						XA_CORE_WARN("INTERSECTION!");
-						m_SelectionContext.push_back({ entity });
+						// TODO select using the scene hierarchy panel
+						m_SceneHierarchyPanel->SetSelected(entity);
 					}
-
 				}
 				// TODO std::sort(m_SelectionContext.begin(), m_SelectionContext.end(), [](auto& a, auto& b) { return a.Distance < b.Distance; });
-				if (m_SelectionContext.size())
-					OnEntitySelected(m_SelectionContext[0]);
 			}
+			*/
 		}
 		
 		return false;
 	}
 
 
-	void EditorLayer::OnEntitySelected(const SelectedEntity& selection)
+
+
+	void EditorLayer::ResetDockSpace()
 	{
-		XA_CORE_TRACE("Entity Selected: {0}", (uint32_t)selection.Entity);
-		m_SceneHierarchyPanel->SetSelected(selection.Entity);
-	}
+		m_DockspaceReady = true;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-	
+		ImGui::DockBuilderRemoveNode(m_DockspaceId); // Clear out existing layout
+		ImGui::DockBuilderAddNode(m_DockspaceId, ImGuiDockNodeFlags_DockSpace); // Add empty node
+		ImGui::DockBuilderSetNodeSize(m_DockspaceId, viewport->Size);
 
-	std::pair<float, float> EditorLayer::GetMouseViewportSpace()
-	{
-		auto [mx, my] = ImGui::GetMousePos(); // Input::GetMousePosition();
-		mx -= m_ViewportBounds[0].x;
-		my -= m_ViewportBounds[0].y;
-		auto viewportWidth = m_ViewportBounds[1].x - m_ViewportBounds[0].x;
-		auto viewportHeight = m_ViewportBounds[1].y - m_ViewportBounds[0].y;
+		ImGuiID dock_main_id = m_DockspaceId;
 
-		return { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
+		ImGuiID dock_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, NULL, &dock_main_id);
+		ImGuiID dock_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, NULL, &dock_main_id);
+		ImGuiID dock_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.20f, NULL, &dock_main_id);
+		//ImGuiID dock_top = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up, 0.20f, NULL, &dock_main_id);
+
+		ImGuiID dock_left_top;
+		ImGuiID dock_left_bot = ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Down, 0.50f, NULL, &dock_left_top);
+
+
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::GAME_PREVIEW, dock_main_id);
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::SCENE, dock_main_id);
+
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::PROJECT, dock_right);
+
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::SCENE_HIERARCHY, dock_left_top);
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::PROPERTIES, dock_left_bot);
+
+		ImGui::DockBuilderDockWindow(EditorNames::Windows::CONSOLE, dock_bottom);
+		ImGui::DockBuilderDockWindow("Profiler", dock_bottom);
+		ImGui::DockBuilderDockWindow("Graphics", dock_bottom);
+
+
+		ImGui::DockBuilderFinish(m_DockspaceId);
 	}
 
 

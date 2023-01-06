@@ -2,7 +2,21 @@
 
 #include "Xaloc.h"
 
-#include "Xaloc/Editor/SceneHierarchyPanel.h"
+#include "EditorIcons.h"
+#include "EditorMenuBar.h"
+#include "Viewports/EditorGamePreview.h"
+#include "Viewports/EditorSceneView.h"
+
+#include "Xaloc/Renderer/Cameras/EditorCamera.h"
+#include "Xaloc/Renderer/Cameras/EditorCameraPerspective.h"
+#include "Xaloc/Renderer/Cameras/EditorCameraOrthographic.h"
+
+#include "Panels/SceneHierarchyPanel.h"
+#include "Panels/ContentBrowser/ContentBrowserPanel.h"
+
+#include "Layers/RuntimeLayer.h"
+
+#include "imgui/imgui.h"
 
 namespace Xaloc {
 
@@ -20,54 +34,59 @@ namespace Xaloc {
 		void OnEvent(Event& e) override;
 		
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+		bool OnWindowResized(WindowResizeEvent& e);
+
+	public:
+		void OpenScene(const Ref<Scene>& scene);
+
+		const Ref<EditorIcons>& GetIcons() const { return m_Icons; }
+
 
 	private:
-
-		struct SelectedEntity
-		{
-			Entity Entity;
-			// TODO cast a ray and get distance float Distance;
-		};
-		void OnEntitySelected(const SelectedEntity& selection);
-		
-		std::pair<float, float> GetMouseViewportSpace();
+		void ResetDockSpace();
 
 		
 	private:
+		Ref<EditorIcons> m_Icons;
+
+		Ref<EditorMenuBar> m_MenuBar;
+		friend class EditorMenuBar;
+
+		RuntimeLayer* m_RuntimeLayer = nullptr;
+		bool m_OnRuntime = false;
 
 		Ref<Scene> m_Scene;
+
+		Entity m_MainCamera;
+		
+		// TODO: main camera
+		//InstanceId m_MainCamera; // TODO: change to "camera index" in a camera stack
+
+		Ref<EditorCamera> m_EditorCamera; // The currently active editor camera
+		Ref<EditorCameraPerspective> m_EditorCameraPerspective;
+		Ref<EditorCameraOrthographic> m_EditorCameraOrthographic;
+
+
+		Ref<RenderPass> m_EditorRenderPass;
+		Ref<RenderPass> m_PreviewRenderPass;
+
+		Ref<EditorGamePreview> m_GamePreview;
+		Ref<EditorSceneView> m_SceneViewport;
+
+		Ref<Shader> m_CheckerboardShader;
+		
+
+	private: // =============== Editor Windows ===============
+
+		bool m_PanelsInitialized = false;
 		Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		Scope<ContentBrowserPanel> m_ContentBrowserPanel;
 
-		std::vector<SelectedEntity> m_SelectionContext;
+		ImGuiID m_DockspaceId;
+		bool m_DockspaceReady = false;
 
-		OrthographicCameraController m_CameraController;
-
-		float m_TilingFactor;
-		float m_Rotation;
-		glm::vec4 m_FirstColor;
-		glm::vec4 m_SecondColor;
-		Ref<Texture2D> m_Texture;
-
-		//Ref<Framebuffer> m_Framebuffer;
-		Ref<RenderPass> m_RenderPass;
-		Ref<RenderPass> m_GuizmoRenderPass;
-		
-		bool m_ViewportFocused = false;
-		bool m_ViewportHovered = false;
-		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
-		glm::vec2 m_ViewportBounds[2];
-		
-
-
-		Ref<SubTexture2D> m_TileWater;
-		std::unordered_map<char, Ref<SubTexture2D>> s_TextureMap;
-		float m_TilesDepth = -0.1f;
-
-
-	// Editor Windows
-	private:
 		bool m_ShowWindowConsole = true; // TODO
-		bool m_ShowWindowRenderStats = true;
+		bool m_ShowWindowRenderStats = false;
 	};
 
 }

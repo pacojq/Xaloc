@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include "Xaloc/Debugging/DebugBreak.h"
 
 
 namespace Xaloc {
@@ -75,34 +74,8 @@ namespace Xaloc {
 #endif
 
 
-
-
-// DLL support
-#ifdef XA_PLATFORM_WINDOWS
-	#if XA_DYNAMIC_LINK
-		#ifdef XA_BUILD_DLL
-			#define XALOC_API __declspec(dllexport)
-		#else
-			#define XALOC_API __declspec(dllimport)
-		#endif
-	#else
-		#define XALOC_API
-	#endif
-#else
-	#error Xaloc only supports Windows!
-#endif // End of DLL support
-
-#ifdef XA_DEBUG
-	#define XA_ENABLE_ASSERTS
-#endif
-
-#ifdef XA_ENABLE_ASSERTS
-	#define XA_ASSERT(x, ...) { if(!(x)) { XA_ERROR("Assertion Failed: {0}", __VA_ARGS__); XA_DEBUGBREAK(); } }
-	#define XA_CORE_ASSERT(x, ...) { if(!(x)) { XA_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); XA_DEBUGBREAK(); } }
-#else
-	#define XA_ASSERT(x, ...)
-	#define XA_CORE_ASSERT(x, ...)
-#endif
+#define XA_EXPAND_MACRO(x) x
+#define XA_STRINGIFY_MACRO(x) #x
 
 #define BIT(x) (1 << x)
 
@@ -131,4 +104,14 @@ namespace Xaloc {
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 
+	template<typename T1, typename T2>
+	constexpr Ref<T2> CastRef(const Ref<T1>& ref)
+	{
+		return std::static_pointer_cast<T2>(ref);
+	}
+
 }
+
+
+#include "Xaloc/Core/Log.h"
+#include "Xaloc/Debugging/Assert.h"

@@ -1,7 +1,12 @@
 #include "xapch.h"
 #include "Renderer2D.h"
 
-#include "VertexArray.h"
+#include "Camera.h"
+
+#include "Pipeline.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+
 #include "Shader.h"
 #include "RenderCommand.h"
 
@@ -18,6 +23,12 @@ namespace Xaloc {
 		float TilingFactor;
 	};
 
+	struct BlitVertex
+	{
+		glm::vec3 Position;
+		glm::vec2 TexCoord;
+	};
+
 	struct Renderer2DData
 	{
 		static const uint32_t MaxQuads = 10000; // Max per draw call
@@ -25,8 +36,10 @@ namespace Xaloc {
 		static const uint32_t MaxIndices = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 32; // TODO render capabilities API
 
-		Ref<VertexArray> QuadVertexArray;
+		Ref<Pipeline> QuadPipeline;
+		Ref<IndexBuffer> QuadIndexBuffer;
 		Ref<VertexBuffer> QuadVertexBuffer;
+		
 		Ref<Shader> TextureShader;
 		Ref<Texture2D> WhiteTexture;
 
@@ -39,9 +52,17 @@ namespace Xaloc {
 
 		glm::vec4 QuadVertexPositions[4];
 
+
+		Ref<Pipeline> BlitPipeline;
+		Ref<IndexBuffer> BlitIndexBuffer;
+		Ref<VertexBuffer> BlitVertexBuffer;
+
+		BlitVertex* BlitVertexBufferBase;
+
 		Renderer2D::Statistics Stats;
 	};
 
+	static bool s_Init = false;
 	static Renderer2DData s_Data;
 
 
@@ -49,68 +70,104 @@ namespace Xaloc {
 
 	void Renderer2D::Init()
 	{
-		s_Data.QuadVertexArray = VertexArray::Create();
-
-		s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
-		s_Data.QuadVertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" },
-			{ ShaderDataType::Float2, "a_TexCoord" },
-			{ ShaderDataType::Float,  "a_TexIndex" },
-			{ ShaderDataType::Float,  "a_TilingFactor" }
-			});
-		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
-
-		// Allocate vertex buffer
-		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
-
-
-
-		uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
-
-		uint32_t offset = 0;
-		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+		XA_CORE_ASSERT(!s_Init, "Renderer2D is already initialized!");
+		s_Init = true;
+		
+		// CREATE QUADS PIPELINE
 		{
-			quadIndices[i + 0] = offset + 0;
-			quadIndices[i + 1] = offset + 1;
-			quadIndices[i + 2] = offset + 2;
+			PipelineSpecification pipelineSpecification;
+			pipelineSpecification.Layout = {
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float4, "a_Color" },
+				{ ShaderDataType::Float2, "a_TexCoord" },
+				{ ShaderDataType::Float,  "a_TexIndex" },
+				{ ShaderDataType::Float,  "a_TilingFactor" }
+			};
+			s_Data.QuadPipeline = Pipeline::Create(pipelineSpecification);
 
-			quadIndices[i + 3] = offset + 2;
-			quadIndices[i + 4] = offset + 3;
-			quadIndices[i + 5] = offset + 0;
+			s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
+			s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 
-			offset += 4;
+
+			// Create index buffer
+			uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
+
+			uint32_t offset = 0;
+			for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+			{
+				quadIndices[i + 0] = offset + 0;
+				quadIndices[i + 1] = offset + 1;
+				quadIndices[i + 2] = offset + 2;
+
+				quadIndices[i + 3] = offset + 2;
+				quadIndices[i + 4] = offset + 3;
+				quadIndices[i + 5] = offset + 0;
+
+				offset += 4;
+			}
+
+			s_Data.QuadIndexBuffer = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
+
+			delete[] quadIndices;
+
+
+			s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+			s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
+			s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
+			s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 		}
 
-		Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
-		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
+		// CREATE BLIT PIPELINE
+		{
+			PipelineSpecification pipelineSpecification;
+			pipelineSpecification.Layout = {
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float2, "a_TexCoord" }
+			};
+			s_Data.BlitPipeline = Pipeline::Create(pipelineSpecification);
 
-		delete[] quadIndices;
-
-
-
-
-		s_Data.WhiteTexture = Texture2D::Create(1, 1);
-		uint32_t whiteTextureData = 0xffffffff;
-		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-
-		int32_t samplers[s_Data.MaxTextureSlots];
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
-			samplers[i] = i;
-
-		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+			s_Data.BlitVertexBuffer = VertexBuffer::Create(4 * sizeof(QuadVertex));
+			s_Data.BlitVertexBufferBase = new BlitVertex[4];
 
 
-		// Slot 0 is for white texture
-		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+			s_Data.BlitVertexBufferBase[0].Position = { -1.0f, -1.0f, 0.0f };
+			s_Data.BlitVertexBufferBase[0].TexCoord = { 0.0f, 1.0f };
+
+			s_Data.BlitVertexBufferBase[1].Position = { 1.0f, -1.0f, 0.0f };
+			s_Data.BlitVertexBufferBase[1].TexCoord = { 1.0f, 1.0f };
+
+			s_Data.BlitVertexBufferBase[2].Position = { 1.0f, 1.0f, 0.0f };
+			s_Data.BlitVertexBufferBase[2].TexCoord = { 1.0f, 0.0f };
+
+			s_Data.BlitVertexBufferBase[3].Position = { -1.0f, 1.0f, 0.0f };
+			s_Data.BlitVertexBufferBase[3].TexCoord = { 0.0f, 0.0f };
 
 
-		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+			// Create index buffer
+			uint32_t* quadIndices = new uint32_t[6]{ 0, 1, 2, 2, 3, 0 };
+			s_Data.BlitIndexBuffer = IndexBuffer::Create(quadIndices, 6);
+			delete[] quadIndices;
+		}
+
+
+		// INITIALIZE TEXTURE DATA
+		{
+			s_Data.WhiteTexture = Texture2D::Create(1, 1);
+			uint32_t whiteTextureData = 0xffffffff;
+			s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+
+			int32_t samplers[s_Data.MaxTextureSlots];
+			for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
+				samplers[i] = i;
+
+			s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+			s_Data.TextureShader->Bind();
+			s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+
+			// Slot 0 is for white texture
+			s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+
+		}
 	}
 
 
@@ -122,45 +179,73 @@ namespace Xaloc {
 
 
 
-	void Renderer2D::BeginScene(const OrthographicCamera& camera)
+
+	void Renderer2D::BeginScene(glm::mat4 viewProj)
 	{
 		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProj);
 
-		// Reset pointer to the first element of the Vertex Buffer
-		s_Data.QuadIndexCount = 0;
-		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
-
-		s_Data.TextureSlotIndex = 1; // slot 0 = white texture
+		StartBatch();
 	}
 
 	void Renderer2D::EndScene()
 	{
-		// Upload data to GPU
-		uint32_t dataSize = (uint32_t)( (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase ); // Count how many elements we have by looking at the difference between pointers
-		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
-
 		// Flush everything
 		Flush();
 	}
 
 
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	{
+		//                   Projection matrix      * View matrix
+		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
+		BeginScene(viewProj);
+	}
+
+	void Renderer2D::BeginScene(const EditorCamera& camera)
+	{
+		BeginScene(camera.GetViewProjection());
+	}
+
+
+
+	void Renderer2D::Blit(const Ref<Shader>& shader)
+	{
+		shader->Bind();
+
+		s_Data.BlitVertexBuffer->SetData(s_Data.BlitVertexBufferBase, sizeof(BlitVertex) * 4);
+
+		s_Data.BlitPipeline->Bind();
+		// TODO bind vertex buffer?
+		s_Data.BlitIndexBuffer->Bind();
+
+		RenderCommand::DrawBlit();
+	}
+
+
+
+	
 
 	void Renderer2D::Flush()
 	{
 		if (s_Data.QuadIndexCount == 0)
 			return; // Nothing to draw
 
+		// Upload data to GPU
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase); // Count how many elements we have by looking at the difference between pointers
+		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+		
 		// Bind textures
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 		{
 			s_Data.TextureSlots[i]->Bind(i);
 		}
 
-
 		// Draw everything
-		//s_Data.QuadVertexArray->Bind();
-		RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
+		s_Data.QuadPipeline->Bind();
+		// TODO bind vertex buffer?
+		s_Data.QuadIndexBuffer->Bind();
+		RenderCommand::DrawIndexed(s_Data.QuadIndexCount);
 
 
 		s_Data.Stats.DrawCalls++;
@@ -185,7 +270,19 @@ namespace Xaloc {
 		return textureIndex;
 	}
 
-	void Renderer2D::FlushAndReset()
+
+
+
+	void Renderer2D::StartBatch()
+	{
+		// Reset pointer to the first element of the Vertex Buffer
+		s_Data.QuadIndexCount = 0;
+		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1; // slot 0 = white texture
+	}
+	
+	void Renderer2D::NextBatch()
 	{
 		EndScene();
 
@@ -194,6 +291,9 @@ namespace Xaloc {
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
 		s_Data.TextureSlotIndex = 1; // slot 0 = white texture
+
+		Flush();
+		StartBatch();
 	}
 
 
@@ -217,7 +317,7 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -253,13 +353,13 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = FindTextureIndex(texture);
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 			
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
@@ -313,13 +413,13 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = FindTextureIndex(texture);
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = subTexture->GetTexture();
@@ -363,7 +463,7 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
@@ -397,13 +497,13 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = FindTextureIndex(texture);
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 			
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
@@ -445,13 +545,13 @@ namespace Xaloc {
 
 		// Check if we need to flush
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = FindTextureIndex(texture);
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 			
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;

@@ -1,13 +1,19 @@
 #include "xapch.h"
 #include "ScriptAPI.h"
 
+#include "Xaloc/Scene/Scene.h"
 #include "Xaloc/Scene/Entity.h"
+#include "Xaloc/Scene/Components.h"
+
 #include "Xaloc/Core/Input/Input.h"
+
+#include <glm/gtc/type_ptr.hpp>
 
 #include <mono/jit/jit.h>
 
 namespace Xaloc {
-	extern std::unordered_map<uint32_t, Scene*> s_ActiveScenes;
+
+	// Maps used to store entity components
 	extern std::unordered_map<MonoType*, std::function<bool(Entity&)>> s_HasComponentFuncs;
 	extern std::unordered_map<MonoType*, std::function<void(Entity&)>> s_CreateComponentFuncs;
 }
@@ -17,10 +23,7 @@ namespace Xaloc {
 
 namespace Xaloc { namespace Scripting {
 
-
-	// = = = = = = = = = = = = = INPUT = = = = = = = = = = = = = //
-
-	std::string FromMonoString(MonoString* str)
+	static std::string FromMonoString(MonoString* str)
 	{
 		mono_unichar2* chl = mono_string_chars(str);
 		std::string out("");
@@ -28,6 +31,20 @@ namespace Xaloc { namespace Scripting {
 			out += chl[i];
 		return out;
 	}
+
+	static Entity FindEntity(uint64_t id)
+	{
+		auto scene = ScriptEngine::GetCurrentSceneContext();
+		XA_CORE_ASSERT(scene, "No active scene!");
+		auto entityMap = scene->GetEntityMap();
+		XA_CORE_ASSERT(entityMap.find(id) != entityMap.end(), "Invalid entity ID or entity doesn't exist in scene!");
+
+		return entityMap[id];
+	}
+	
+	
+
+	// ============================ LOGGING ============================ //
 	
 	void Xaloc_Log_Fatal(MonoString* msg) { XA_FATAL(FromMonoString(msg)); }
 	void Xaloc_Log_Error(MonoString* msg) { XA_ERROR(FromMonoString(msg)); }
@@ -38,56 +55,53 @@ namespace Xaloc { namespace Scripting {
 
 
 	
+
+	// ============================= INPUT ============================= //
 	
-	// = = = = = = = = = = = = = INPUT = = = = = = = = = = = = = //
-	
-	bool Xaloc_Input_IsKeyPressed(KeyCode key)
+	bool Xaloc_Input_IsKeyPressed(KeyCode key) { return Input::IsKeyPressed(key); }
+
+
+
+
+	// ============================ ENTITIES ============================ //
+
+	void Xaloc_Entity_GetTransform(uint64_t entityID, glm::mat4* outTransform)
 	{
-		return Input::IsKeyPressed(key);
-	}
-
-
-
-
-	// = = = = = = = = = = = = = ENTITY = = = = = = = = = = = = = //
-
-	void Xaloc_Entity_GetTransform(uint32_t sceneID, uint32_t entityID, glm::mat4* outTransform)
-	{
-		XA_CORE_ASSERT(s_ActiveScenes.find(sceneID) != s_ActiveScenes.end(), "Invalid Scene ID!");
-
-		Scene* scene = s_ActiveScenes[sceneID];
-		Entity entity((entt::entity)entityID, scene);
+		Entity entity = FindEntity(entityID);
 		auto& transformComponent = entity.GetComponent<TransformComponent>();
-		memcpy(outTransform, glm::value_ptr(transformComponent.Transform), sizeof(glm::mat4));
+		memcpy(outTransform, glm::value_ptr(transformComponent.GetTransform()), sizeof(glm::mat4));
 	}
 
-	void Xaloc_Entity_SetTransform(uint32_t sceneID, uint32_t entityID, glm::mat4* inTransform)
+	void Xaloc_Entity_SetTransform(uint64_t entityID, glm::mat4* inTransform)
 	{
-		XA_CORE_ASSERT(s_ActiveScenes.find(sceneID) != s_ActiveScenes.end(), "Invalid Scene ID!");
+		Entity entity = FindEntity(entityID);
 
-		Scene* scene = s_ActiveScenes[sceneID];
-		Entity entity((entt::entity)entityID, scene);
 		auto& transformComponent = entity.GetComponent<TransformComponent>();
-		memcpy(glm::value_ptr(transformComponent.Transform), inTransform, sizeof(glm::mat4));
+
+		glm::vec3 scale, translation, skew;
+		glm::vec4 perspective;
+		glm::quat orientation;
+		glm::decompose(*inTransform, scale, orientation, translation, skew, perspective);
+
+		if (glm::abs(orientation.y < 0.001f))
+			orientation.y = 0.0f;
+
+		transformComponent.Translation = translation;
+		transformComponent.Rotation = glm::degrees(glm::eulerAngles(orientation));
+		transformComponent.Scale = scale;
 	}
 
-	void Xaloc_Entity_CreateComponent(uint32_t sceneID, uint32_t entityID, void* type)
+	void Xaloc_Entity_CreateComponent(uint64_t entityID, void* type)
 	{
-		XA_CORE_ASSERT(s_ActiveScenes.find(sceneID) != s_ActiveScenes.end(), "Invalid Scene ID!");
+		Entity entity = FindEntity(entityID);
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
-
-		Scene* scene = s_ActiveScenes[sceneID];
-		Entity entity((entt::entity)entityID, scene);
 		s_CreateComponentFuncs[monoType](entity);
 	}
 
-	bool Xaloc_Entity_HasComponent(uint32_t sceneID, uint32_t entityID, void* type)
+	bool Xaloc_Entity_HasComponent(uint64_t entityID, void* type)
 	{
-		XA_CORE_ASSERT(s_ActiveScenes.find(sceneID) != s_ActiveScenes.end(), "Invalid Scene ID!");
+		Entity entity = FindEntity(entityID);
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
-
-		Scene* scene = s_ActiveScenes[sceneID];
-		Entity entity((entt::entity)entityID, scene);
 		bool result = s_HasComponentFuncs[monoType](entity);
 		return result;
 	}
@@ -96,14 +110,11 @@ namespace Xaloc { namespace Scripting {
 
 
 
-	// = = = = = = = = = = = = = TAG COMPONENT = = = = = = = = = = = = = //
+	// =========================== COMPONENTS =========================== //
 
-	MonoString* Xaloc_TagComponent_GetTag(uint32_t sceneID, uint32_t entityID)
+	MonoString* Xaloc_TagComponent_GetTag(uint64_t entityID)
 	{
-		XA_CORE_ASSERT(s_ActiveScenes.find(sceneID) != s_ActiveScenes.end(), "Invalid Scene ID!");
-
-		Scene* scene = s_ActiveScenes[sceneID];
-		Entity entity((entt::entity)entityID, scene);
+		Entity entity = FindEntity(entityID);
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 
 		std::string tag = tagComponent.Tag;
@@ -111,12 +122,9 @@ namespace Xaloc { namespace Scripting {
 		return mono_string_new(mono_domain_get(), tag.c_str());
 	}
 	
-	void Xaloc_TagComponent_SetTag(uint32_t sceneID, uint32_t entityID, MonoString* inTag)
+	void Xaloc_TagComponent_SetTag(uint64_t entityID, MonoString* inTag)
 	{
-		XA_CORE_ASSERT(s_ActiveScenes.find(sceneID) != s_ActiveScenes.end(), "Invalid Scene ID!");
-
-		Scene* scene = s_ActiveScenes[sceneID];
-		Entity entity((entt::entity)entityID, scene);
+		Entity entity = FindEntity(entityID);
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 
 		std::string tag = FromMonoString(inTag);

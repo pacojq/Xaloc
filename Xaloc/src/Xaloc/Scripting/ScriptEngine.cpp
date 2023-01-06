@@ -3,12 +3,10 @@
 
 #include "ScriptEngineRegistry.h"
 
-#include "Xaloc/Scripting/Engine/MonoUtils.h"
-#include "Xaloc/Scripting/Engine/Entity.h"
-
 #include <mono/jit/jit.h>
 #include <mono/metadata/debug-helpers.h>
 #include <mono/metadata/attrdefs.h>
+#include <mono/metadata/assembly.h>
 
 #include <iostream>
 
@@ -16,15 +14,102 @@
 
 namespace Xaloc {
 
+
+
+	static MonoMethod* GetMethod(MonoImage* image, const std::string& methodDesc)
+	{
+		MonoMethodDesc* desc = mono_method_desc_new(methodDesc.c_str(), NULL);
+		if (!desc)
+			std::cout << "mono_method_desc_new failed" << std::endl;
+
+		MonoMethod* method = mono_method_desc_search_in_image(desc, image);
+		if (!method)
+			std::cout << "mono_method_desc_search_in_image failed" << std::endl;
+
+		return method;
+	}
+
+	struct EntityBehaviourClass
+	{
+		std::string FullName;
+		std::string ClassName;
+		std::string NamespaceName;
+
+		MonoClass* Class;
+		MonoMethod* MethodOnCreate;
+		MonoMethod* MethodOnDestroy;
+		MonoMethod* MethodOnUpdate;
+
+		void InitClassMethods(MonoImage* image)
+		{
+			MethodOnCreate = GetMethod(image, FullName + ":OnCreate()");
+			MethodOnUpdate = GetMethod(image, FullName + ":OnUpdate(single)");
+		}
+	};
+
+	MonoObject* EntityInstance::GetInstance()
+	{
+		return mono_gchandle_get_target(Handle);
+	}
+
+
+
+
+
+
+
+
+
+
+	static FieldType GetXalocFieldType(MonoType* monoType)
+	{
+		int type = mono_type_get_type(monoType);
+		switch (type)
+		{
+		case MONO_TYPE_R4: return FieldType::Float;
+		case MONO_TYPE_I4: return FieldType::Int;
+		case MONO_TYPE_U4: return FieldType::UnsignedInt;
+		case MONO_TYPE_STRING: return FieldType::String;
+		case MONO_TYPE_VALUETYPE:
+		{
+			char* name = mono_type_get_name(monoType);
+			if (strcmp(name, "Xaloc.Vector2") == 0) return FieldType::Vec2;
+			if (strcmp(name, "Xaloc.Vector3") == 0) return FieldType::Vec3;
+			if (strcmp(name, "Xaloc.Vector4") == 0) return FieldType::Vec4;
+		}
+		}
+		return FieldType::None;
+	}
+
+	void PublicField::SetValue_Internal(void* value) const
+	{
+		mono_field_set_value(m_EntityInstance->GetInstance(), m_MonoClassField, value);
+	}
+
+	void PublicField::GetValue_Internal(void* outValue) const
+	{
+		mono_field_get_value(m_EntityInstance->GetInstance(), m_MonoClassField, outValue);
+	}
+
+
+
+
+
+	
+
+
+
+
+	
 	static bool s_Initialized = false;
 	
 	static MonoDomain* s_MonoDomain = nullptr;
 	static std::string s_AssemblyPath;
 
-	static ScriptModuleFieldMap s_PublicFields;
-
+	static Ref<Scene> s_SceneContext;
+	
 	static std::unordered_map<std::string, EntityBehaviourClass> s_BehaviourClassMap;
-	static std::unordered_map<uint32_t, EntityInstance> s_EntityInstanceMap;
+	static EntityInstanceMap s_EntityInstanceMap;
 
 
 	MonoAssembly* LoadAssemblyFromFile(const char* filepath)
@@ -122,6 +207,16 @@ namespace Xaloc {
 
 
 
+	static MonoObject* CallMethod(MonoObject* object, MonoMethod* method, void** params = nullptr)
+	{
+		MonoObject* pException = NULL;
+		MonoObject* result = mono_runtime_invoke(method, object, params, &pException);
+		return result;
+	}
+
+	
+
+
 	
 	static MonoAssembly* s_AppAssembly = nullptr;
 	static MonoAssembly* s_CoreAssembly = nullptr;
@@ -161,7 +256,7 @@ namespace Xaloc {
 
 		}
 
-		s_CoreAssembly = LoadAssembly("assets/scripts/XalocSharp.dll");
+		s_CoreAssembly = LoadAssembly("assets/game/scripts/XalocSharp.dll");
 		s_CoreAssemblyImage = GetAssemblyImage(s_CoreAssembly);
 
 		s_AppAssembly = LoadAssembly(s_AssemblyPath);
@@ -175,97 +270,211 @@ namespace Xaloc {
 	}
 
 
-	void ScriptEngine::OnCreateEntity(Entity entity)
+
+
+
+	bool ScriptEngine::ModuleExists(const std::string& moduleName)
 	{
-		EntityInstance& entityInstance = s_EntityInstanceMap[(uint32_t)entity.m_EntityHandle];
-		if (entityInstance.ScriptClass->MethodOnCreate)
-			MonoUtils::CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->MethodOnCreate);
-	}
-
-	void ScriptEngine::OnUpdateEntity(uint32_t entityID, Timestep ts)
-	{
-		if (!s_Initialized)
-			return;
-		
-		XA_CORE_ASSERT(s_EntityInstanceMap.find(entityID) != s_EntityInstanceMap.end(), "Could not find entity in instance map!");
-
-		auto& entity = s_EntityInstanceMap[entityID];
-
-		if (entity.ScriptClass->MethodOnUpdate)
+		std::string NamespaceName, ClassName;
+		if (moduleName.find('.') != std::string::npos)
 		{
-			void* args[] = { &ts };
-			MonoUtils::CallMethod(entity.GetInstance(), entity.ScriptClass->MethodOnUpdate, args);
-		}
-	}
-
-	void ScriptEngine::OnInitEntity(BehaviourComponent& behaviour, uint32_t entityID, uint32_t sceneID)
-	{
-		if (!s_Initialized)
-			return;
-
-		EntityBehaviourClass& behaviourClass = s_BehaviourClassMap[behaviour.ModuleName];
-		behaviourClass.FullName = behaviour.ModuleName;
-		if (behaviour.ModuleName.find('.') != std::string::npos)
-		{
-			behaviourClass.NamespaceName = behaviour.ModuleName.substr(0, behaviour.ModuleName.find_last_of('.'));
-			behaviourClass.ClassName = behaviour.ModuleName.substr(behaviour.ModuleName.find_last_of('.') + 1);
+			NamespaceName = moduleName.substr(0, moduleName.find_last_of('.'));
+			ClassName = moduleName.substr(moduleName.find_last_of('.') + 1);
 		}
 		else
 		{
-			behaviourClass.ClassName = behaviour.ModuleName;
+			ClassName = moduleName;
 		}
 
-		behaviourClass.Class = GetClass(s_AppAssemblyImage, behaviourClass);
-		behaviourClass.InitClassMethods(s_AppAssemblyImage);
+		MonoClass* monoClass = mono_class_from_name(s_AppAssemblyImage, NamespaceName.c_str(), ClassName.c_str());
+		return monoClass != nullptr;
+	}
 
-		EntityInstance& entityInstance = s_EntityInstanceMap[entityID];
-		entityInstance.ScriptClass = &behaviourClass;
-		entityInstance.Handle = Instantiate(behaviourClass);
+	
 
-		MonoProperty* entityIDPropery = mono_class_get_property_from_name(behaviourClass.Class, "EntityID");
-		mono_property_get_get_method(entityIDPropery);
-		MonoMethod* entityIDSetMethod = mono_property_get_set_method(entityIDPropery);
-		void* param[] = { &entityID };
-		MonoUtils::CallMethod(entityInstance.GetInstance(), entityIDSetMethod, param);
 
-		MonoProperty* sceneIDPropery = mono_class_get_property_from_name(behaviourClass.Class, "SceneID");
-		mono_property_get_get_method(sceneIDPropery);
-		MonoMethod* sceneIDSetMethod = mono_property_get_set_method(sceneIDPropery);
-		param[0] = { &sceneID };
-		MonoUtils::CallMethod(entityInstance.GetInstance(), sceneIDSetMethod, param);
+	void ScriptEngine::InitBehaviourEntity(Entity entity)
+	{
+		if (!s_Initialized)
+		{
+			XA_CORE_ERROR("Cannot init Behaviour when the ScriptEngine is not initialized!");
+			return;
+		}
 
-		if (behaviourClass.MethodOnCreate)
-			MonoUtils::CallMethod(entityInstance.GetInstance(), behaviourClass.MethodOnCreate);
+		Scene* scene = entity.m_Scene;
+		UUID id = entity.GetComponent<IdComponent>().ID;
+		auto& moduleName = entity.GetComponent<BehaviourComponent>().ModuleName;
+		if (moduleName.empty())
+			return;
 
-		// Retrieve public fields
+		XA_CORE_INFO("ScriptEngine::InitBehaviourEntity -> Id = {}", id);
+		
+		if (!ModuleExists(moduleName))
+		{
+			XA_CORE_ERROR("Entity references non-existent script module '{0}'", moduleName);
+			return;
+		}
+
+		EntityBehaviourClass& scriptClass = s_BehaviourClassMap[moduleName];
+		scriptClass.FullName = moduleName;
+		if (moduleName.find('.') != std::string::npos)
+		{
+			scriptClass.NamespaceName = moduleName.substr(0, moduleName.find_last_of('.'));
+			scriptClass.ClassName = moduleName.substr(moduleName.find_last_of('.') + 1);
+		}
+		else
+		{
+			scriptClass.ClassName = moduleName;
+		}
+
+		scriptClass.Class = GetClass(s_AppAssemblyImage, scriptClass);
+		scriptClass.InitClassMethods(s_AppAssemblyImage);
+
+		EntityInstanceFields& entityInstanceData = s_EntityInstanceMap[scene->GetID()][id];
+		EntityInstance& entityInstance = entityInstanceData.Instance;
+		entityInstance.ScriptClass = &scriptClass;
+		ScriptModuleFieldMap& moduleFieldMap = entityInstanceData.ModuleFieldMap;
+		auto& fieldMap = moduleFieldMap[moduleName];
+
+		// Save old fields
+		std::unordered_map<std::string, PublicField> oldFields;
+		oldFields.reserve(fieldMap.size());
+		for (auto& [fieldName, field] : fieldMap)
+			oldFields.emplace(fieldName, std::move(field));
+		fieldMap.clear();
+
+		// Retrieve public fields (TODO: cache these fields if the module is used more than once)
 		{
 			MonoClassField* iter;
 			void* ptr = 0;
-			while ((iter = mono_class_get_fields(behaviourClass.Class, &ptr)) != NULL)
+			while ((iter = mono_class_get_fields(scriptClass.Class, &ptr)) != NULL)
 			{
 				const char* name = mono_field_get_name(iter);
 				uint32_t flags = mono_field_get_flags(iter);
-				if (flags & MONO_FIELD_ATTR_PUBLIC == 0)
+				if ((flags & MONO_FIELD_ATTR_PUBLIC) == 0)
 					continue;
 
 				MonoType* fieldType = mono_field_get_type(iter);
-				FieldType xalocFieldType = GetXalocFieldType(fieldType);
+				FieldType hazelFieldType = GetXalocFieldType(fieldType);
 
 				// TODO: Attributes
-				MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(behaviourClass.Class, iter);
+				MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(scriptClass.Class, iter);
 
-				auto& publicField = s_PublicFields[behaviour.ModuleName].emplace_back(name, xalocFieldType);
-				publicField.m_EntityInstance = &entityInstance;
-				publicField.m_MonoClassField = iter;
-				// mono_field_set_value(entityInstance.Instance, iter, )
+				if (oldFields.find(name) != oldFields.end())
+				{
+					fieldMap.emplace(name, std::move(oldFields.at(name)));
+				}
+				else
+				{
+					PublicField field = { name, hazelFieldType };
+					field.m_EntityInstance = &entityInstance;
+					field.m_MonoClassField = iter;
+					fieldMap.emplace(name, std::move(field));
+				}
 			}
 		}
 	}
 
-	const Xaloc::ScriptModuleFieldMap& ScriptEngine::GetFieldMap()
+	void ScriptEngine::ShutdownBehaviourEntity(Entity entity, const std::string& moduleName)
 	{
-		return s_PublicFields;
+		UUID id = entity.GetComponent<IdComponent>().ID;
+		EntityInstanceFields& entityInstanceFields = GetEntityInstanceFields(entity.GetScene()->GetID(), id);
+		ScriptModuleFieldMap& moduleFieldMap = entityInstanceFields.ModuleFieldMap;
+		if (moduleFieldMap.find(moduleName) != moduleFieldMap.end())
+			moduleFieldMap.erase(moduleName);
 	}
+
+	void ScriptEngine::InstantiateEntityClass(Entity entity)
+	{
+		Scene* scene = entity.m_Scene;
+		UUID id = entity.GetComponent<IdComponent>().ID;
+		auto& moduleName = entity.GetComponent<BehaviourComponent>().ModuleName;
+
+		EntityInstanceFields& entityInstanceData = GetEntityInstanceFields(scene->GetID(), id);
+		EntityInstance& entityInstance = entityInstanceData.Instance;
+		XA_CORE_ASSERT(entityInstance.ScriptClass, "No behaviour found!");
+		entityInstance.Handle = Instantiate(*entityInstance.ScriptClass);
+
+		XA_CORE_TRACE("Entity Behaviour instanciated with handle {0}", entityInstance.Handle);
+		
+		MonoProperty* entityIDPropery = mono_class_get_property_from_name(entityInstance.ScriptClass->Class, "ID");
+		mono_property_get_get_method(entityIDPropery);
+		MonoMethod* entityIDSetMethod = mono_property_get_set_method(entityIDPropery);
+		void* param[] = { &id };
+		CallMethod(entityInstance.GetInstance(), entityIDSetMethod, param);
+
+		// TODO Set all public fields to appropriate values
+		//ScriptModuleFieldMap& moduleFieldMap = entityInstanceData.ModuleFieldMap;
+		//if (moduleFieldMap.find(moduleName) != moduleFieldMap.end())
+		//{
+		//	auto& publicFields = moduleFieldMap.at(moduleName);
+		//	for (auto& [name, field] : publicFields)
+		//		field.CopyStoredValueToRuntime();
+		//}
+
+		// Call OnCreate function (if exists)
+		OnCreateEntity(entity);
+	}
+
+
+
+	
+
+
+	void ScriptEngine::OnCreateEntity(Entity entity)
+	{
+		OnCreateEntity(entity.m_Scene->GetID(), entity.GetComponent<IdComponent>().ID);
+	}
+
+	void ScriptEngine::OnCreateEntity(UUID sceneID, UUID entityID)
+	{
+		if (!s_Initialized)
+			return;
+		
+		EntityInstance& entityInstance = GetEntityInstanceFields(sceneID, entityID).Instance;
+		if (entityInstance.ScriptClass->MethodOnCreate)
+		{
+			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->MethodOnCreate);
+		}
+	}
+
+	void ScriptEngine::OnUpdateEntity(UUID sceneID, UUID entityID, Timestep ts)
+	{
+		if (!s_Initialized)
+			return;
+		
+		EntityInstance& entityInstance = GetEntityInstanceFields(sceneID, entityID).Instance;
+		if (entityInstance.ScriptClass->MethodOnUpdate)
+		{
+			void* args[] = { &ts };
+			CallMethod(entityInstance.GetInstance(), entityInstance.ScriptClass->MethodOnUpdate, args);
+		}
+	}
+
+
 	
 	
+	EntityInstanceMap& ScriptEngine::GetEntityInstanceMap()
+	{
+		return s_EntityInstanceMap;
+	}
+
+	EntityInstanceFields& ScriptEngine::GetEntityInstanceFields(UUID sceneID, UUID entityID)
+	{
+		XA_CORE_ASSERT(s_EntityInstanceMap.find(sceneID) != s_EntityInstanceMap.end(), "Invalid scene ID!");
+		auto& entityIDMap = s_EntityInstanceMap.at(sceneID);
+		XA_CORE_ASSERT(entityIDMap.find(entityID) != entityIDMap.end(), "Invalid entity ID!");
+		return entityIDMap.at(entityID);
+	}
+
+	void ScriptEngine::SetSceneContext(const Ref<Scene>& scene)
+	{
+		s_SceneContext = scene;
+	}
+
+	const Ref<Scene>& ScriptEngine::GetCurrentSceneContext()
+	{
+		return s_SceneContext;
+	}
+
 }

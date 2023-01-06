@@ -30,8 +30,8 @@ namespace Xaloc {
 		spec.Name = "Xaloc Editor";
 		spec.TargetGraphics = RendererAPI::API::OpenGL;
 
-		//spec.UseScripting = true;
-		//spec.ScriptingDllPath = "assets/scripts/SandboxCs.dll";
+		spec.UseScripting = true;
+		spec.ScriptingDllPath = "assets/game/scripts/SandboxCs.dll";
 
 		//spec.PauseOnFocusLost = true;
 

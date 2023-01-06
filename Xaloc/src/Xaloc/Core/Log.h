@@ -9,7 +9,7 @@
 namespace Xaloc {
 
 
-	class XALOC_API Log
+	class Log
 	{
 	public:
 		static void Init();

@@ -1,5 +1,6 @@
 workspace "Xaloc"
 	architecture "x64"
+	targetdir "build"
 
 	configurations
 	{
@@ -8,17 +9,16 @@ workspace "Xaloc"
 		"Dist"
 	}
 	
-	startproject "Sandbox"
+	startproject "XalocEditor"
 	
-
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "Xaloc/vendor/GLFW/include"
 IncludeDir["Glad"] = "Xaloc/vendor/Glad/include"
 IncludeDir["ImGui"] = "Xaloc/vendor/imgui"
+IncludeDir["ImPlot"] = "Xaloc/vendor/implot"
 IncludeDir["stb_image"] = "Xaloc/vendor/stb_image"
 IncludeDir["glm"] = "Xaloc/vendor/glm"
 IncludeDir["entt"] = "Xaloc/vendor/entt/single_include"
@@ -34,9 +34,11 @@ group "Dependencies"
 	include "Xaloc/vendor/GLFW"
 	include "Xaloc/vendor/Glad"
 	include "Xaloc/vendor/imgui"
-
 group ""
 
+
+
+group "Core"
 
 project "Xaloc"
 	location "Xaloc"
@@ -63,6 +65,11 @@ project "Xaloc"
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
 		
+		"%{prj.name}/vendor/implot/implot.h",
+		"%{prj.name}/vendor/implot/implot.cpp",
+		"%{prj.name}/vendor/implot/implot_internal.h",
+		"%{prj.name}/vendor/implot/implot_items.cpp",
+		
 		"%{prj.name}/vendor/pugixml/**.hpp",
 		"%{prj.name}/vendor/pugixml/**.cpp"
 	}
@@ -76,16 +83,17 @@ project "Xaloc"
 	includedirs
 	{
 		"%{prj.name}/src",
+		"%{prj.name}/vendor",
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImPlot}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.mono}",
-		"%{IncludeDir.pugixml}",
-		"$(VULKAN_SDK)/Include" -- VULKAN SDK must be installed
+		"%{IncludeDir.pugixml}"
 	}
 	
 	links
@@ -94,13 +102,7 @@ project "Xaloc"
 		"Glad",
 		"ImGui",
 		"opengl32.lib",
-		"%{LibraryDir.mono}",
-		"$(VULKAN_SDK)/Lib/vulkan-1.lib" -- VULKAN SDK must be installed
-	}
-	
-	libdirs 
-	{
-		"$(VULKAN_SDK)/Lib" -- VULKAN SDK must be installed	
+		"%{LibraryDir.mono}"
 	}
 
 	filter "system:windows"
@@ -124,7 +126,7 @@ project "Xaloc"
 	filter "configurations:Dist"
 		defines "XA_DIST"
 		runtime "Release"
-		optimize "on"
+		optimize "On"
 
 		
 		
@@ -141,7 +143,11 @@ project "XalocSharp"
 		"%{prj.name}/src/**.cs", 
 	}
 	
+group ""
 
+
+
+group "Tools"
 
 project "XalocEditor"
 	location "XalocEditor"
@@ -182,6 +188,11 @@ project "XalocEditor"
 	
 	filter "system:windows"
 		systemversion "latest"
+		
+		defines
+		{
+			"XA_PLATFORM_WINDOWS"
+		}
 
 	filter "configurations:Debug"
 		defines "XA_DEBUG"
@@ -214,9 +225,7 @@ project "XalocEditor"
 			'{COPY} "../Xaloc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
 		}
 
-
-
-
+group ""
 
 
 

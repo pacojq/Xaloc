@@ -10,26 +10,43 @@ extern "C" {
 	typedef struct _MonoArray MonoArray;
 }
 
-namespace Xaloc { namespace Scripting {
 
-	// Logging
+namespace Xaloc {
+	
+/// <summary>
+/// Namespace storing the C# scripting API.
+/// </summary>
+namespace Scripting {
+
+	// ============================ LOGGING ============================ //
+	
 	void Xaloc_Log_Fatal(MonoString* msg);
 	void Xaloc_Log_Error(MonoString* msg);
 	void Xaloc_Log_Warn(MonoString* msg);
 	void Xaloc_Log_Info(MonoString* msg);
 	void Xaloc_Log_Trace(MonoString* msg);
 
-	// Input
+
+
+	// ============================= INPUT ============================= //
+	
 	bool Xaloc_Input_IsKeyPressed(KeyCode key);
 
-	// Entity
-	void Xaloc_Entity_GetTransform(uint32_t sceneID, uint32_t entityID, glm::mat4* outTransform);
-	void Xaloc_Entity_SetTransform(uint32_t sceneID, uint32_t entityID, glm::mat4* inTransform);
-	void Xaloc_Entity_CreateComponent(uint32_t sceneID, uint32_t entityID, void* type);
-	bool Xaloc_Entity_HasComponent(uint32_t sceneID, uint32_t entityID, void* type);
 
 
-	// Tag Component
-	MonoString* Xaloc_TagComponent_GetTag(uint32_t sceneID, uint32_t entityID);
-	void Xaloc_TagComponent_SetTag(uint32_t sceneID, uint32_t entityID, MonoString* inTag);
+
+	// ============================ ENTITIES ============================ //
+
+	void Xaloc_Entity_GetTransform(uint64_t entityID, glm::mat4* outTransform);
+	void Xaloc_Entity_SetTransform(uint64_t entityID, glm::mat4* inTransform);
+	void Xaloc_Entity_CreateComponent(uint64_t entityID, void* type);
+	bool Xaloc_Entity_HasComponent(uint64_t entityID, void* type);
+
+
+
+
+	// =========================== COMPONENTS =========================== //
+
+	MonoString* Xaloc_TagComponent_GetTag(uint64_t entityID);
+	void Xaloc_TagComponent_SetTag(uint64_t entityID, MonoString* inTag);
 } }

@@ -1,15 +1,15 @@
 #pragma once
 
-namespace Xaloc {
+#include "Xaloc/Core/UUID.h"
 
-	class Entity;
+namespace Xaloc {
 
 	struct IdComponent
 	{
-		uint32_t ID;
+		UUID ID = 0;
 
-		operator uint32_t () { return ID; }
-		operator const uint32_t() const { return ID; }
+		operator UUID () { return ID; }
+		operator const UUID() const { return ID; }
 	};
 
 }

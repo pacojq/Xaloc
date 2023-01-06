@@ -1,11 +1,13 @@
 #pragma once
 
-#include <string>
 #include "Xaloc/Core/Core.h"
+#include "Xaloc/Core/Assets/Asset.h"
+
+#include <string>
 
 namespace Xaloc {
 
-	class Texture
+	class Texture : public Asset
 	{
 	public:
 		virtual ~Texture() = default;
@@ -32,12 +34,9 @@ namespace Xaloc {
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);
 		static Ref<Texture2D> Create(const std::string& path);
 
-		virtual const std::string& AssetID() const { return m_AssetID; }
 
-	private:
-		std::string m_AssetID = "";
-
-		friend class AssetManager;
+		static AssetType GetStaticAssetType() { return AssetType::Texture2D; }
+		virtual AssetType GetAssetType() const override { return GetStaticAssetType(); }
 	};
 	
 }

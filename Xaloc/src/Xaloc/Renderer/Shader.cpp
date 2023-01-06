@@ -11,12 +11,12 @@ namespace Xaloc {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::API::None:
-			XA_CORE_ASSERT(false, "RendererAPI::None is curently not supported!");
-			return nullptr;
+			case RendererAPI::API::None:
+				XA_CORE_ASSERT(false, "RendererAPI::None is curently not supported!");
+				return nullptr;
 
-		case RendererAPI::API::OpenGL:
-			return std::make_shared<OpenGLShader>(filepath);
+			case RendererAPI::API::OpenGL:
+				return std::make_shared<OpenGLShader>(filepath);
 		}
 
 		XA_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -28,12 +28,12 @@ namespace Xaloc {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::API::None:
-			XA_CORE_ASSERT(false, "RendererAPI::None is curently not supported!");
-			return nullptr;
+			case RendererAPI::API::None:
+				XA_CORE_ASSERT(false, "RendererAPI::None is curently not supported!");
+				return nullptr;
 
-		case RendererAPI::API::OpenGL:
-			return std::make_shared<OpenGLShader>(name, vertexSrc, fragmentSrc);
+			case RendererAPI::API::OpenGL:
+				return std::make_shared<OpenGLShader>(name, vertexSrc, fragmentSrc);
 		}
 
 		XA_CORE_ASSERT(false, "Unknown RendererAPI!");
