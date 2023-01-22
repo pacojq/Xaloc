@@ -3,16 +3,7 @@
 </h1>
 
 <p align="center">
-  <img height="300" src="res/xaloc-logo.svg" alt="Xaloc Engine logo" />
-</p>
-
-<p align="center">
-  <a href=""><img alt="platforms" src="https://img.shields.io/badge/platform-Windows-blue?style=flat-square"/></a>
-  <img alt="GitHub" src="https://img.shields.io/github/license/pacojq/Xaloc?color=blue&style=flat-square">
-  <a href=""><img alt="size" src="https://img.shields.io/github/repo-size/pacojq/Xaloc?style=flat-square"/></a>
-  <br/>
-  <!-- <a href=""><img alt="stars" src="https://img.shields.io/github/stars/pacojq/Xaloc?style=social"/></a> -->
-  <img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/_thisIsPJ?style=social">
+  <img height="260" src="res/xaloc-logo.svg" alt="Xaloc Engine logo" />
 </p>
 
 > Sirocco (Catalan: _Xaloc_).
@@ -74,8 +65,6 @@ Right now, Xaloc is very bare-bones. Its most remarkable features are:
 | **ImGui support** | Basic game editor and in-game debug UI using ImGui. | Done✔️ |
 | **Asset manager** | Basic asset handling API. | Done✔️ |
 
-
- > For in-development features, check the [dev branch](https://github.com/pacojq/Xaloc/tree/dev).
  
 
 ## Planned Features
