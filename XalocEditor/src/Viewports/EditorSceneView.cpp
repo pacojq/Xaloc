@@ -63,15 +63,13 @@ namespace Xaloc {
 
 		// ============================================= GUIZMO ============================================= //
 
-		const bool isOrthographic = camera->GetProjectionType() == EditorCamera::ProjectionType::Orthographic;
-
 		// Editor Camera
 		const glm::mat4& cameraProjection = camera->GetProjection();
 		glm::mat4 cameraView = camera->GetViewMatrix();
 
 		float rw = (float)viewportSize.x;
 		float rh = (float)viewportSize.y;
-		ImGuizmo::SetOrthographic(isOrthographic);
+		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(minBound.x, minBound.y, rw, rh);
 
@@ -112,7 +110,7 @@ namespace Xaloc {
 					glm::vec3 translation, rotation, scale;
 					Math::DecomposeTransform(transform, translation, rotation, scale);
 
-					if (isOrthographic) translation.z = z;
+					translation.z = z;
 
 					glm::vec3 deltaRotation = rotation - tc.Rotation;
 					tc.Translation = translation;

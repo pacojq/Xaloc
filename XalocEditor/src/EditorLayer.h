@@ -8,8 +8,6 @@
 #include "Viewports/EditorSceneView.h"
 
 #include "Xaloc/Renderer/Cameras/EditorCamera.h"
-#include "Xaloc/Renderer/Cameras/EditorCameraPerspective.h"
-#include "Xaloc/Renderer/Cameras/EditorCameraOrthographic.h"
 
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowser/ContentBrowserPanel.h"
@@ -62,10 +60,7 @@ namespace Xaloc {
 		// TODO: main camera
 		//InstanceId m_MainCamera; // TODO: change to "camera index" in a camera stack
 
-		Ref<EditorCamera> m_EditorCamera; // The currently active editor camera
-		Ref<EditorCameraPerspective> m_EditorCameraPerspective;
-		Ref<EditorCameraOrthographic> m_EditorCameraOrthographic;
-
+		Ref<EditorCamera> m_EditorCamera;
 
 		Ref<RenderPass> m_EditorRenderPass;
 		Ref<RenderPass> m_PreviewRenderPass;

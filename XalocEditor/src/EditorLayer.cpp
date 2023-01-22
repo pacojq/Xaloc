@@ -26,10 +26,7 @@ namespace Xaloc {
 		OpenScene(scene);
 
 		// Init Editor
-		m_EditorCameraPerspective = CreateRef<EditorCameraPerspective>(glm::perspective(45.0f, 1.778f, 0.01f, 1000.0f));
-		m_EditorCameraOrthographic = CreateRef<EditorCameraOrthographic>();
-		m_EditorCamera = m_EditorCameraOrthographic;
-
+		m_EditorCamera = CreateRef<EditorCamera>();
 
 		m_Icons = CreateRef<EditorIcons>();
 
@@ -139,10 +136,9 @@ namespace Xaloc {
 		}
 		
 		Application::Get().GetImGuiLayer()->SetBlockEvents(blockEvents);
-		if (m_GamePreview->IsFocused())
+		if (m_SceneViewport->IsFocused() && m_SceneViewport->IsHovered())
 		{
-			// TODO update editor camera
-			//m_CameraController.OnUpdate(ts);
+			m_EditorCamera->OnUpdate(ts);
 		}
 		
 

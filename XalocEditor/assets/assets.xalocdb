@@ -2,38 +2,38 @@
 <!-- Xaloc Engine. Assets database -->
 <assetdb>
 	<assets>
-		<asset handle="a70525e8534e79db" type="Texture2D" path="editor\asset_icons\room.png" />
-		<asset handle="8a5c45c1af47f846" type="Sprite" path="game\textures\trees.xaspr" />
-		<asset handle="df6494d177ef636" type="Texture2D" path="editor\asset_icons\texture.png" />
-		<asset handle="5216c6f99bae6f19" type="Texture2D" path="editor\asset_icons\gameobject.png" />
-		<asset handle="ab84345b622363d" type="Dll" path="game\scripts\SandboxCs.dll" />
-		<asset handle="e857d7299363bc2c" type="Texture2D" path="game\textures\tilemap.png" />
-		<asset handle="40143e24f5f3783b" type="Shader" path="shaders\Texture.glsl" />
-		<asset handle="edd4a971951c4d74" type="Sprite" path="game\textures\player.xaspr" />
-		<asset handle="df9439b33f710cb3" type="Texture2D" path="editor\asset_icons\sprite.png" />
-		<asset handle="9c1f92c2ed4a0633" type="Texture2D" path="editor\asset_icons\folder.png" />
-		<asset handle="36c0fff4082638be" type="Text" path="fonts\Roboto\LICENSE.txt" />
-		<asset handle="f65eb0c796e1b1fb" type="Texture2D" path="editor\asset_icons\file.png" />
-		<asset handle="a723e06761a29196" type="Font" path="fonts\Roboto\RobotoMono-Regular.ttf" />
-		<asset handle="86111332c7884e82" type="Texture2D" path="editor\file.png" />
-		<asset handle="c3704a4ac65bf2c7" type="Texture2D" path="editor\list.png" />
-		<asset handle="f605b6bb0914961a" type="Font" path="fonts\Oxygen\OxygenMono-Regular.ttf" />
-		<asset handle="61da3f92e6a9606b" type="Texture2D" path="editor\asset_icons\none.png" />
-		<asset handle="9248d43d8d2b3aa7" type="Texture2D" path="editor\btn-back.png" />
-		<asset handle="790c268600e91f71" type="Texture2D" path="editor\folder.png" />
-		<asset handle="3a089553c29a5c34" type="Texture2D" path="editor\btn-forward.png" />
-		<asset handle="b874cebfac1acb4a" type="Texture2D" path="editor\grid.png" />
-		<asset handle="fbb9afc76b640e3e" type="Texture2D" path="editor\asset_icons\script.png" />
-		<asset handle="eb8809dc3e9740e8" type="Texture2D" path="editor\search.png" />
-		<asset handle="ff16008a7e4bb51b" type="Text" path="fonts\Oxygen\OFL.txt" />
-		<asset handle="da84b35335a08cb5" type="Shader" path="shaders\CheckerboardBlit.glsl" />
 		<asset handle="49c7077c9cf889c" type="Shader" path="shaders\FlatColor.glsl" />
-		<asset handle="a4ffa4935e69963c" type="Scene" path="game\scenes\serializedScene.xaloc" />
+		<asset handle="ab84345b622363d" type="Dll" path="game\scripts\SandboxCs.dll" />
+		<asset handle="df6494d177ef636" type="Texture2D" path="editor\asset_icons\texture.png" />
 		<asset handle="22abcfce89baf84a" type="Texture2D" path="textures\Checkerboard.png" />
-		<asset handle="795eae3aa022a290" type="Text" path="game\textures\License.txt" />
-		<asset handle="82e26f5ae633fb72" type="Scene" path="game\scenes\testScene.xaloc" />
-		<asset handle="e98f3a479c0ff3ad" type="Scene" path="game\scenes\serializedScene_loaded.xaloc" />
 		<asset handle="2be07f879922d490" type="Dll" path="game\scripts\XalocSharp.dll" />
 		<asset handle="32154f2c767db75a" type="Texture2D" path="editor\asset_icons\shader.png" />
+		<asset handle="36c0fff4082638be" type="Text" path="fonts\Roboto\LICENSE.txt" />
+		<asset handle="3a089553c29a5c34" type="Texture2D" path="editor\btn-forward.png" />
+		<asset handle="40143e24f5f3783b" type="Shader" path="shaders\Texture.glsl" />
+		<asset handle="5216c6f99bae6f19" type="Texture2D" path="editor\asset_icons\gameobject.png" />
+		<asset handle="61da3f92e6a9606b" type="Texture2D" path="editor\asset_icons\none.png" />
+		<asset handle="790c268600e91f71" type="Texture2D" path="editor\folder.png" />
+		<asset handle="795eae3aa022a290" type="Text" path="game\textures\License.txt" />
+		<asset handle="82e26f5ae633fb72" type="Scene" path="game\scenes\testScene.xaloc" />
+		<asset handle="86111332c7884e82" type="Texture2D" path="editor\file.png" />
+		<asset handle="8a5c45c1af47f846" type="Sprite" path="game\textures\trees.xaspr" />
+		<asset handle="9248d43d8d2b3aa7" type="Texture2D" path="editor\btn-back.png" />
+		<asset handle="9c1f92c2ed4a0633" type="Texture2D" path="editor\asset_icons\folder.png" />
+		<asset handle="a4ffa4935e69963c" type="Scene" path="game\scenes\serializedScene.xaloc" />
+		<asset handle="a70525e8534e79db" type="Texture2D" path="editor\asset_icons\room.png" />
+		<asset handle="a723e06761a29196" type="Font" path="fonts\Roboto\RobotoMono-Regular.ttf" />
+		<asset handle="b874cebfac1acb4a" type="Texture2D" path="editor\grid.png" />
+		<asset handle="c3704a4ac65bf2c7" type="Texture2D" path="editor\list.png" />
+		<asset handle="da84b35335a08cb5" type="Shader" path="shaders\CheckerboardBlit.glsl" />
+		<asset handle="df9439b33f710cb3" type="Texture2D" path="editor\asset_icons\sprite.png" />
+		<asset handle="e857d7299363bc2c" type="Texture2D" path="game\textures\tilemap.png" />
+		<asset handle="e98f3a479c0ff3ad" type="Scene" path="game\scenes\serializedScene_loaded.xaloc" />
+		<asset handle="eb8809dc3e9740e8" type="Texture2D" path="editor\search.png" />
+		<asset handle="edd4a971951c4d74" type="Sprite" path="game\textures\player.xaspr" />
+		<asset handle="f605b6bb0914961a" type="Font" path="fonts\Oxygen\OxygenMono-Regular.ttf" />
+		<asset handle="f65eb0c796e1b1fb" type="Texture2D" path="editor\asset_icons\file.png" />
+		<asset handle="fbb9afc76b640e3e" type="Texture2D" path="editor\asset_icons\script.png" />
+		<asset handle="ff16008a7e4bb51b" type="Text" path="fonts\Oxygen\OFL.txt" />
 	</assets>
 </assetdb>

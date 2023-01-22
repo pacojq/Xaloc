@@ -216,9 +216,15 @@ namespace Xaloc {
 		pugi::xml_node root = doc.append_child("assetdb");
 		pugi::xml_node assets = root.append_child("assets");
 
+		std::vector<AssetHandle> sorted;
+
 		for (auto pair : AssetManager::s_AssetRegistry)
+			sorted.push_back(pair.first);
+		std::sort(sorted.begin(), sorted.begin() + sorted.size());
+
+		for (auto handle : sorted)
 		{
-			auto& metadata = pair.second;
+			auto& metadata = AssetManager::s_AssetRegistry.Get(handle);
 			SerializeAsset(doc, assets, metadata);
 		}
 
