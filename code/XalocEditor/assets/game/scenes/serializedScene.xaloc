@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!-- Xaloc Engine. Serialized Scene -->
+<scene uuid="669af856a46dfe5b">
+	<name>Sandbox Scene</name>
+	<entities>
+		<entity uuid="5c80d91a8e96628">
+			<Tag tag="Player" />
+			<Transform position="[0.000000, 0.000000, 0.000000]" rotation="[0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
+			<Behaviour name="SandboxCs.PlayerEntity" />
+			<SpriteRenderer texcoords="[0.890830, 0.947541]" width="16" height="16" sprite="edd4a971951c4d74" />
+		</entity>
+		<entity uuid="7801834c534af574">
+			<Tag tag="Tree 4" />
+			<Transform position="[3.000000, 2.000000, 0.000000]" rotation="[0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
+			<SpriteRenderer texcoords="[0.816594, 0.390164]" width="16" height="16" sprite="8a5c45c1af47f846" />
+		</entity>
+		<entity uuid="571e506bdc9af9a7">
+			<Tag tag="Tree 3" />
+			<Transform position="[-2.000000, -1.000000, 0.000000]" rotation="[0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
+			<SpriteRenderer texcoords="[0.816594, 0.445902]" width="16" height="16" sprite="8a5c45c1af47f846" />
+		</entity>
+		<entity uuid="1d565f8c2f0686a4">
+			<Tag tag="Tree 2" />
+			<Transform position="[4.000000, 0.000000, 0.000000]" rotation="[0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
+			<SpriteRenderer texcoords="[0.816594, 0.390164]" width="16" height="16" sprite="8a5c45c1af47f846" />
+		</entity>
+		<entity uuid="887890778459a881">
+			<Tag tag="Tree 1" />
+			<Transform position="[2.000000, -3.000000, 0.000000]" rotation="[0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
+			<SpriteRenderer texcoords="[0.816594, 0.445902]" width="16" height="16" sprite="8a5c45c1af47f846" />
+		</entity>
+		<entity uuid="243dca27f30bdf57">
+			<Tag tag="Tree 0" />
+			<Transform position="[-4.000000, 2.000000, 0.000000]" rotation="[0.000000, 0.000000, 0.000000]" scale="[1.000000, 1.000000, 1.000000]" />
+			<SpriteRenderer texcoords="[0.816594, 0.390164]" width="16" height="16" sprite="8a5c45c1af47f846" />
+		</entity>
+	</entities>
+</scene>

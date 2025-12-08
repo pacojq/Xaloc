@@ -1,0 +1,72 @@
+#pragma once
+#include <glm/glm.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
+namespace Xaloc
+{
+
+static glm::vec3 TransformToTranslation(const glm::mat4& transform)
+{
+	glm::vec3 scale;
+	glm::vec3 translation;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::quat orientation;
+	glm::decompose(transform, scale, orientation, translation, skew, perspective);
+	return translation;
+}
+
+struct CmpTransform
+{
+	glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+
+	CmpTransform() = default;
+	CmpTransform(const CmpTransform&) = default;
+	CmpTransform(const glm::vec3& translation)
+		: Translation(translation) {}
+
+	glm::mat4 GetTransform() const
+	{
+		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), Rotation.x, { 1, 0, 0 })
+			* glm::rotate(glm::mat4(1.0f), Rotation.y, { 0, 1, 0 })
+			* glm::rotate(glm::mat4(1.0f), Rotation.z, { 0, 0, 1 });
+
+		return glm::translate(glm::mat4(1.0f), Translation)
+			* rotation
+			* glm::scale(glm::mat4(1.0f), Scale);
+	}
+
+	glm::mat4 GetRotation() const
+	{
+		return glm::rotate(glm::mat4(1.0f), Rotation.x, { 1, 0, 0 })
+			* glm::rotate(glm::mat4(1.0f), Rotation.y, { 0, 1, 0 })
+			* glm::rotate(glm::mat4(1.0f), Rotation.z, { 0, 0, 1 });
+	}
+
+	void SetTransform(glm::mat4 trans)
+	{
+		glm::vec3 scale, translation, skew;
+		glm::vec4 perspective;
+		glm::quat orientation;
+		glm::decompose(trans, scale, orientation, translation, skew, perspective);
+
+		if (glm::abs(orientation.y < 0.001f))
+		{
+			orientation.y = 0.0f;
+		}
+
+		Translation = translation;
+		Rotation = glm::degrees(glm::eulerAngles(orientation));
+		Scale = scale;
+	}
+};
+
+}

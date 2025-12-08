@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!-- Xaloc Engine. Sprite -->
+<sprite>
+	<name>Player</name>
+	<Texture2D assetID="e857d7299363bc2c" />
+  <cliprect texcoords="[0.890830, 0.947541]" width="16" height="16" />
+</sprite>
