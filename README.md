@@ -17,11 +17,16 @@
 
 ## About
 
-Xaloc is an in-development 2D game engine written in C++, allowing an ECS
+Xaloc is an in-development 2D game engine written in C++, with an ECS
 approach and C# scripting.
 
-I develop it in my spare time as a personal project, so expect frequent
-periods of time with no activity in this repository.
+I started the working on this project in 2020 as a way to learn C++
+and game engine development. Now I'm back at it, updating it as a hobby
+project in my spare time.
+
+So expect frequent periods of time with no activity in this repository;
+and maybe some inconsistencies in code looks, conventions and quality,
+as big part of the codebase was written by 21 year-old me.
 
 <p align="center">
     <img height="360" src="res/sandbox.png" alt="Screenshot of an example application built with Xaloc." />
@@ -60,7 +65,7 @@ Right now, Xaloc is very bare-bones. Its most remarkable features are:
 | Feature | Description | Status |
 | ------- | ----------- | ------ |
 | **Scene system** | Scene-based entity management. Scene serialization with XML. | Done✔️ |
-| **ECS support** | Entity Component System approach through *entt*. Sort list of components, including `TransformComponent`, `SpriteRenderer`, `TagComponent` and `BehaviourComponent`. | Done✔️ |
+| **ECS support** | Entity Component System approach through _entt_. Short list of components, including `Transform`, `SpriteRenderer`, `Tag` and script `Behaviour`. | Done✔️ |
 | **C# scripting** | Basic scripting in C# using mono. | Done✔️ |
 | **2D Renderer** | 2D batch renderer supporting OpenGL. | Done✔️ |
 | **ImGui support** | Basic game editor and in-game debug UI using ImGui. | Done✔️ |
@@ -71,9 +76,14 @@ Right now, Xaloc is very bare-bones. Its most remarkable features are:
 
 | Feature | Description | Status |
 | ------- | ----------- | ------ |
-| **Better asset manager** | Packaging assets, streaming, etc. | WIP 💻 |
+| **Simpler asset manager** | Asset handles as pointers to content data. | WIP 💻 |
+| **Resource packers** | Pack construction assets into binary format. | WIP 💻 |
+| **Memory management** | Introduce arenas as memory allocation strategy. | TODO 📋 |
+| **Sprite animations** | In-editor sprite-sheet animation toolset. | TODO 📋 |
+| **Tile-sets** | In-editor tile-set editing toolset. | TODO 📋 |
+| **User interface** | Have a proper way of rendering UI. | TODO 📋 |
 | **Audio system** | Sound API. | TODO 📋 |
-| **Physics system** | Own 2D physics API. | TODO 📋 |
+| **Physics system** | Have a 2D physics API. | TODO 📋 |
 | **Font support** | Extend the Renderer capabilities so it can draw text. | TODO 📋 |
 
 The game editor is in continuous development.
