@@ -33,11 +33,6 @@ project "XalocEditor"
 		"%{LibraryDir.mono}"
 	}
 
-	postbuildcommands 
-	{
-		'{COPY} "assets" "%{cfg.targetdir}/assets"'
-	}
-	
 	filter "system:windows"
 		systemversion "latest"
 
